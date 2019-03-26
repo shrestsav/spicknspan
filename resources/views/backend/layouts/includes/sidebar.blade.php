@@ -18,7 +18,7 @@
         </li> 
         <li class="@if ($title === 'Attendance') active @endif"><a href="{{route('attendance.list')}}"><i class="fa fa-dashboard"></i> <span>View Attendance</span></a>
         </li>
-        <li class="@if ($title === 'Sites') active @endif"><a href="/scanner"><i class="fa fa-dashboard"></i> <span>Scanner</span></a>
+        <li class="@if ($title === 'QR Scanner') active @endif"><a href="{{route('scanner')}}"><i class="fa fa-dashboard"></i> <span>Scanner</span></a>
         </li>
 
       {{-- Allow these menus for admin only --}}
@@ -34,6 +34,8 @@
         <li class="@if ($title === 'Wages') active @endif"><a href="{{route('wages.index')}}"><i class="fa fa-dashboard"></i> <span>Wages</span></a>
         </li>
         <li class="@if ($title === 'Sites') active @endif"><a href="{{route('site.index')}}"><i class="fa fa-dashboard"></i> <span>Sites</span></a>
+        </li>
+        <li class="@if ($title === 'Site Attendance') active @endif"><a href="{{route('site.attendance')}}"><i class="fa fa-dashboard"></i> <span>Site Attendance</span></a>
         </li>
       @endcan
         <li class="@if ($title === 'Mail') active @endif"><a href="{{route('mail.index')}}"><i class="fa fa-dashboard"></i> <span>Mail</span></a>

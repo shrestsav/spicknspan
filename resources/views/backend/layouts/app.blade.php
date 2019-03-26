@@ -136,6 +136,7 @@
 <script src="{{ asset('backend/js/adminlte.min.js') }}"></script>
 <script src="{{ asset('backend/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('backend/js/dataTables.bootstrap.min.js') }}"></script>
+<script src="{{ asset('backend/js/sweetalert.min.js') }}"></script>
 
 @stack('scripts')
 

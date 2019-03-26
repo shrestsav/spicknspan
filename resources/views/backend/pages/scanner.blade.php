@@ -1,4 +1,4 @@
-@extends('backend.layouts.app',['title'=> 'Wages'])
+@extends('backend.layouts.app',['title'=> 'QR Scanner'])
 
 @push('style')
  <link href="https://fonts.googleapis.com/css?family=Ropa+Sans" rel="stylesheet">
@@ -59,7 +59,7 @@
 <section class="content">
   <div class="row">
     <div class="col-md-6">
-      <div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div>
+      <div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam or camera enabled)</div>
       <canvas id="canvas" hidden></canvas>
       <div id="output" hidden>
         <div id="outputMessage">No QR code detected.</div>
@@ -72,8 +72,9 @@
 @endsection
 
 @push('scripts')
-  <script src="{{ asset('backend/js/jsQR.js') }}"></script>
 
+  <script src="{{ asset('backend/js/jsQR.js') }}"></script>
+  
   <script>
     var video = document.createElement("video");
     var canvasElement = document.getElementById("canvas");
@@ -101,7 +102,7 @@
     });
 
     function tick() {
-      loadingMessage.innerText = "⌛ Loading video..."
+      loadingMessage.innerText = "⌛ Loading Scanner ..."
       if (video.readyState === video.HAVE_ENOUGH_DATA) {
         loadingMessage.hidden = true;
         canvasElement.hidden = false;
@@ -115,14 +116,50 @@
           inversionAttempts: "dontInvert",
         });
         if (code) {
-          drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
-          drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
-          drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
-          drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+          drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#56c318");
+          drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#56c318");
+          drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#56c318");
+          drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#56c318");
           outputMessage.hidden = true;
           outputData.parentElement.hidden = false;
           outputData.innerText = code.data;
-          alert(code.data);
+          swal({
+            title: "Room "+code.data+" Connected",
+            text: "Do you want to Log in ?",
+            icon: "success",
+            buttons: ["Cancel", "LOG ME IN"],
+          })
+          .then((login) => {
+          if (login) {
+            swal("LOGGED INTO ROOM "+code.data+" SUCCESSFULLY !", {
+              type: "success",
+              timer: 1200
+            })
+            .then((value) => {
+
+                  $.ajax({
+                          type:'post',
+                          url:'{{ route("ajax.qrLogin") }}',
+                          dataType: 'json',
+                          data:{
+                              room_id:code.data                 
+                          },
+                          success:function(data) {
+                              console.log(data);
+                              window.location.href = "{{route('site.attendance')}}";
+                          },
+                          error: function(response){
+                          
+                          }
+                      });
+               
+            });
+           
+          }
+          else{
+            window.location.href = "/scanner";
+          }
+        });
           return;
         } else {
           outputMessage.hidden = false;
@@ -131,6 +168,7 @@
       }
       requestAnimationFrame(tick);
     }
+
   </script>
   
 @endpush
