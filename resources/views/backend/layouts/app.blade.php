@@ -30,7 +30,7 @@
   <style type="text/css" media="print">
     .printer{
       display:none;
-      }
+    }
   </style>
   
 

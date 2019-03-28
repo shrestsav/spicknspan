@@ -118,6 +118,14 @@
               <label for="r_image">Image</label>
               <input type="file" name="image" class="form-control" id="r_image">
             </div>
+            <div class="form-group">
+              <label for="r_image">Select Questionare</label><br>
+              <select class="select2" name="question_id">
+                @foreach($questionTemplate as $qT)
+                  <option value="{{$qT->id}}">{{$qT->template_title}}</option>
+                @endforeach
+              </select>
+            </div>
           </div>
           <div class="box-footer">
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -139,6 +147,7 @@
               <th>Name</th>
               <th>Room No</th>
               <th>Building No</th>
+              <th>Question Template</th>
               <th>QR</th>
             </tr>
             </thead>
@@ -150,6 +159,7 @@
                 <td>{{$room->name}}</td>
                 <td>{{$room->room_no}}</td>
                 <td>{{$room->building_no}}</td>
+                <td></td>
                 <td><a href="{{route('generate.qr',$room->id)}}" target="_blank">Show QR</a></td>
               </tr>
               <?php $count++; ?>

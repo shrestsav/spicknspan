@@ -41,7 +41,11 @@
         </li>
         <li class="@if ($title === 'Site Attendance') active @endif"><a href="{{route('site.attendance')}}"><i class="fa fa-dashboard"></i> <span>Site Attendance</span></a>
         </li>
+        <li class="@if ($title === 'Question Template') active @endif"><a href="{{route('question.index')}}"><i class="fa fa-dashboard"></i> <span>Question Template</span></a>
+        </li>
+
       @endcan
+
         <li class="@if ($title === 'Mail') active @endif"><a href="{{route('mail.index')}}"><i class="fa fa-dashboard"></i> <span>Mail</span></a>
         </li>
 
