@@ -28,6 +28,21 @@
               <div class="box-body check_in_body">
                 <input type="hidden" name="latitude" id="latitude">
                 <input type="hidden" name="longitude" id="longitude">
+                <input type="hidden" name="image" id="user_image" required>
+                <div class="row">
+                  
+                  <div id="container"  name='cont' class="container-fluid no-padding ">
+                     <video autoplay="true" id="videoElement" name='vid'>
+                      
+                     </video>
+                     <div id="captured_photo"></div>
+                  </div>
+
+                  <a id="download" download="snap.jpg">
+                    <button onclick="myFunction(); download();" align="center" style="margin: 20px 250px auto " class="btn btn-primary dropdown-toggle" type="button" >capture</button>
+                  </a>
+                </div>
+
                 <select class="select2" name="client" required>
                   @foreach($clients as $client)
                     <option value="{{$client->id}}">{{$client->name}}</option>
@@ -44,11 +59,8 @@
                   </a>
                 </div>
 
-                <video id="video" width="640" height="480" autoplay></video>
-                <button id="snap" onclick="event.preventDefault();">Snap Photo</button>
-                <canvas id="canvas" width="640" height="480"></canvas>
-
-                <button type="submit"></button>
+                
+                {{-- <button type="submit"></button> --}}
               </div>
               <!-- /.box-body -->
             </div>
@@ -58,9 +70,10 @@
       </form>
     </section>
     <!-- /.content -->
-
+    <canvas id="CANVAS" name="CANVAS" width="400" height="400">Your browser does not support Canvas.</canvas>
 @endsection
 @push('scripts')
+
   <script type="text/javascript">
 
         function checkin(){
@@ -98,29 +111,44 @@
         }
 
         $('.select2').select2();
-      
-        // Grab elements, create settings, etc.
-        var video = document.getElementById('video');
-        
-        // Get access to the camera!
-        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            // Not adding `{ audio: true }` since we only want video now
-            navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
-                //video.src = window.URL.createObjectURL(stream);
-                video.srcObject = stream;
-                video.play();
-            });
-        }
-        
-        // Elements for taking the snapshot
-        var canvas = document.getElementById('canvas');
-        var context = canvas.getContext('2d');
-        var video = document.getElementById('video');
-        
-        // Trigger photo take
-        document.getElementById("snap").addEventListener("click", function() {
-          context.drawImage(video, 0, 0, 640, 480);
-        });
+    
+  </script>
 
-    </script>
+  <script>
+
+    function download(){
+      var download = document.getElementById("download");
+      var image = document.getElementById("CANVAS").toDataURL();
+      $('#user_image').val(image);
+      
+      // download.setAttribute("href", image);
+    }
+
+    var video = document.querySelector("#videoElement");
+
+    if (navigator.mediaDevices.getUserMedia) 
+    {       
+       navigator.mediaDevices.getUserMedia({video: true})
+        .then(function(stream) {
+          video.srcObject = stream;
+         })
+        .catch(function(err0r) {
+          console.log("Something went wrong!");
+        });
+      
+      var i=0;
+      function myFunction() {
+        var x =  document.getElementById("CANVAS") ;
+        var ctx = x.getContext("2d");
+        ctx.fillStyle = "#FF0000";
+        ctx.drawImage(video, 0, 0, 400, 350);
+        if (i <10)
+        {
+          document.getElementById("captured_photo").appendChild(x);
+          $('#videoElement').remove();
+          i=i+1;
+        }
+      }
+    }
+</script>
 @endpush

@@ -13,6 +13,8 @@ use App\User;
 use App\Roster;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 
 class AttendanceController extends Controller
 {
@@ -109,6 +111,7 @@ class AttendanceController extends Controller
     }
     public function checkin(Request $request)
     {
+        // return $request->all();
         if(isset($_POST['latitude']))
             { $latitude = $_POST['latitude']; }
         else { $latitude = 0; }
@@ -124,7 +127,9 @@ class AttendanceController extends Controller
 
         //Check if already Logged In
         $attendance_check = Attendance::where('client_id',$client_id)->whereDate('created_at',\Carbon\Carbon::today());
-        if(!$attendance_check->exists()){
+        if(!$attendance_check->exists() && $request->get('image')){
+            $now = strtotime(date('H:i:s'));
+            $filename = 'check_in_'.Auth::user()->id.'_'.$now.'.png';
             $carbon = now();
             $current_date_time = $carbon->toDateTimeString();
             $check_in = new Attendance;
@@ -132,7 +137,13 @@ class AttendanceController extends Controller
             $check_in->employee_id = $employee_id;
             $check_in->check_in = $current_date_time;
             $check_in->check_in_location = $location;
+            $check_in->check_in_image = $filename;
             $check_in->save();
+
+            
+            $image = Image::make($request->get('image'));
+            Storage::disk('local')->makeDirectory('public/employee_login/'.Auth::user()->id);
+            $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
         }
         else{
             return  redirect()->back()->withErrors('Client Already Logged In for Today');
@@ -155,7 +166,17 @@ class AttendanceController extends Controller
         $employee_id = Auth::id();
         $carbon = now();
         $current_date_time = $carbon->toDateTimeString();
-        $check_in = Attendance::where('client_id',$client_id)->where('employee_id',$employee_id)->whereDate('created_at',\Carbon\Carbon::today())->update(['full_date'=>$current_date_time, 'check_out'=>$current_date_time, 'check_out_location'=>$location]);
+        
+
+        $now = strtotime(date('H:i:s'));
+        $filename = 'check_out_'.Auth::user()->id.'_'.$now.'.png';
+        $image = Image::make($request->get('image'));
+        Storage::disk('local')->makeDirectory('public/employee_login/'.Auth::user()->id);
+            $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
+
+
+
+        $check_in = Attendance::where('client_id',$client_id)->where('employee_id',$employee_id)->whereDate('created_at',\Carbon\Carbon::today())->update(['full_date'=>$current_date_time, 'check_out'=>$current_date_time, 'check_out_location'=>$location, 'check_out_image'=>$filename]);
 
         //check total hours difference in the roster table
         $current_date_time = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $current_date_time)->format('Y-m-d');
@@ -184,7 +205,7 @@ class AttendanceController extends Controller
     public function details(Request $request, $id)
     {
         $att_details = Attendance::findOrFail($id);
-        $att_details = json_decode($att_details, true);
+        // return $att_details;
         return view('backend.pages.attendance_details', compact('att_details'));
     }
 
@@ -219,4 +240,5 @@ class AttendanceController extends Controller
         return json_encode($request->room_id);
         $request->all();
     }
+
 }

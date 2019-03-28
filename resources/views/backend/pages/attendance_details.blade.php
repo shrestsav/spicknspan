@@ -15,14 +15,24 @@
                     <div id="mapid"></div>
                     <?php echo '<strong>Date & Time : </strong>' . $att_details['check_in'];?><br>
                     <?php list($latitude1, $longitude1) = explode(",", $att_details['check_in_location']);
+                      $employee_id = $att_details['employee_id'];
+                      $check_in_image = $att_details['check_in_image'];
+
                     ?>
+                    <img height="200" src="{{asset('storage/employee_login/'.$employee_id.'/'.$check_in_image)}}">
                   </div>
                   <div class="col-md-6">
+                    @if($att_details['check_out']!='' || $att_details['check_out']!=null)
                     <h2>Check-Out Details</h2>
                     <div id="mapid2"></div>
                     <?php echo '<strong>Date & Time : </strong>' . $att_details['check_out'];?><br>
                     <?php list($latitude2, $longitude2) = explode(",", $att_details['check_out_location']);
+                      $check_out_image = $att_details['check_out_image'];
                     ?>
+                    <img height="200" src="{{asset('storage/employee_login/'.$employee_id.'/'.$check_out_image)}}">
+                    @else
+                      <?php $latitude2 = ''; $longitude2 = ''; ?>
+                    @endif
                   </div>
                 </div>
               </div>
