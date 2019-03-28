@@ -26,16 +26,34 @@
           @csrf
           <div class="box-body pad">
             <div class="form-group">
-              <label for="photo">Photo</label>
-              <input type="file" name="photo" class="form-control" id="photo" required>
+              <label for="employee_id">Employee Name</label>
+              <select class="form-control" name="employee_id">
+
+                  @if ($employee->count())
+                          <option selected disabled>Select Employee</option>
+                      @foreach($employee as $user)
+                          <option value="{{$user->id}}">{{$user->name}}</option>
+                      @endForeach
+                  @endif
+
+              </select>
             </div>
             <div class="form-group">
-              <label for="annual_salary">Annual Salary</label>
-              <input type="number" name="annual_salary" class="form-control" id="annual_salary" placeholder="Enter Annual Salary">
+              <label for="client_id">Client Name</label>
+              <select class="form-control" name="client_id">
+
+                  @if ($client->count())
+                          <option selected disabled>Select Client</option>
+                      @foreach($client as $user)
+                          <option value="{{$user->id}}">{{$user->name}}</option>
+                      @endForeach
+                  @endif
+
+              </select>
             </div>
             <div class="form-group">
-              <label for="description">Description</label>
-              <textarea name="description" class="form-control" id="description" placeholder="Enter Annual Salary" required></textarea>
+              <label for="hourly_rate">Base Hourly Rate ($)</label>
+              <input type="number" name="hourly_rate" class="form-control" id="hourly_rate" placeholder="Select Hourly Rate">
             </div>
           </div>
           <div class="box-footer">
@@ -56,20 +74,31 @@
             <tr>
               <th>Employee</th>
               <th>Client</th>
-              <th>Hourly Rate</th>
+              <th>Hourly Rate ($)</th>
               <th>Action</th>
             </tr>
             </thead>
             <tbody>
-            {{-- @foreach($users as $user)
-              <tr>
-                <td>{{$user->name}}</td>
-                <td>{{$user->email}}</td>
-                <td>{{$user->contact}}</td>
-                <td>{{$user->hourly_rate}}</td>
-                <td>{{$user->employment_start_date}}</td>
-              </tr>
-            @endforeach --}}
+            @foreach($wages as $wage)
+                    <tr>
+                      @foreach($employee as $user1)
+                          @if($wage->employee_id == $user1->id)
+                              <td>{{$user1->name}}</td>
+                          @endif
+                      @endforeach
+                      @foreach($client as $user2)
+                          @if($wage->client_id == $user2->id)
+                              <td>{{$user2->name}}</td>
+                          @endif
+                      @endforeach
+                      <td>{{$wage->hourly_rate}}</td>
+                      <form action="{{ url('/wages/').'/'.$wage->id}}" method="POST">
+                        {{ csrf_field() }}
+                        <input type="hidden" name="_method" value="POST">
+                        <td><button>Delete</button></td>
+                      </form>
+                    </tr>
+            @endforeach
             </tbody>
           </table>
         </div>

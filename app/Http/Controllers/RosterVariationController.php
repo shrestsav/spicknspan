@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Wages;
+use DB;
+use App\Attendance;
+use App\Roster;
 use App\User;
-// use App\UserDetail;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
-class WagesController extends Controller
+class RosterVariationController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,30 +17,10 @@ class WagesController extends Controller
      */
     public function index()
     {
-
-    $wages = Wages::select(
-        'id',
-        'employee_id',
-        'client_id',
-        'hourly_rate')->get();
-
-    $employee = 'employee';
-    $employee = User::select(
-                            'users.id',
-                            'users.name',
-                            'users.email',
-                            'users.user_type')
-                    ->where('users.user_type','=',$employee)->get();
-
-    $client = 'client';
-    $client = User::select(
-                            'users.id',
-                            'users.name',
-                            'users.email',
-                            'users.user_type')
-                    ->where('users.user_type','=',$client)->get();
-
-    return view('backend.pages.wages',compact('wages', 'employee', 'client'));
+        $user_lists   = User::all();
+        $roster_lists = Roster::all();
+        $variations   = DB::table('attendances')->orWhere('attendances.status', '=', 2)->orWhere('attendances.status', '=', 3)->get();
+        return view('backend.pages.roster_variation',compact('variations', 'roster_lists', 'user_lists'));
     }
 
     /**
@@ -62,12 +41,7 @@ class WagesController extends Controller
      */
     public function store(Request $request)
     {
-        Wages::create([
-            'employee_id'   => $request['employee_id'],
-            'client_id'     => $request['client_id'],
-            'hourly_rate'   => $request['hourly_rate']
-        ]);
-        return redirect()->back()->with('message', 'Added Successfully');
+        //
     }
 
     /**
@@ -112,8 +86,21 @@ class WagesController extends Controller
      */
     public function destroy($id)
     {
-        $wages = Wages::find($id); 
-        $wages->delete(); //delete the id
-        return redirect()->back()->with('message','Wages Deleted Successfully');
+        //
     }
+
+    public function statusAccept(Request $request, $id)
+    {
+        $attendance = Attendance::find($id);
+        $active_status = Attendance::where('id',$id)->update(['status'=>1]);
+        return redirect()->back()->with('message', 'Variation Approved');
+    }
+
+    public function statusDecline(Request $request, $id)
+    {
+        $attendance = Attendance::find($id);
+        $active_status = Attendance::where('id',$id)->update(['status'=>3]);
+        return redirect()->back()->with('message', 'Variation Decline');
+    }
+    
 }

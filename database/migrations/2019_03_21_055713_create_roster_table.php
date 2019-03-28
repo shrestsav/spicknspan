@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAttendancesTable extends Migration
+class CreateRosterTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,14 @@ class CreateAttendancesTable extends Migration
      */
     public function up()
     {
-        Schema::create('attendances', function (Blueprint $table) {
+        Schema::create('rosters', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('client_id');
             $table->integer('employee_id');
+            $table->integer('client_id');
             $table->date('full_date')->nullable();
-            $table->dateTime('check_in');
-            $table->text('check_in_location')->nullable();            
-            $table->dateTime('check_out')->nullable();
-            $table->text('check_out_location')->nullable();
-            $table->integer('status')->nullable();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
+            $table->integer('total_hours')->nullable();
             $table->timestamps();
         });
     }
@@ -34,6 +32,6 @@ class CreateAttendancesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('rosters');
     }
 }

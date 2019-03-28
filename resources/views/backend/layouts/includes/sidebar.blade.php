@@ -33,6 +33,10 @@
         </li>
         <li class="@if ($title === 'Wages') active @endif"><a href="{{route('wages.index')}}"><i class="fa fa-dashboard"></i> <span>Wages</span></a>
         </li>
+        <li class="@if ($title === 'Roster') active @endif"><a href="{{route('roster.index')}}"><i class="fa fa-dashboard"></i> <span>Roster</span></a>
+        </li>
+        <li class="@if ($title === 'Roster Variation') active @endif"><a href="{{route('roster_variation.index')}}"><i class="fa fa-dashboard"></i> <span>Roster Variation</span></a>
+        </li>
         <li class="@if ($title === 'Sites') active @endif"><a href="{{route('site.index')}}"><i class="fa fa-dashboard"></i> <span>Sites</span></a>
         </li>
         <li class="@if ($title === 'Site Attendance') active @endif"><a href="{{route('site.attendance')}}"><i class="fa fa-dashboard"></i> <span>Site Attendance</span></a>
