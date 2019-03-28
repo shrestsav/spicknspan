@@ -14,3 +14,29 @@
 .custom_error_msg, .custom_success_msg{
 	text-align: center;
 }
+.box-roster.row {
+	padding-top: 50px;
+    display: flex;
+}
+.year_month {
+    padding-bottom: 20px;
+    padding-top: 10px;
+}
+.box-footer-right {
+    padding-left: 3px;
+}
+.table-striped>tbody>tr:nth-of-type(odd) {
+    background-color: #dfdef5;
+}
+span.select2.select2-container.select2-container--default {
+    min-width: 125px;
+}
+span.select2.select2-container.select2-container--default.select2-container--below {
+    min-width: 125px;
+}
+div#tblRosterVariation_wrapper {
+    padding: 12px;
+}
+div#mapid, div#mapid2 {
+    height: 300px;
+}

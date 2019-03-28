@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="{{ asset('backend/css/AdminLTE.min.css') }}">
   {{-- Theme Color CSS --}}
   <link rel="stylesheet" href="{{ asset('backend/css/skin-purple.min.css') }}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css">
   {{-- CUSTOM CSS BY SHRESTSAV --}}
   <link rel="stylesheet" href="{{ asset('backend/css/style.css') }}">
   <style type="text/css" media="print">
