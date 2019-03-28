@@ -62,6 +62,9 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/siteAttendance','AttendanceController@site_attendance')->name('site.attendance');
 		Route::post('/qr_login', 'AttendanceController@ajax_qr_login')->name('ajax.qrLogin');
 		
+		Route::get('/questionTemplate','QuestionTemplateController@index')->name('question.index');
+		Route::get('/questionTemplate/add','QuestionTemplateController@addMore')->name('question.add');
+		Route::post("/questionTemplate/add","QuestionTemplateController@addMorePost");
 	});
 	
 });

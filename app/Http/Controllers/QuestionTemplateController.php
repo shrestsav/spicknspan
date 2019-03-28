@@ -2,25 +2,54 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Building;
 use App\QuestionTemplate;
-use App\Room;
+use App\Question;
+use App\User;
+use DB;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
-class SiteController extends Controller
+class QuestionTemplateController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
+
     public function index()
     {
-        $buildings = Building::all();
-        $questionTemplate = QuestionTemplate::all();
-        $rooms = Room::select('rooms.id','rooms.name','rooms.description','rooms.building_id','buildings.building_no','rooms.room_no')->join('buildings','rooms.building_id','=','buildings.id')->get();
-        // return $rooms;
-        return view('backend.pages.sites',compact('buildings','rooms', 'questionTemplate'));
+        // $qTemplate = QuestionTemplate::all();
+        $qTemplate = DB::table('question_template')->distinct()->get(['template_title']);
+        return view('backend.pages.question_template.list', compact('qTemplate'));
+    }
+
+    public function addMore()
+    {
+        return view('backend.pages.question_template.add');
+    }
+
+
+    public function addMorePost(Request $request)
+    {
+        $rules = [];
+        foreach($request->input('name') as $key => $value) {
+            $rules["name.{$key}"] = 'required';
+        }
+        $validator = Validator::make($request->all(), $rules);
+
+        $template_title = $request->input('question_template_title');
+        QuestionTemplate::create(['template_title'=>$template_title]);
+        $last_id = DB::getPdo()->lastInsertId();
+        // echo $last_id;
+        if ($validator->passes()) {
+            foreach($request->input('name') as $key => $value) {                
+                Question::create(['template_id'=>$last_id, 'name'=>$value]);
+            }
+            return response()->json(['success'=>'done']);
+        }
+        return response()->json(['error'=>$validator->errors()->all()]);
     }
 
     /**
@@ -30,7 +59,7 @@ class SiteController extends Controller
      */
     public function create()
     {
-        //
+        return view('backend.pages.question_template.add');
     }
 
     /**
@@ -41,9 +70,7 @@ class SiteController extends Controller
      */
     public function store(Request $request)
     {
-        Building::create($request->all());
-        return redirect()->back()->with('message', 'Building Added Successfully');
-
+        //
     }
 
     /**
@@ -89,20 +116,5 @@ class SiteController extends Controller
     public function destroy($id)
     {
         //
-    }
-    public function store_room(Request $request)
-    {
-        // return $request->all();
-        Room::create($request->all());
-        return redirect()->back()->with('message', 'Room Added Successfully');
-    }
-    public function generate_qr($id)
-    {   
-        // $rooms = Room::where('id',$id)->pluck('building_id')->first();
-        $pngImage = \QrCode::format('png')
-                            ->size(500)
-                            ->generate($id);
- 
-        return response($pngImage)->header('Content-type','image/png');
     }
 }
