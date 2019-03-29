@@ -65,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/questionTemplate','QuestionTemplateController@index')->name('question.index');
 		Route::get('/questionTemplate/add','QuestionTemplateController@addMore')->name('question.add');
 		Route::post("/questionTemplate/add","QuestionTemplateController@addMorePost");
+		Route::post('/questionTemplate/{id}','QuestionTemplateController@destroy')->name('question.destroy');
 	});
 	
 });

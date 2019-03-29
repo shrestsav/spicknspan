@@ -28,7 +28,7 @@
               <table class="table table-hover">
                 <tr>
                   <th>S.N.</th>
-                  <th>Category</th>
+                  <!-- <th>Category</th> -->
                   <th>Title</th>
                   <th>Action</th>
                 </tr>
@@ -36,9 +36,9 @@
                 @foreach($qTemplate as $qT)
                   <tr>
                     <td><?php echo $i;?></td>
-                    <td></td>
+                    <!-- <td></td> -->
                     <td>{{$qT->template_title}}</td>
-                    <form action="" method="POST">
+                    <form action="{{ url('/questionTemplate/').'/'.$qT->id}}" method="POST">
                         {{ csrf_field() }}
                         <input type="hidden" name="_method" value="POST">
                         <td><button>Delete</button></td>

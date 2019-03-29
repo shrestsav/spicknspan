@@ -20,8 +20,7 @@ class QuestionTemplateController extends Controller
 
     public function index()
     {
-        // $qTemplate = QuestionTemplate::all();
-        $qTemplate = DB::table('question_template')->distinct()->get(['template_title']);
+        $qTemplate = QuestionTemplate::all();
         return view('backend.pages.question_template.list', compact('qTemplate'));
     }
 
@@ -42,7 +41,7 @@ class QuestionTemplateController extends Controller
         $template_title = $request->input('question_template_title');
         QuestionTemplate::create(['template_title'=>$template_title]);
         $last_id = DB::getPdo()->lastInsertId();
-        // echo $last_id;
+
         if ($validator->passes()) {
             foreach($request->input('name') as $key => $value) {                
                 Question::create(['template_id'=>$last_id, 'name'=>$value]);
@@ -115,6 +114,8 @@ class QuestionTemplateController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $qTemp = QuestionTemplate::find($id); 
+        $qTemp->delete(); //delete the id
+        return redirect()->back()->with('message','Question Template Deleted Successfully');
     }
 }

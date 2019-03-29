@@ -24,7 +24,7 @@
              <form role="form" action="{{route('roster.store')}}" method="POST">
 
               <div class="year_month">
-                Year - Month : <input name="full_date" type="text" id="full_date" class="txtTime" style="width:85px;" value="<?php //echo $roster['full_date'];?>">
+                Year - Month : <input name="full_date" type="text" id="full_date" class="txtTime" style="width:85px;" value="<?php //echo $roster['full_date'];?>" required>
               </div>
 
               {{ csrf_field() }}
@@ -117,9 +117,23 @@
                                             ->where('client_id','=',$client_id)
                                             ->get();
                         $working_time = json_decode($working_time, true);
+
+                        $full_date  =  $working_time[$j]['full_date'];
+                        $month_part = explode('-', $full_date);
+                        $month = $month_part[1];
+
+                        if(($month == '01') || ($month == '03') || ($month == '05') || ($month == '07') || ($month == '08') || ($month == '10') || ($month == '12')){
+                            $days = 31;
+                        } 
+                        elseif(($month == '04') || ($month == '06') || ($month == '09') || ($month == '11')){
+                            $days = 30;
+                        } 
+                        else{
+                            $days = 28;
+                        }
                   ?>
 
-                    @for ($i = 0; $i < 31; $i++)
+                    @for ($i = 0; $i < $days; $i++)
                         <td>
                             <input name="start_time_<?php echo $j;?>_<?php echo $i;?>" type="text" id="start_time" class="timepicker txtTime" style="width:40px;" value="<?php echo $working_time[$i]['start_time'];?>">
                               <br>to<br>

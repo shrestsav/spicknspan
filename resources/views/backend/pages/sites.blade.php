@@ -159,7 +159,11 @@
                 <td>{{$room->name}}</td>
                 <td>{{$room->room_no}}</td>
                 <td>{{$room->building_no}}</td>
-                <td></td>
+                @foreach($questionTemplate as $qT)
+                <?php if($qT->id == $room->question_id){ ?>
+                <td>{{$qT->template_title}}</td>
+                <?php } ?>
+                @endforeach
                 <td><a href="{{route('generate.qr',$room->id)}}" target="_blank">Show QR</a></td>
               </tr>
               <?php $count++; ?>

@@ -37,7 +37,7 @@ class RosterController extends Controller
         $rosters = DB::table('rosters')->distinct()->get(['employee_id', 'client_id']);
 
         $rosters = json_decode($rosters, true);
-
+        // print_r($rosters);
         return view('backend.pages.roster',compact('rosters', 'employee', 'client'));
     }
 
@@ -65,7 +65,23 @@ class RosterController extends Controller
         $j = 0;
         foreach ($arr_employee_id as $emp_id) {
 
-            for ($i = 1; $i <= 31; $i++) {
+            $full_date  =  $request['full_date'];
+            $month_part = explode('-', $full_date);
+            $month = $month_part[1];
+
+            if(($month == '01') || ($month == '03') || ($month == '05') || ($month == '07') || ($month == '08') || ($month == '10') || ($month == '12')){
+                $k = 31;
+            } 
+            elseif(($month == '04') || ($month == '06') || ($month == '09') || ($month == '11')){
+                $k = 30;
+            } 
+            else{
+                $k = 28;
+            }
+
+            // print_r($month);
+
+            for ($i = 1; $i <= $k; $i++) {
                 $start_time    = $request['start_time_'.$i];
                 $end_time      = $request['end_time_'.$i];
 
@@ -73,7 +89,6 @@ class RosterController extends Controller
                 $timeIn         = \Carbon\Carbon::parse($start_time);
                 $timeOut        = \Carbon\Carbon::parse($end_time);
                 $diffInHours    = round($timeOut->diffInMinutes($timeIn) / 60);
-                // print_r($diffInHours);
                 
                 $roster_arr = [
                 'employee_id'   => $emp_id,
@@ -84,7 +99,6 @@ class RosterController extends Controller
                 'end_time'      => $request['end_time_'.$i],
                 'total_hours'   => $diffInHours
             ];
-                // print_r( $roster_arr);
                 Roster::create( $roster_arr);
             }
             $j++;
