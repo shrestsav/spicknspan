@@ -76,7 +76,7 @@
 
                 <tbody class="roster-list">
 
-                <?php $k = count($rosters); ?>
+                <?php $k = count($rosters); $x = 0; ?>
 
                 @for ($j=0; $j<$k; $j++)
 
@@ -122,8 +122,17 @@
                                             ->where('client_id','=',$client_id)
                                             ->get();
                         $working_time = json_decode($working_time, true);
+                        // $working_time = $working_time[0]['id'];
+                        echo 'test';
+                        print_r($working_time[$j]['id']);
 
-                        $full_date  =  $working_time[$j]['full_date'];
+                        $time_table = DB::table('rosters_timetable')
+                                            ->where('rosters_id','=', $working_time)
+                                            ->get();
+                        $time_table = json_decode($time_table, true);
+                        // print_r($time_table);
+
+                        $full_date  =  $time_table[$j]['full_date'];
                         $month_part = explode('-', $full_date);
                         $month = $month_part[1];
 
@@ -136,20 +145,20 @@
                         else{
                             $days = 28;
                         }
+                        // echo $working_time[$j]['id'];
                   ?>
+                    <input type="hidden" name="old_rosters_id[]" value="<?php echo $working_time[$j]['id'];?>">
 
                     @for ($i = 0; $i < $days; $i++)
                         <td>
-                            <input name="start_time_<?php echo $j;?>_<?php echo $i;?>" type="text" id="start_time" class="timepicker txtTime" style="width:40px;" value="<?php echo $working_time[$i]['start_time'];?>">
+                            <input name="start_time_<?php echo $i;?>" type="text" id="start_time" class="timepicker txtTime" style="width:40px;" value="<?php echo $time_table[$i]['start_time'];?>">
                               <br>to<br>
-                            <input name="end_time_<?php echo $j;?>_<?php echo $i;?>" type="text" id="end_time" class="timepicker txtTime" style="width:40px;" value="<?php echo $working_time[$i]['end_time'];?>">
+                            <input name="end_time_<?php echo $i;?>" type="text" id="end_time" class="timepicker txtTime" style="width:40px;" value="<?php echo $time_table[$i]['end_time'];?>">
                         </td>
                     @endfor
-                    
-                </tr>
 
-              @endfor
-
+                  </tr>
+                @endfor
               </tbody>
             </table>
 

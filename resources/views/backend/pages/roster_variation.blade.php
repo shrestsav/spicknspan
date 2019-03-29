@@ -82,11 +82,13 @@
                                             ->get();
                                     $roster_val = json_decode($roster_val, true);
 
-                                    $check_in  = $roster_val[0]['start_time'];
-                                    $check_out = $roster_val[0]['end_time'];
+                                    if(!empty($roster_val)){
+                                      $check_in  = $roster_val[0]['start_time'];
+                                      $check_out = $roster_val[0]['end_time'];
 
-                                    $tot_hours = round(abs(strtotime($check_in) - strtotime($check_out)) / 3600,2). " Hours";
-                                    echo $tot_hours;
+                                      $tot_hours = round(abs(strtotime($check_in) - strtotime($check_out)) / 3600,2). " Hours";
+                                      echo $tot_hours;
+                                    }
                               ?>
                             </div>
                         </td>
