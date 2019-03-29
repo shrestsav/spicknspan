@@ -23,8 +23,13 @@
           <div class="box-header with-border">
              <form role="form" action="{{route('roster.store')}}" method="POST">
 
-              <div class="year_month">
-                Year - Month : <input name="full_date" type="text" id="full_date" class="txtTime" style="width:85px;" value="<?php //echo $roster['full_date'];?>" required>
+              <div class="box-header">
+                <h3 class="box-title">Roster List</h3>
+                <p class="pull-right">
+                    <label for="">Month-Year</label>
+                    <input name="full_date" type="text" id="full_date" class="txtTime" style="width:85px;" value="<?php //echo $roster['full_date'];?>" autocomplete="off" required>
+                    <a id="contentSection_btnRefresh" class="btn btn-warning" href='javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions("ctl00$contentSection$btnRefresh", "", true, "validation", "", false, true))' style="margin-top: -7px !important;"><i class="fa fa-refresh"></i></a>
+                </p>
               </div>
 
               {{ csrf_field() }}
@@ -155,7 +160,6 @@
               </div>
               <div class="box-footer-right">
                 <button id="addrow" class="btn btn-primary">Add Row</button>
-                <button id="delBtn" class="btn btn-danger">Cancel</button>
               </div>
             </div>
 
@@ -186,7 +190,7 @@
           var newRow = $("<tr style='text-align: center;' role='row' class='odd'>");
           var cols = "";
           // cols += '<td><span class="chkRow"><input type="checkbox" name="roster_check"></span></td>';
-          cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger" value="Remove"></td>';
+          cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger" value="X"></td>';
           cols += '<td><select name="employee_id[]" class="form-control select2" style="width: 100%;" tabindex="-1" aria-hidden="true"><?php if ($employee->count()){?><option selected disabled>Select Employee</option><?php foreach($employee as $user){?><option value="<?php echo $user->id;?>"><?php echo $user->name;?></option><?php } } ?></select></td>';
           cols += '<td><select name="client_id[]" id="client_name" class="form-control select2" style="width: 100%;" tabindex="-1" aria-hidden="true"><?php if ($client->count()){?><option selected disabled>Select Client</option><?php foreach($client as $user){?><option value="<?php echo $user->id;?>"><?php echo $user->name;?></option><?php } } ?></select></td>';
           cols += '<?php for ($i = 1; $i <= 31; $i++){?><td><input name="start_time_<?php echo $i;?>" type="text" id="start_time" class="timepicker txtTime" style="width:40px;"><br>to<br><input name="end_time_<?php echo $i;?>" type="text" id="end_time" class="timepicker txtTime" style="width:40px;"></td><?php } ?>';

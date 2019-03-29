@@ -140,12 +140,13 @@ class AttendanceController extends Controller
             $check_in->check_in_image = $filename;
             $check_in->save();
 
-            
             $image = Image::make($request->get('image'));
             Storage::disk('local')->makeDirectory('public/employee_login/'.Auth::user()->id);
             $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
         }
-        else{
+        elseif(!$request->get('image')){
+            return  redirect()->back()->withErrors('Please snap your photo for login.');
+        } else{
             return  redirect()->back()->withErrors('Client Already Logged In for Today');
         }
         return redirect()->back()->with('message', 'Client Logged In Successfully');
@@ -160,21 +161,23 @@ class AttendanceController extends Controller
             { $longitude = $_POST['longitude']; }
         else { $longitude = 0; }
 
+        if(!$request->get('image')){
+            return  redirect()->back()->withErrors('Please snap your photo to logout.');
+        }
+        
         $location = $latitude.', '. $longitude;
 
         $client_id = $request->client;
         $employee_id = Auth::id();
         $carbon = now();
         $current_date_time = $carbon->toDateTimeString();
-        
 
         $now = strtotime(date('H:i:s'));
         $filename = 'check_out_'.Auth::user()->id.'_'.$now.'.png';
         $image = Image::make($request->get('image'));
+
         Storage::disk('local')->makeDirectory('public/employee_login/'.Auth::user()->id);
             $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
-
-
 
         $check_in = Attendance::where('client_id',$client_id)->where('employee_id',$employee_id)->whereDate('created_at',\Carbon\Carbon::today())->update(['full_date'=>$current_date_time, 'check_out'=>$current_date_time, 'check_out_location'=>$location, 'check_out_image'=>$filename]);
 

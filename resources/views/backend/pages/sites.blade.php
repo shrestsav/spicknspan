@@ -149,6 +149,7 @@
               <th>Building No</th>
               <th>Question Template</th>
               <th>QR</th>
+              <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -165,6 +166,11 @@
                 <?php } ?>
                 @endforeach
                 <td><a href="{{route('generate.qr',$room->id)}}" target="_blank">Show QR</a></td>
+                <form action="{{ url('/site/delete_room/').'/'.$room->id}}" method="POST">
+                  {{ csrf_field() }}
+                  <input type="hidden" name="_method" value="POST">
+                  <td><button>Delete</button></td>
+                </form>
               </tr>
               <?php $count++; ?>
             @endforeach
@@ -183,10 +189,12 @@
 <script type="text/javascript">
   $(function () {
     $('#building_list_table').DataTable({
-      "pageLength": 8
+      "pageLength": 8,
+      "scrollX": true
     });
     $('#room_list_table').DataTable({
-      "pageLength": 8
+      "pageLength": 8,
+      "scrollX": true
     });
   })
 </script>

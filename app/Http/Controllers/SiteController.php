@@ -90,12 +90,21 @@ class SiteController extends Controller
     {
         //
     }
+
     public function store_room(Request $request)
     {
         // return $request->all();
         Room::create($request->all());
         return redirect()->back()->with('message', 'Room Added Successfully');
     }
+
+    public function delete_room(Request $request, $id)
+    {
+        $room = Room::find($id); 
+        $room->delete(); //delete the id
+        return redirect()->back()->with('message', 'Room Deleted Successfully');
+    }
+
     public function generate_qr($id)
     {   
         // $rooms = Room::where('id',$id)->pluck('building_id')->first();

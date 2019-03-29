@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('/site','SiteController@store')->name('site.store');
 		Route::post('/store_room','SiteController@store_room')->name('room.store');
 		Route::get('/generate_qr/{id}', 'SiteController@generate_qr')->name('generate.qr');
+		Route::post('/site/delete_room/{id}','SiteController@delete_room')->name('room.destroy');
 		
 
 		Route::get('/scanner', function(){
