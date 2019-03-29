@@ -1,9 +1,12 @@
     <!-- Logo -->
     <a href="{{url('/')}}" class="logo">
+      <div class="logo-lg">
+        <img src="{{ asset('backend/img/trackncheck.png') }}" width="200px;">
+      </div>
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini">S<b>n</b>S</span>
+      <span class="logo-mini">T<b>&</b>C</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg">SPICK <b>N</b> SPAN</span>
+      {{-- <span class="logo-lg">SPICK <b>N</b> SPAN</span> --}}
     </a>
     <!-- Header Navbar: style can be found in header.less -->
     <nav class="navbar navbar-static-top">

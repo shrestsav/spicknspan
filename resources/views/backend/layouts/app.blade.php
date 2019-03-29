@@ -23,10 +23,30 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="{{ asset('backend/css/AdminLTE.min.css') }}">
   {{-- Theme Color CSS --}}
-  <link rel="stylesheet" href="{{ asset('backend/css/skin-purple.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('backend/css/skin-green.min.css') }}">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css">
   {{-- CUSTOM CSS BY SHRESTSAV --}}
   <link rel="stylesheet" href="{{ asset('backend/css/style.css') }}">
+  <style type="text/css">
+    .skin-green .main-header .logo {
+        background-color: #292929;
+    }
+    .skin-green .main-header .navbar {
+        background-color: #292929 !important;
+    }
+    .skin-green .wrapper, .skin-green .main-sidebar, .skin-green .left-side {
+        background-color: #292929;
+    }
+    .skin-green .sidebar a:hover {
+        background-color: #0060A2 !important;
+    }
+    .skin-green .sidebar-menu>li.active>a {
+        border-left-color: #0060A2;
+    }
+    .skin-green .main-header li.user-header {
+        background-color: #19506f;
+    }
+  </style>
   <style type="text/css" media="print">
     .printer{
       display:none;
@@ -39,7 +59,7 @@
   <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 </head>
-<body class="hold-transition skin-purple sidebar-mini {{Session::get('theme_sidebar')}}">
+<body class="hold-transition skin-green sidebar-mini {{Session::get('theme_sidebar')}}">
   <div class="wrapper printer">
 
     <header class="main-header">

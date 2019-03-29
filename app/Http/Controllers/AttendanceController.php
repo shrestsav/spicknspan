@@ -28,7 +28,24 @@ class AttendanceController extends Controller
         $user_type = 'client';
         $clients = User::all()->where('user_type','=',$user_type);
 
-        return view('backend.pages.check_in_out',compact('clients'));
+        $check_in_time = '';
+        $check_out_time = '';
+        $check_in_status = 0;
+        $check_out_status = 0;
+        // Check if User is already logged in and Out
+        $attendance_check_in = Attendance::select('check_in')->where('employee_id',Auth::id())->whereDate('created_at',\Carbon\Carbon::today());
+        if($attendance_check_in->exists()){
+            $check_in_time = $attendance_check_in->first()->check_in;
+            $check_in_status = 1;
+        }
+
+        $attendance_check_out = Attendance::select('check_out')->where('employee_id',Auth::id())->whereDate('check_out',\Carbon\Carbon::today());
+        if($attendance_check_out->exists()){
+            $check_out_time = $attendance_check_out->first()->check_out;
+            $check_out_status = 1;
+        }
+
+        return view('backend.pages.check_in_out',compact('clients','check_in_status','check_out_status','check_in_time','check_out_time'));
     }
 
     /**
@@ -111,24 +128,23 @@ class AttendanceController extends Controller
     }
     public function checkin(Request $request)
     {
-        // return $request->all();
-        if(isset($_POST['latitude']))
-            { $latitude = $_POST['latitude']; }
-        else { $latitude = 0; }
-
-        if(isset($_POST['longitude']))
-            { $longitude = $_POST['longitude']; }
-        else { $longitude = 0; }
-
-        $location = $latitude.', '. $longitude;
+        $request->validate([
+            'image' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
+        ]);
+    
+       
 
         $client_id = $request->client;
         $employee_id = Auth::id();
 
         //Check if already Logged In
         $attendance_check = Attendance::where('client_id',$client_id)->whereDate('created_at',\Carbon\Carbon::today());
+
         if(!$attendance_check->exists() && $request->get('image')){
-            $now = strtotime(date('H:i:s'));
+            $now = date("Y-m-d").'_'.strtotime(date('H:i:s'));
+            $location = $request->latitude.', '. $request->longitude;
             $filename = 'check_in_'.Auth::user()->id.'_'.$now.'.png';
             $carbon = now();
             $current_date_time = $carbon->toDateTimeString();
@@ -139,73 +155,85 @@ class AttendanceController extends Controller
             $check_in->check_in_location = $location;
             $check_in->check_in_image = $filename;
             $check_in->save();
-
             
             $image = Image::make($request->get('image'));
             Storage::disk('local')->makeDirectory('public/employee_login/'.Auth::user()->id);
             $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
         }
         else{
-            return  redirect()->back()->withErrors('Client Already Logged In for Today');
+            return  redirect()->back()->withErrors('You are Already Logged In for Today');
         }
         return redirect()->back()->with('message', 'Client Logged In Successfully');
     }
     public function checkout(Request $request)
     {
-       if(isset($_POST['latitude']))
-            { $latitude = $_POST['latitude']; }
-        else { $latitude = 0; }
+        $request->validate([
+            'image' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
+        ]);
 
-        if(isset($_POST['longitude']))
-            { $longitude = $_POST['longitude']; }
-        else { $longitude = 0; }
-
-        $location = $latitude.', '. $longitude;
+        $location = $request->latitude.', '. $request->longitude;
 
         $client_id = $request->client;
         $employee_id = Auth::id();
         $carbon = now();
         $current_date_time = $carbon->toDateTimeString();
         
+        $attendance_check = Attendance::where('client_id',$client_id)->whereDate('check_out',\Carbon\Carbon::today());
+        if(!$attendance_check->exists() && $request->get('image')){
+            $now = strtotime(date('H:i:s'));
+            $filename = 'check_out_'.Auth::user()->id.'_'.$now.'.png';
+            $image = Image::make($request->get('image'));
+            Storage::disk('local')->makeDirectory('public/employee_login/'.Auth::user()->id);
+                $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
 
-        $now = strtotime(date('H:i:s'));
-        $filename = 'check_out_'.Auth::user()->id.'_'.$now.'.png';
-        $image = Image::make($request->get('image'));
-        Storage::disk('local')->makeDirectory('public/employee_login/'.Auth::user()->id);
-            $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
 
-
-
-        $check_in = Attendance::where('client_id',$client_id)->where('employee_id',$employee_id)->whereDate('created_at',\Carbon\Carbon::today())->update(['full_date'=>$current_date_time, 'check_out'=>$current_date_time, 'check_out_location'=>$location, 'check_out_image'=>$filename]);
-
+            $check_in = Attendance::where('client_id',$client_id)->where('employee_id',$employee_id)->whereDate('created_at',\Carbon\Carbon::today())->update(['full_date'=>$current_date_time, 'check_out'=>$current_date_time, 'check_out_location'=>$location, 'check_out_image'=>$filename]);
+        }
+        else{
+            return  redirect()->back()->withErrors('You have already logged out');
+        }
         //check total hours difference in the roster table
-        $current_date_time = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $current_date_time)->format('Y-m-d');
-        $roster_lists     = DB::table('rosters')->where('client_id', '=', $client_id)->where('employee_id', '=', $employee_id)->where('full_date', '=', $current_date_time)->get();
-        $roster_lists = json_decode($roster_lists, true);
-        $diff_hour1 = $roster_lists[0]['total_hours'];
+        // $current_date_time = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $current_date_time)->format('Y-m-d');
+        // $roster_lists     = DB::table('rosters')->where('client_id', '=', $client_id)->where('employee_id', '=', $employee_id)->where('full_date', '=', $current_date_time)->get();
+        // $roster_lists = json_decode($roster_lists, true);
+        // $diff_hour1 = $roster_lists[0]['total_hours'];
 
         //check total hours difference in the attendance table
-        $attendance_lists = DB::table('attendances')->where('attendances.client_id', '=', $client_id)->where('attendances.employee_id', '=', $employee_id)->where('attendances.full_date', '=', $current_date_time)->get();
-        $attendance_lists = json_decode($attendance_lists, true);
-        $check_in  = $attendance_lists[0]['check_in'];
-        $check_out = $attendance_lists[0]['check_out'];
-        $diff_hour2 = round(abs(strtotime($check_in) - strtotime($check_out)) / 3600);
+        // $attendance_lists = DB::table('attendances')->where('attendances.client_id', '=', $client_id)->where('attendances.employee_id', '=', $employee_id)->where('attendances.full_date', '=', $current_date_time)->get();
+        // $attendance_lists = json_decode($attendance_lists, true);
+        // $check_in  = $attendance_lists[0]['check_in'];
+        // $check_out = $attendance_lists[0]['check_out'];
+        // $diff_hour2 = round(abs(strtotime($check_in) - strtotime($check_out)) / 3600);
 
-        if($diff_hour1 == $diff_hour2){
-            $status = 1;
-        }else{
-            $status = 2;
-        }
+        // if($diff_hour1 == $diff_hour2){
+        //     $status = 1;
+        // }else{
+        //     $status = 2;
+        // }
 
-        $check_in = Attendance::where('client_id',$client_id)->where('employee_id',$employee_id)->whereDate('created_at',\Carbon\Carbon::today())->update(['status'=>$status]);
+        // $check_in = Attendance::where('client_id',$client_id)->where('employee_id',$employee_id)->whereDate('created_at',\Carbon\Carbon::today())->update(['status'=>$status]);
 
-        return redirect()->back()->with('message', 'Client Logged Out Successfully');
+        return redirect()->back()->with('message', 'Logged Out Successfully');
     }
 
     public function details(Request $request, $id)
     {
-        $att_details = Attendance::findOrFail($id);
-        // return $att_details;
+        $att_details = Attendance::select('attendances.id',
+                                            'attendances.client_id',
+                                            'attendances.employee_id',
+                                            'attendances.check_in',
+                                            'attendances.check_in_location',
+                                            'attendances.check_in_image',
+                                            'attendances.check_out',
+                                            'attendances.check_out_location',
+                                            'attendances.check_out_image',
+                                            'users.name',
+                                            'users.email')
+                                ->where('attendances.id',$id)
+                                ->join('users','attendances.employee_id','=','users.id')
+                                ->first();
         return view('backend.pages.attendance_details', compact('att_details'));
     }
 

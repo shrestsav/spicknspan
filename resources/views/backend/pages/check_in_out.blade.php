@@ -1,10 +1,25 @@
 @extends('backend.layouts.app',['title'=>'Check In / Out'])
-
+@push('styles')
+<style type="text/css">
+    video,canvas{
+    margin-left: -80px;
+    margin-top: 20px;
+    position: absolute;
+  }
+</style>
+@endpush
 @section('content')
  
     <!-- Main content -->
     <section class="content" style="padding-top: 50px;">
-      <!-- /.row -->
+
+      {{-- To display Errors from Javascript --}}
+      <div class="alert alert-danger access_error_msg" style="display: none;">   
+          @foreach ($errors->all() as $error)
+             {{ $error }}
+          @endforeach
+      </div>
+      {{-- To display Errors from Laravel Session --}}
       @if ($errors->any())
           <div class="alert alert-danger custom_error_msg">   
               @foreach ($errors->all() as $error)
@@ -29,86 +44,165 @@
                 <input type="hidden" name="latitude" id="latitude">
                 <input type="hidden" name="longitude" id="longitude">
                 <input type="hidden" name="image" id="user_image" required>
-                <div class="row">
-                  
+                <div class="col-md-4">  
                   <div id="container"  name='cont' class="container-fluid no-padding ">
-                     <video autoplay="true" id="videoElement" name='vid'>
-                      
-                     </video>
+
+                      {{-- <div class="demo-frame">
+                        <div class="demo-container">
+                          <video id="video" width="320" height="240" preload autoplay loop muted></video>
+                          <canvas id="canvas" width="320" height="240"></canvas>
+                        </div>
+                      </div> --}}
+                     <video autoplay="true" id="videoElement" name='vid' width="320" height="240"></video>
+                     <canvas id="canvas" width="320" height="240"></canvas>
+                     
                      <div id="captured_photo"></div>
                   </div>
-
-                  <a id="download" download="snap.jpg">
-                    <button onclick="myFunction(); download();" align="center" style="margin: 20px 250px auto " class="btn btn-primary dropdown-toggle" type="button" >capture</button>
-                  </a>
                 </div>
+                <div class="col-md-8" style="margin-top: 30px;">  
+                  <select class="select2 check_in_out_client" name="client" required>
+                    @foreach($clients as $client)
+                      <option value="{{$client->id}}">{{$client->name}}</option>
+                    @endforeach
+                  </select>
+                  <div class="check_in_btn_container">
+                    <button class="btn check_in_btn" type="submit" onclick="checkin();" @if($check_in_status == '1')disabled @endif>
+                      IN 
+                    </button>
 
-                <select class="select2" name="client" required>
-                  @foreach($clients as $client)
-                    <option value="{{$client->id}}">{{$client->name}}</option>
-                  @endforeach
-                </select>
-                <div class="check_in_btn_container">
-                  <a class="btn check_in_btn" type="submit" onclick="checkin();">
-                    IN
-                  </a>
+                  <span style="left: 200px;"> {{$check_in_time}} </span>
+                  </div>
+                  <div class="check_out_btn_container">
+                    <button class="btn check_out_btn" onclick="checkout();" @if($check_out_status == '1')disabled @endif>
+                      OUT
+                    </button>
+                    <span style="left: 100px">{{$check_out_time}}</span>
+                  </div>
                 </div>
-                <div class="check_in_btn_container">
-                  <a class="btn check_in_btn" onclick="checkout();">
-                    OUT
-                  </a>
-                </div>
-
-                
-                {{-- <button type="submit"></button> --}}
               </div>
-              <!-- /.box-body -->
             </div>
-            <!-- /.box -->
           </div>
         </div>
       </form>
     </section>
-    <!-- /.content -->
-    <canvas id="CANVAS" name="CANVAS" width="400" height="400">Your browser does not support Canvas.</canvas>
+    <canvas id="CANVAS" name="CANVAS" height="240" width="320px">Your browser does not support Canvas.</canvas>
+
 @endsection
 @push('scripts')
+  <script src="{{ asset('backend/js/tracking-min.js') }}"></script>
+  <script src="{{ asset('backend/js/face-min.js') }}"></script>
 
+    <script>
+    window.onload = function() {
+      var video = document.getElementById('videoElement');
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
+
+      var tracker = new tracking.ObjectTracker('face');
+      tracker.setInitialScale(4);
+      tracker.setStepSize(2);
+      tracker.setEdgesDensity(0.1);
+
+      tracking.track('#videoElement', tracker, { camera: true });
+
+      tracker.on('track', function(event) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        event.data.forEach(function(rect) {
+          context.strokeStyle = '#a64ceb';
+          context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+          context.font = '11px Helvetica';
+          context.fillStyle = "#fff";
+          context.fillText('Face Detected', rect.x + rect.width + 5, rect.y + 11);
+          // context.fillText('x: ' + rect.x + 'px', rect.x + rect.width + 5, rect.y + 11);
+          // context.fillText('y: ' + rect.y + 'px', rect.x + rect.width + 5, rect.y + 22);
+        });
+      });
+
+      var gui = new dat.GUI();
+      gui.add(tracker, 'edgesDensity', 0.1, 0.5).step(0.01);
+      gui.add(tracker, 'initialScale', 1.0, 10.0).step(0.1);
+      gui.add(tracker, 'stepSize', 1, 5).step(0.1);
+    };
+  </script>
   <script type="text/javascript">
+    var video = document.querySelector("#videoElement");
+
+    if (navigator.mediaDevices.getUserMedia) 
+    {       
+      navigator.mediaDevices.getUserMedia({video: true})
+        .then(function(stream) {
+          video.srcObject = stream;
+         })
+        .catch(function(err0r) {
+          $('#CANVAS').remove();
+          $('.access_error_msg').html('Please Allow Camera Permission');
+          $('.access_error_msg').slideDown("slow");
+        });
+      
+      var i=0;
+
+      function capture() {
+        var x =  document.getElementById("CANVAS") ;
+        var ctx = x.getContext("2d");
+        ctx.fillStyle = "#FF0000";
+        ctx.drawImage(video, 0, 0, 320, 240);
+        if (i <10)
+        {
+          document.getElementById("captured_photo").appendChild(x);
+          $('#videoElement').remove();
+          i=i+1;
+        }
+      }
+    }
 
         function checkin(){
-            if (navigator.geolocation) {
-              navigator.geolocation.getCurrentPosition(showPosition);
-            } else { 
-              x.innerHTML = "Geolocation is not supported by this browser.";
-            }
-        }
-        function showPosition(position) {
-          var latitude = position.coords.latitude;
-          var longitude = position.coords.longitude;
-          var action = "{{route('attendance.checkin')}}";
-            $('#latitude').val(latitude);
-            $('#longitude').val(longitude);
-            $('form').attr('action',action);
-            $('form').submit();
+          if(navigator.geolocation) {
+            // Proceed only if User allows Location Access
+            navigator.geolocation.getCurrentPosition(function(check_in_Position){
+              capture();
+              var latitude = check_in_Position.coords.latitude;
+              var longitude = check_in_Position.coords.longitude;
+              var action = "{{route('attendance.checkin')}}";
+              var image = document.getElementById("CANVAS").toDataURL();
+              $('#user_image').val(image);
+              $('#latitude').val(latitude);
+              $('#longitude').val(longitude);
+              $('form').attr('action',action);
+              $('form').submit();
+            }, function(){
+              $('.access_error_msg').html('You Cannot Login Without Giving Location Access');
+              $('.access_error_msg').slideDown("slow");
+            });
+          } else { 
+            x.innerHTML = "Geolocation is not supported by this browser. You cannot Login";
+          }
         }
 
         function checkout(){
             if (navigator.geolocation) {
-              navigator.geolocation.getCurrentPosition(showPosition1);
+
+              // Proceed only if User allows Location Access
+              navigator.geolocation.getCurrentPosition(function(check_out_Position){
+                capture();
+                var latitude = check_out_Position.coords.latitude;
+                var longitude = check_out_Position.coords.longitude;
+                var action = "{{route('attendance.checkout')}}";
+                var image = document.getElementById("CANVAS").toDataURL();
+                $('#user_image').val(image);
+                $('#latitude').val(latitude);
+                $('#longitude').val(longitude);
+                $('form').attr('action',action);
+                $('form').submit();
+              }, function(){
+                $('.access_error_msg').html('You Cannot Login Without Giving Location Access');
+                $('.access_error_msg').slideDown("slow");
+              });
             } else { 
               x.innerHTML = "Geolocation is not supported by this browser.";
             }
         }
-        function showPosition1(position) {
-          var latitude = position.coords.latitude;
-          var longitude = position.coords.longitude;
-          var action = "{{route('attendance.checkout')}}";
-            $('#latitude').val(latitude);
-            $('#longitude').val(longitude);
-            $('form').attr('action',action);
-            $('form').submit();
-        }
+
 
         $('.select2').select2();
     
@@ -124,31 +218,6 @@
       // download.setAttribute("href", image);
     }
 
-    var video = document.querySelector("#videoElement");
 
-    if (navigator.mediaDevices.getUserMedia) 
-    {       
-       navigator.mediaDevices.getUserMedia({video: true})
-        .then(function(stream) {
-          video.srcObject = stream;
-         })
-        .catch(function(err0r) {
-          console.log("Something went wrong!");
-        });
-      
-      var i=0;
-      function myFunction() {
-        var x =  document.getElementById("CANVAS") ;
-        var ctx = x.getContext("2d");
-        ctx.fillStyle = "#FF0000";
-        ctx.drawImage(video, 0, 0, 400, 350);
-        if (i <10)
-        {
-          document.getElementById("captured_photo").appendChild(x);
-          $('#videoElement').remove();
-          i=i+1;
-        }
-      }
-    }
 </script>
 @endpush
