@@ -93,7 +93,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
               <div class="form-group">
                 <label for="description">Description</label>
-                <textarea name="description" class="form-control" id="description" placeholder="Enter Annual Salary" required></textarea>
+                <textarea name="description" class="form-control" id="description" placeholder="Enter Description" required></textarea>
               </div>
               <div class="form-group">
                 <label for="employment_start_date">Employment Start Date</label>
@@ -116,7 +116,8 @@ elseif(Route::current()->getName() == 'user_client.index'){
       </div>
     </div>
     <div class="col-md-12">
-      <div class="box">
+      <div class="box"> 
+        <a href="{{ route('export_to_excel',Route::current()->getName()) }}"><button class="btn btn-success">Download Excel xls</button></a>
        {{--  <div class="box-header">
           <h3 class="box-title">Data Table With Full Features</h3>
         </div> --}}
@@ -130,6 +131,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
               <th>Contact No</th>
               <th>Hourly Rate</th>
               <th>Start Date</th>
+              <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -140,6 +142,13 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <td>{{$user->contact}}</td>
                 <td>{{$user->hourly_rate}}</td>
                 <td>{{$user->employment_start_date}}</td>
+                <td>
+                  <a href="{{route('user.edit',$user->id)}}">
+                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                  </a>
+                  <a href="javascript:;" id="delete_user" data-user_id = '{{$user->id}}'><i class="fa fa-trash" aria-hidden="true"></i>
+                  </a>
+                </td>
               </tr>
             @endforeach
             </tbody>
@@ -156,7 +165,24 @@ elseif(Route::current()->getName() == 'user_client.index'){
 <script type="text/javascript">
   $(function () {
     $('#users_table').DataTable()
+  });
+  $('#delete_user').on('click',function(){
+    swal({
+    title: "Are you sure?",
+    text: "Once deleted, you will not be able to recover this data!",
+    icon: "warning",
+    buttons: true,
+    dangerMode: true,
   })
+  .then((willDelete) => {
+    if (willDelete) {
+      var user_id = $(this).data('user_id');
+      alert(user_id);
+      window.location.href = "{{url('delete_user/')}}/"+user_id;
+    } 
+  });
+  });
+
 </script>
   
 @endpush

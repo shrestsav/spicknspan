@@ -37,6 +37,9 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/contractors', 'UserController@index')->name('user_contractor.index');
 		Route::get('/clients', 'UserController@index')->name('user_client.index');
 		Route::post('/add_user', 'UserController@store')->name('user.store');
+		Route::get('/edit_user/{id}', 'UserController@edit')->name('user.edit');
+		Route::post('/update_user/{id}', 'UserController@update')->name('user.update');
+		Route::get('/delete_user/{id}', 'UserController@destroy')->name('user.delete');
 
 		Route::get('/wages','WagesController@index')->name('wages.index');
 		Route::post('/wages','WagesController@store')->name('wages.store');
@@ -54,13 +57,14 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('/store_room','SiteController@store_room')->name('room.store');
 		Route::get('/generate_qr/{id}', 'SiteController@generate_qr')->name('generate.qr');
 		
-
 		Route::get('/scanner', function(){
 			return view('backend.pages.scanner');
 		})->name('scanner');
 
 		Route::get('/siteAttendance','AttendanceController@site_attendance')->name('site.attendance');
 		Route::post('/qr_login', 'AttendanceController@ajax_qr_login')->name('ajax.qrLogin');
+
+		Route::get('/export_excel/{id}', 'CoreController@export_to_excel')->name('export_to_excel');
 		
 		Route::get('/questionTemplate','QuestionTemplateController@index')->name('question.index');
 		Route::get('/questionTemplate/add','QuestionTemplateController@addMore')->name('question.add');

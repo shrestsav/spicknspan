@@ -118,13 +118,28 @@ class AttendanceController extends Controller
         $employee_id = Auth::id();
 
         if(Auth::check() && Auth::user()->user_type == "admin")
-            $attendance_lists = Attendance::all();
+            $attendance_lists = \DB::select('SELECT 
+                                            a.id,
+                                            a.check_in as check_in,
+                                            a.check_in_location,
+                                            a.check_out as check_out,
+                                            a.check_out_location,
+                                            a.created_at,  
+                                            (select name from users where id=a.client_id) as client_name,  
+                                            (select name from users where id=a.`employee_id`) as employee_name 
+                                            FROM `attendances` a');
         else
-            $attendance_lists = Attendance::all()->where('employee_id',$employee_id);
-
-        
-        $user_lists = User::all();
-        return view('backend.pages.attendance_list',compact('attendance_lists', 'user_lists'));
+            $attendance_lists = \DB::select('SELECT 
+                                            a.id,
+                                            a.check_in as check_in,
+                                            a.check_in_location,
+                                            a.check_out as check_out,
+                                            a.check_out_location,
+                                            a.created_at,  
+                                            (select name from users where id=a.client_id) as client_name,  
+                                            (select name from users where id=a.`employee_id`) as employee_name 
+                                            FROM `attendances` a where a.employee_id=1');
+        return view('backend.pages.attendance_list',compact('attendance_lists'));
     }
     public function checkin(Request $request)
     {
