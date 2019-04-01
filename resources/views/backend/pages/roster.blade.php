@@ -122,15 +122,13 @@
                                             ->where('client_id','=',$client_id)
                                             ->get();
                         $working_time = json_decode($working_time, true);
-                        // $working_time = $working_time[0]['id'];
-                        echo 'test';
-                        print_r($working_time[$j]['id']);
-
+                    
+                        // print_r($working_time);
+                        // die();
                         $time_table = DB::table('rosters_timetable')
                                             ->where('rosters_id','=', $working_time)
                                             ->get();
                         $time_table = json_decode($time_table, true);
-                        // print_r($time_table);
 
                         $full_date  =  $time_table[$j]['full_date'];
                         $month_part = explode('-', $full_date);
@@ -145,9 +143,8 @@
                         else{
                             $days = 28;
                         }
-                        // echo $working_time[$j]['id'];
                   ?>
-                    <input type="hidden" name="old_rosters_id[]" value="<?php echo $working_time[$j]['id'];?>">
+                    <input type="hidden" name="old_rosters_id[]" value="<?php echo $working_time[0]['id'];?>">
 
                     @for ($i = 0; $i < $days; $i++)
                         <td>

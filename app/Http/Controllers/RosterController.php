@@ -64,11 +64,14 @@ class RosterController extends Controller
     {
         $arr_employee_id   = $request['employee_id'];
         $arr_client_id     = $request['client_id'];
-
+        // print_r($arr_employee_id);
+        // print_r($arr_client_id);
+        // die();
         $j = 0;
         $x = 0;
         foreach ($arr_employee_id as $emp_id) {
-
+            // echo $j;
+            // die();
             $full_date  =  $request['full_date'];
             $month_part = explode('-', $full_date);
             $month = $month_part[1];
@@ -118,35 +121,31 @@ class RosterController extends Controller
             }
             else{
                 //edit the current data
-                echo 'old record';
+                // echo 'old record';
                 $old_rosters_id = $request['old_rosters_id'];
-                // print_r($old_rosters_id);
+                // echo $x;
+                print_r($old_rosters_id[$x]);
+                // die();
+                $full_date      = $request['full_date'];
 
                 for ($i = 1; $i <= $k; $i++) {
-                    $start_time    = $request['start_time_'.$i];
-                    $end_time      = $request['end_time_'.$i];
+                    $start_time    = $request['start_time_'.($i-1)];
+                    $end_time      = $request['end_time_'.($i-1)];
                     $full_date     =  $request['full_date'].'-'.$i;
                     $timeIn        = \Carbon\Carbon::parse($start_time);
                     $timeOut       = \Carbon\Carbon::parse($end_time);
                     $diffInHours   = round($timeOut->diffInMinutes($timeIn) / 60);
                     
                     $full_date      =  $request['full_date'];
-                    print_r($request['start_time_'.$i]);
-                    print_r($request['end_time_'.$i]);
-                    $roster_arr = [
-                        'rosters_id'    => $old_rosters_id[$x],
-                        'full_date'     => $full_date.'-'.$i,
-                        'start_time'    => $request['start_time_'.$i],
-                        'end_time'      => $request['end_time_'.$i],
-                        'total_hours'   => $diffInHours
-                    ];
-                    RosterTimetable::where('id', '589')->update($roster_arr);
-                    // print_r($roster_arr);
-                }                
+
+                    RosterTimetable::where('rosters_id', '=', $old_rosters_id[$x])
+                    ->where('full_date', '=', $full_date.'-'.$i)
+                    ->update(['start_time' => $start_time, 'end_time' => $end_time, 'total_hours' => $diffInHours]);
+                } 
             }
             $j++; $x++;
         }
-        // return redirect()->back()->with('message', 'Roster Added Successfully');
+        return redirect()->back()->with('message', 'Roster Added Successfully');
     }
 
     /**
