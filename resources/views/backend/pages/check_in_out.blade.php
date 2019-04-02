@@ -60,22 +60,22 @@
                   </div>
                 </div>
                 <div class="col-md-8" style="margin-top: 30px;">  
-                  <select class="select2 check_in_out_client" name="client" required>
+                  <select class="select2 check_in_out_client" name="client_id" required>
                     @foreach($clients as $client)
                       <option value="{{$client->id}}">{{$client->name}}</option>
                     @endforeach
                   </select>
                   <div class="check_in_btn_container">
-                    <button class="btn check_in_btn" type="submit" onclick="checkin();" @if($check_in_status == '1')disabled @endif>
+                    <a class="btn check_in_btn" type="submit" onclick="checkin();" @if($check_in_status == '1')disabled @endif>
                       IN 
-                    </button>
+                    </a>
 
                   <span style="left: 200px;"> {{$check_in_time}} </span>
                   </div>
                   <div class="check_out_btn_container">
-                    <button class="btn check_out_btn" onclick="checkout();" @if($check_out_status == '1')disabled @endif>
+                    <a class="btn check_out_btn" onclick="checkout();" @if($check_out_status == '1')disabled @endif>
                       OUT
-                    </button>
+                    </a>
                     <span style="left: 100px">{{$check_out_time}}</span>
                   </div>
                 </div>

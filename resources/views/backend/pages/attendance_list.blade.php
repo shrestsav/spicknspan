@@ -23,7 +23,7 @@
                   <th>Date</th>
                   <th>Employee Name</th>
                   <th>Client Name</th>
-                  <th>Total Hours</th>
+                  <th>Total Time</th>
                   <th>Timing</th>
                   <th>View Details</th>
                 </tr>
@@ -32,19 +32,19 @@
                   @php  
                       $check_in = \Carbon\Carbon::parse($attendance_list->check_in);
                       $check_out = \Carbon\Carbon::parse($attendance_list->check_out);
-                      $hours = $check_out->diffInHours($check_in);
+                      // $hours = $check_out->diffInHours($check_in);
                   @endphp
                   <tr>
-                    <td>{{$check_in->format('d-m-Y')}}</td>                   
+                    <td>{{$attendance_list->date}}</td>                   
                     <td>{{$attendance_list->employee_name}}</td>
                     <td>{{$attendance_list->client_name}}</td>
-                    <td>{{$hours}} Hours</td>
+                    <td>{{$attendance_list->total_time}}</td>
                     <td>{{$check_in->format('H:i')}} - 
                         @if($attendance_list->check_out!=null || $attendance_list->check_out!='')
                           {{$check_out->format('H:i')}}@else Logged In @endif</td>
                     <td>
                       <button class="view_att_details">
-                        <a href="{{ url('attendance/details/').'/'.$attendance_list->id}}">Details</a>
+                        <a href="{{ url('attendance/details').'/'.$attendance_list->client_id.'/'.$attendance_list->employee_id.'/'.$attendance_list->date}}">Details</a>
                       </button>
                     </td>
                   </tr>

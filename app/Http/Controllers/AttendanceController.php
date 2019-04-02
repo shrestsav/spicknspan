@@ -25,25 +25,31 @@ class AttendanceController extends Controller
      */
     public function index()
     {
-        $user_type = 'client';
-        $clients = User::all()->where('user_type','=',$user_type);
+        $clients = User::all()->where('user_type','=','client');
 
         $check_in_time = '';
         $check_out_time = '';
         $check_in_status = 0;
         $check_out_status = 0;
-        // Check if User is already logged in and Out
-        $attendance_check_in = Attendance::select('check_in')->where('employee_id',Auth::id())->whereDate('created_at',\Carbon\Carbon::today());
-        if($attendance_check_in->exists()){
-            $check_in_time = $attendance_check_in->first()->check_in;
-            $check_in_status = 1;
-        }
 
-        $attendance_check_out = Attendance::select('check_out')->where('employee_id',Auth::id())->whereDate('check_out',\Carbon\Carbon::today());
-        if($attendance_check_out->exists()){
-            $check_out_time = $attendance_check_out->first()->check_out;
-            $check_out_status = 1;
-        }
+        // Check if User is already logged in and Out
+        $attendance_check_in = Attendance::select('check_in', 'check_out')
+                                        ->where('employee_id',Auth::id())
+                                        ->whereDate('check_in',\Carbon\Carbon::today())
+                                        ->get();
+        // return $attendance_check_in;
+        // return $attendance_check_in->last();
+        // if($attendance_check_in->exists()){
+            // $check_in_time = $attendance_check_in->check_in;
+            // return $check_in_time;
+            // $check_in_status = 1;
+        // }
+
+        // $attendance_check_out = Attendance::select('check_out')->where('employee_id',Auth::id())->whereDate('check_out',\Carbon\Carbon::today());
+        // if($attendance_check_out->exists()){
+        //     $check_out_time = $attendance_check_out->first()->check_out;
+        //     $check_out_status = 1;
+        // }
 
         return view('backend.pages.check_in_out',compact('clients','check_in_status','check_out_status','check_in_time','check_out_time'));
     }
@@ -117,17 +123,22 @@ class AttendanceController extends Controller
     {
         $employee_id = Auth::id();
 
-        if(Auth::check() && Auth::user()->user_type == "admin")
-            $attendance_lists = \DB::select('SELECT 
-                                            a.id,
-                                            a.check_in as check_in,
-                                            a.check_in_location,
-                                            a.check_out as check_out,
-                                            a.check_out_location,
-                                            a.created_at,  
+        if(Auth::check() && Auth::user()->user_type == "admin"){
+
+            $attendance_lists = \DB::select('SELECT
+                                            SEC_TO_TIME(SUM(TIME_TO_SEC(CAST(TIMEDIFF(`check_out`,`check_in`) AS TIME)))) AS total_time,
+                                            min(a.check_in) as check_in,
+                                            max(a.check_out) as check_out,
+                                            CAST(a.check_in AS date) AS date,
+                                            a.client_id,
+                                            a.employee_id,
                                             (select name from users where id=a.client_id) as client_name,  
                                             (select name from users where id=a.`employee_id`) as employee_name 
-                                            FROM `attendances` a');
+                                            FROM `attendances` a
+                                            GROUP BY client_name,employee_name,date,client_id,employee_id
+                                            ');
+            // return $attenda\nce_lists;
+        }
         else
             $attendance_lists = \DB::select('SELECT 
                                             a.id,
@@ -143,40 +154,49 @@ class AttendanceController extends Controller
     }
     public function checkin(Request $request)
     {
+        // return $request->all();
         $request->validate([
             'image' => 'required',
             'latitude' => 'required',
             'longitude' => 'required',
         ]);
-    
-       
 
-        $client_id = $request->client;
-        $employee_id = Auth::id();
+        //Have to check this validation
+
+        if(!$request->get('image')){
+            return redirect()->back()->withErrors('No Photo');
+        }
 
         //Check if already Logged In
-        $attendance_check = Attendance::where('client_id',$client_id)->whereDate('created_at',\Carbon\Carbon::today());
-
-        if(!$attendance_check->exists() && $request->get('image')){
+        $attendance_check = Attendance::where('client_id',$request->client_id)
+                                      ->where('employee_id',Auth::id())
+                                      ->whereDate('check_in',\Carbon\Carbon::today())
+                                      ->orderBy('id', 'desc')
+                                      ->first();
+        
+        if(($attendance_check && $attendance_check->check_out!=null ) || !$attendance_check){
             $now = date("Y-m-d").'_'.strtotime(date('H:i:s'));
             $location = $request->latitude.', '. $request->longitude;
             $filename = 'check_in_'.Auth::user()->id.'_'.$now.'.png';
             $carbon = now();
             $current_date_time = $carbon->toDateTimeString();
             $check_in = new Attendance;
-            $check_in->client_id = $client_id;
-            $check_in->employee_id = $employee_id;
+            $check_in->client_id = $request->client_id;
+            $check_in->employee_id = Auth::id();
             $check_in->check_in = $current_date_time;
             $check_in->check_in_location = $location;
             $check_in->check_in_image = $filename;
             $check_in->save();
             
-            $image = Image::make($request->get('image'));
-            Storage::disk('local')->makeDirectory('public/employee_login/'.Auth::user()->id);
-            $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
+            //Save User Log In Image 
+            if($check_in){
+                $image = Image::make($request->get('image'));
+                Storage::disk('local')->makeDirectory('public/employee_login/'.Auth::user()->id);
+                $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
+            }
         }
         else{
-            return  redirect()->back()->withErrors('You are Already Logged In for Today');
+            return redirect()->back()->withErrors('You are Already Logged In ');
         }
         return redirect()->back()->with('message', 'Client Logged In Successfully');
     }
@@ -189,14 +209,19 @@ class AttendanceController extends Controller
         ]);
 
         $location = $request->latitude.', '. $request->longitude;
-
-        $client_id = $request->client;
+        $client_id = $request->client_id;
         $employee_id = Auth::id();
         $carbon = now();
         $current_date_time = $carbon->toDateTimeString();
         
-        $attendance_check = Attendance::where('client_id',$client_id)->whereDate('check_out',\Carbon\Carbon::today());
-        if(!$attendance_check->exists() && $request->get('image')){
+        $attendance_check = Attendance::where('client_id',$request->client_id)
+                                      ->where('employee_id',$employee_id)
+                                      ->whereDate('check_in',\Carbon\Carbon::today())
+                                      ->orderBy('id', 'desc')
+                                      ->first();
+
+        if($attendance_check && $attendance_check->check_out==null ){
+            $update_id = $attendance_check->id;
             $now = strtotime(date('H:i:s'));
             $filename = 'check_out_'.Auth::user()->id.'_'.$now.'.png';
             $image = Image::make($request->get('image'));
@@ -204,8 +229,10 @@ class AttendanceController extends Controller
                 $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
 
 
-            $check_in = Attendance::where('client_id',$client_id)->where('employee_id',$employee_id)->whereDate('created_at',\Carbon\Carbon::today())->update(['full_date'=>$current_date_time, 'check_out'=>$current_date_time, 'check_out_location'=>$location, 'check_out_image'=>$filename]);
+            $check_in = Attendance::where('id',$update_id )->update(['check_out'=>$current_date_time, 'check_out_location'=>$location, 'check_out_image'=>$filename]);
         }
+        elseif($attendance_check && $attendance_check->check_out!=null)
+            return  redirect()->back()->withErrors('You have already logged out');
         else{
             return  redirect()->back()->withErrors('You have already logged out');
         }
@@ -233,9 +260,10 @@ class AttendanceController extends Controller
         return redirect()->back()->with('message', 'Logged Out Successfully');
     }
 
-    public function details(Request $request, $id)
+    public function details($client_id, $employee_id, $date)
     {
-        $att_details = Attendance::select('attendances.id',
+        $attendance_details = Attendance::select(
+                                            'attendances.id',
                                             'attendances.client_id',
                                             'attendances.employee_id',
                                             'attendances.check_in',
@@ -246,10 +274,17 @@ class AttendanceController extends Controller
                                             'attendances.check_out_image',
                                             'users.name',
                                             'users.email')
-                                ->where('attendances.id',$id)
+                                ->where('attendances.client_id',$client_id)
+                                ->where('attendances.employee_id',$employee_id)
+                                ->whereDate('attendances.check_in',$date)
                                 ->join('users','attendances.employee_id','=','users.id')
-                                ->first();
-        return view('backend.pages.attendance_details', compact('att_details'));
+                                ->get();
+        // return $attendance_details;
+        return view('backend.pages.attendance_details', compact('attendance_details'));
+    }
+     public function ajax_in_out_stat(Request $request)
+    {
+        return 'here';
     }
 
     public function site_attendance()
