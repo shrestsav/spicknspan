@@ -83,7 +83,7 @@ class UserController extends Controller
             'date_of_birth' => 'required',
             'employment_start_date' => 'required',
         ]);
-
+        
         $user = User::create([
             'name' => $request['name'],
             'email' => $request['email'],
@@ -92,10 +92,19 @@ class UserController extends Controller
         ]);
 
         $user_id = $user->id;
-        
+
+        //Save User Photo 
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+            $fileName = 'dp_user_'.$user_id.'.'.$photo->getClientOriginalExtension();
+            $uploadDirectory = public_path('files'.DS.'users'.DS.$user_id);
+            $photo->move($uploadDirectory, $fileName);
+        }
+
+        //Update User Details Table
         UserDetail::create([
             'user_id' => $user_id,
-            'photo' => $request['photo'],
+            'photo' => $fileName,
             'address' => $request['address'],
             'gender' => $request['gender'],
             'contact' => $request['contact'],
@@ -105,6 +114,7 @@ class UserController extends Controller
             'date_of_birth' => $request['date_of_birth'],
             'employment_start_date' => $request['employment_start_date'],
         ]);
+
         return redirect()->back()->with('message', 'Added Successfully');
     }
 

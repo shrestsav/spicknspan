@@ -4,7 +4,7 @@
         <img src="{{ asset('backend/img/trackncheck.png') }}" width="200px;">
       </div>
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini">T<b>&</b>C</span>
+      <span class="logo-mini"><span class="logo-mini_green">T</span><b>&</b><span class="logo-mini_blue">C</span></span>
       <!-- logo for regular state and mobile devices -->
       {{-- <span class="logo-lg">SPICK <b>N</b> SPAN</span> --}}
     </a>
@@ -23,16 +23,25 @@
           <!-- User Account: style can be found in dropdown.less -->
           <li class="dropdown user user-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <img src="{{ asset('backend/img/user_default.png') }}" class="user-image" alt="User Image">
-              <span class="hidden-xs">{{ Auth::user()->name }}</span>
+              @if(file_exists(public_path('files/users/'.Auth::user()->id.'/dp_user_'.Auth::user()->id.'.png')))
+                <img src="{{ asset('files/users/'.Auth::user()->id.'/dp_user_'.Auth::user()->id.'.png') }}" class="user-image" alt="User Image">
+              @else
+                <img src="{{ asset('backend/img/user_default.png') }}" class="user-image" alt="User Image">
+              @endif
+
+              
+              <span class="hidden-xs">{{ ucfirst(Auth::user()->name) }}</span>
             </a>
             <ul class="dropdown-menu">
               <!-- User image -->
               <li class="user-header">
-                <img src="{{ asset('backend/img/user_default.png') }}" class="img-circle" alt="User Image">
-
+                @if(file_exists(public_path('files/users/'.Auth::user()->id.'/dp_user_'.Auth::user()->id.'.png')))
+                  <img src="{{ asset('files/users/'.Auth::user()->id.'/dp_user_'.Auth::user()->id.'.png') }}" class="img-circle" alt="User Image">
+                @else
+                  <img src="{{ asset('backend/img/user_default.png') }}" class="img-circle" alt="User Image">
+                @endif
                 <p>
-                  System Admin
+                  {{ ucfirst(Auth::user()->user_type) }}
                   <small></small>
                 </p>
               </li>
@@ -52,9 +61,9 @@
               </li> --}}
               <!-- Menu Footer-->
               <li class="user-footer">
-                <div class="pull-left">
+                {{-- <div class="pull-left">
                   <a href="#" class="btn btn-default btn-flat">Profile</a>
-                </div>
+                </div> --}}
                 <div class="pull-right">
                   <a class="btn btn-default btn-flat" href="{{ route('logout') }}"
                      onclick="event.preventDefault();

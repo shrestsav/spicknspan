@@ -41,11 +41,10 @@
                     <td>{{$attendance_list->total_time}}</td>
                     <td>{{$check_in->format('H:i')}} - 
                         @if($attendance_list->check_out!=null || $attendance_list->check_out!='')
-                          {{$check_out->format('H:i')}}@else Logged In @endif</td>
+                          {{$check_out->format('H:i')}}@else NOT LOGGED OUT @endif</td>
                     <td>
-                      <button class="view_att_details">
-                        <a href="{{ url('attendance/details').'/'.$attendance_list->client_id.'/'.$attendance_list->employee_id.'/'.$attendance_list->date}}">Details</a>
-                      </button>
+                      <a class="view_att_details btn btn-success" href="{{ url('attendance/details').'/'.$attendance_list->client_id.'/'.$attendance_list->employee_id.'/'.$attendance_list->date}}">Details
+                      </a>
                     </td>
                   </tr>
                 @endforeach

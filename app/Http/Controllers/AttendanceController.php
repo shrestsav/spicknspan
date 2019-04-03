@@ -123,6 +123,7 @@ class AttendanceController extends Controller
     {
         $employee_id = Auth::id();
 
+        // If User is Admin
         if(Auth::check() && Auth::user()->user_type == "admin"){
 
             $attendance_lists = \DB::select('SELECT
@@ -137,31 +138,32 @@ class AttendanceController extends Controller
                                             FROM `attendances` a
                                             GROUP BY client_name,employee_name,date,client_id,employee_id
                                             ');
-            // return $attenda\nce_lists;
         }
         else
-            $attendance_lists = \DB::select('SELECT 
-                                            a.id,
-                                            a.check_in as check_in,
-                                            a.check_in_location,
-                                            a.check_out as check_out,
-                                            a.check_out_location,
-                                            a.created_at,  
+            $attendance_lists = \DB::select('SELECT
+                                            SEC_TO_TIME(SUM(TIME_TO_SEC(CAST(TIMEDIFF(`check_out`,`check_in`) AS TIME)))) AS total_time,
+                                            min(a.check_in) as check_in,
+                                            max(a.check_out) as check_out,
+                                            CAST(a.check_in AS date) AS date,
+                                            a.client_id,
+                                            a.employee_id,
                                             (select name from users where id=a.client_id) as client_name,  
                                             (select name from users where id=a.`employee_id`) as employee_name 
-                                            FROM `attendances` a where a.employee_id=1');
+                                            FROM `attendances` a where a.employee_id='.$employee_id.'
+                                            GROUP BY client_name,employee_name,date,client_id,employee_id
+                                             ');
         return view('backend.pages.attendance_list',compact('attendance_lists'));
     }
     public function checkin(Request $request)
     {
-        // return $request->all();
         $request->validate([
             'image' => 'required',
+            'client_id' => 'required',
             'latitude' => 'required',
             'longitude' => 'required',
         ]);
 
-        //Have to check this validation
+        //Have to check this validation could be already validated from above validate method
 
         if(!$request->get('image')){
             return redirect()->back()->withErrors('No Photo');
@@ -284,7 +286,14 @@ class AttendanceController extends Controller
     }
      public function ajax_in_out_stat(Request $request)
     {
-        return 'here';
+        $client_id = $request->client_id;
+        $in_out_stats = Attendance::select('check_in', 'check_out')
+                                        ->where('employee_id',Auth::id())
+                                        ->where('client_id',$client_id)
+                                        ->whereDate('check_in',\Carbon\Carbon::today())
+                                        ->orderBy('id','desc')
+                                        ->first();
+        return json_encode($in_out_stats);
     }
 
     public function site_attendance()

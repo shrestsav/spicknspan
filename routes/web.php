@@ -26,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
 	Route::get('/attendance/details/{client_id}/{employee_id}/{date}', 'AttendanceController@details')->name('attendance.details');
 	Route::post('/checkin', 'AttendanceController@checkin')->name('attendance.checkin');
 	Route::post('/checkout', 'AttendanceController@checkout')->name('attendance.checkout');
+	Route::post('/ajax_in_out_stat', 'AttendanceController@ajax_in_out_stat')->name('ajax.in_out_stat');
 
 	Route::get('/mail', 'MailController@index')->name('mail.index');
 	Route::get('/compose', 'MailController@composeMail')->name('mail.compose');

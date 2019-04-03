@@ -1,6 +1,8 @@
 @extends('backend.layouts.app',['title'=>'Attendance Details'])
 
 @push('styles')
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
   <style type="text/css">
     .check_in_user_photo, .check_out_user_photo{
       border: 5px solid #e6e6e6;
@@ -43,18 +45,29 @@
 @endpush
 @section('content')
 
+
+@php  
+  $check_in_date = $check_in = \Carbon\Carbon::parse($attendance_details[0]->check_in); 
+  $employee_id = $attendance_details[0]->employee_id; 
+@endphp
+
     <section class="content location_history" style="padding-top: 50px;">
       <div class="row">
         <div class="col-md-8 col-md-offset-2">
           <div class="box box-widget widget-user-2">
             <!-- Add the bg color to the header using any of the bg-* classes -->
-            <div class="widget-user-header bg-yellow">
+            <div class="widget-user-header bg-green">
               <div class="widget-user-image">
-                {{-- <img class="img-circle" src="../dist/img/user7-128x128.jpg" alt="User Avatar"> --}}
+              @if(file_exists(public_path('files/users/'.$employee_id.'/dp_user_'.$employee_id.'.png')))
+                <img class="img-circle" src="{{ asset('files/users/'.$employee_id.'/dp_user_'.$employee_id.'.png') }}" alt="User Avatar">
+              @else
+                <img class="img-circle" src="{{ asset('backend/img/user_default.png') }}" alt="User Avatar">
+              @endif
               </div>
               <!-- /.widget-user-image -->
+
               <h3 class="widget-user-username">{{strtoupper($attendance_details[0]->name)}}</h3>
-              <h5 class="widget-user-desc">{{$attendance_details[0]->check_in}}</h5>
+              <h5 class="widget-user-desc">DATE : {{$check_in_date->format('d M Y')}}</h5>
             </div>
             <div class="box-footer no-padding">
               <table class="table table-striped user_attendance_table">
@@ -130,7 +143,7 @@
 @endsection
 @push('scripts')
 
-  <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"></script>
+   <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
   <script type="text/javascript">
 
     @foreach($attendance_details as $attendance_detail)

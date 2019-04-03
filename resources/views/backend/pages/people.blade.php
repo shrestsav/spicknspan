@@ -38,7 +38,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
         <div class="box-header with-border">
           <h3 class="box-title">Employee Information</h3>
         </div>
-        <form role="form" action="{{route('user.store')}}" method="POST">
+        <form role="form" action="{{route('user.store')}}" method="POST" data-toggle="validator" enctype="multipart/form-data">
           @csrf
           <div class="box-body pad">
             {{-- Hidden Fields --}}
@@ -47,6 +47,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
               <div class="form-group">
                 <label for="name">Name</label>
                 <input type="text" name="name" class="form-control" id="name" placeholder="Enter Name" required>
+                <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
                 <label for="gender">Gender</label>
@@ -68,6 +69,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
               <div class="form-group">
                 <label for="address">Address</label>
                 <input type="text" name="address" class="form-control" id="address" placeholder="Enter Address" required>
+                <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
                 <label for="contact">Phone Number</label>
@@ -76,16 +78,19 @@ elseif(Route::current()->getName() == 'user_client.index'){
               <div class="form-group">
                 <label for="email">Email address</label>
                 <input type="email" name="email" class="form-control" id="email" placeholder="Enter email" required>
+                <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
                 <label for="date_of_birth">Date of Birth</label>
                 <input type="date" name="date_of_birth" class="form-control" id="date_of_birth" placeholder="Enter Date of Birth" required>
+                <div class="help-block with-errors"></div>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-group">
                 <label for="photo">Photo</label>
                 <input type="file" name="photo" class="form-control" id="photo" required>
+                <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
                 <label for="annual_salary">Annual Salary</label>
@@ -93,19 +98,23 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
               <div class="form-group">
                 <label for="description">Description</label>
-                <textarea name="description" class="form-control" id="description" placeholder="Enter Description" required></textarea>
+                <textarea name="description" class="form-control" id="description" placeholder="Enter Description" required>
+                </textarea><div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
                 <label for="employment_start_date">Employment Start Date</label>
                 <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Enployment Start Date" required>
+                <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" class="form-control" id="password" placeholder="Enter Password" required>
+                <input type="password" name="password" data-minlength="6" class="form-control" id="password" placeholder="Enter Password" required>
+                <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
                 <label for="password">Confirm Password</label>
-                <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" placeholder="Enter Password" required>
+                <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" placeholder="Confirm Password" data-match="#password" data-match-error="Passwords don't match"  required>
+                <div class="help-block with-errors"></div>
               </div>
             </div>
           </div>

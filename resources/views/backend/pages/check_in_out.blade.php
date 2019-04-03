@@ -6,6 +6,10 @@
     margin-top: 20px;
     position: absolute;
   }
+  .heading{
+    padding: 20px 0px 10px 0px;
+    font-size: 1.8rem;
+  }
 </style>
 @endpush
 @section('content')
@@ -59,24 +63,34 @@
                      <div id="captured_photo"></div>
                   </div>
                 </div>
-                <div class="col-md-8" style="margin-top: 30px;">  
-                  <select class="select2 check_in_out_client" name="client_id" required>
-                    @foreach($clients as $client)
-                      <option value="{{$client->id}}">{{$client->name}}</option>
-                    @endforeach
-                  </select>
-                  <div class="check_in_btn_container">
-                    <a class="btn check_in_btn" type="submit" onclick="checkin();" @if($check_in_status == '1')disabled @endif>
-                      IN 
-                    </a>
-
-                  <span style="left: 200px;"> {{$check_in_time}} </span>
+                <div class="col-md-8">  
+                  <div class="col-md-12">
+                    <div class="heading"><strong>Please Select Client</strong></div>
                   </div>
-                  <div class="check_out_btn_container">
-                    <a class="btn check_out_btn" onclick="checkout();" @if($check_out_status == '1')disabled @endif>
-                      OUT
-                    </a>
-                    <span style="left: 100px">{{$check_out_time}}</span>
+                  <div class="col-md-12">
+                    <select class="select2 check_in_out_client" name="client_id" required>
+                        <option value="">--</option>
+                      @foreach($clients as $client)
+                        <option value="{{$client->id}}">{{$client->name}}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="col-md-12">
+                    <div class="check_in_btn_container">
+                      <button  type="button" class="btn check_in_btn" id="check_in_btn" type="submit" onclick="checkin();">
+                        IN 
+                      </button>
+
+                    {{-- <span style="left: 200px;">TEST DATA</span> --}}
+                    </div>
+                  </div>
+                  <div class="col-md-12">
+                    <div class="check_out_btn_container">
+                      <button  type="button" class="btn check_out_btn" id="check_out_btn" onclick="checkout();">
+                        OUT
+                      </button>
+                      {{-- <span style="left: 100px">TEST DATA</span> --}}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -203,21 +217,61 @@
             }
         }
 
-
         $('.select2').select2();
+
+        function download(){
+          var download = document.getElementById("download");
+          var image = document.getElementById("CANVAS").toDataURL();
+          $('#user_image').val(image);
+          
+          // download.setAttribute("href", image);
+        }
     
   </script>
 
   <script>
+    $(function () {
+        $(".check_in_out_client").change();
+    });
 
-    function download(){
-      var download = document.getElementById("download");
-      var image = document.getElementById("CANVAS").toDataURL();
-      $('#user_image').val(image);
-      
-      // download.setAttribute("href", image);
-    }
+      $('.check_in_out_client').on('change',function(e){
+        e.preventDefault();
+        var client_id = $(this).val();
+        $.ajax({
+          type:'post',
+          url:'{{ route("ajax.in_out_stat") }}',
+          dataType: 'json',
+          data:{
+              client_id: client_id                 
+          },
+          success:function(data) {
+            console.log(data);
+            if(data==null || data==''){
+              console.log('You Need to Log In');
+              $('#check_out_btn').prop("disabled",true); 
+              $('#check_in_btn').prop("disabled",false); 
+            }
+            else{
+              var check_in_stat = data.check_in;
+              var check_out_stat = data.check_out;
+              if(check_out_stat==null){
+                $('#check_in_btn').prop("disabled",true);
+                $('#check_out_btn').prop("disabled",false);  
+              }
+              else if(check_out_stat!=null){
+                $('#check_in_btn').prop("disabled",false);
+                $('#check_out_btn').prop("disabled",true);  
+              }
+              console.log(check_in_stat);
+            }
+          },
+          error: function(response){
+          
+          }
+      });
+
+      });
 
 
-</script>
+  </script>
 @endpush
