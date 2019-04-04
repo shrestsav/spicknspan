@@ -15,6 +15,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/test', function () {
+	var_dump('the current time is '. date('Y m d H:i:s'));
+});
+
 Auth::routes();
 
 Route::middleware(['auth'])->group(function () {

@@ -27,31 +27,18 @@ class AttendanceController extends Controller
     {
         $clients = User::all()->where('user_type','=','client');
 
-        $check_in_time = '';
-        $check_out_time = '';
-        $check_in_status = 0;
-        $check_out_status = 0;
-
-        // Check if User is already logged in and Out
-        $attendance_check_in = Attendance::select('check_in', 'check_out')
+        // Check Users last login status
+        $last_check_in_out_client = Attendance::select('check_in', 'check_out', 'client_id')
                                         ->where('employee_id',Auth::id())
                                         ->whereDate('check_in',\Carbon\Carbon::today())
-                                        ->get();
-        // return $attendance_check_in;
-        // return $attendance_check_in->last();
-        // if($attendance_check_in->exists()){
-            // $check_in_time = $attendance_check_in->check_in;
-            // return $check_in_time;
-            // $check_in_status = 1;
-        // }
+                                        ->orderBy('id','desc')
+                                        ->first();
+        if($last_check_in_out_client){
+            $last_check_in_out_client = $last_check_in_out_client->client_id;
+        }
+                                        
 
-        // $attendance_check_out = Attendance::select('check_out')->where('employee_id',Auth::id())->whereDate('check_out',\Carbon\Carbon::today());
-        // if($attendance_check_out->exists()){
-        //     $check_out_time = $attendance_check_out->first()->check_out;
-        //     $check_out_status = 1;
-        // }
-
-        return view('backend.pages.check_in_out',compact('clients','check_in_status','check_out_status','check_in_time','check_out_time'));
+        return view('backend.pages.check_in_out',compact('clients','last_check_in_out_client'));
     }
 
     /**
@@ -137,6 +124,7 @@ class AttendanceController extends Controller
                                             (select name from users where id=a.`employee_id`) as employee_name 
                                             FROM `attendances` a
                                             GROUP BY client_name,employee_name,date,client_id,employee_id
+                                            ORDER BY check_out DESC
                                             ');
         }
         else
@@ -151,20 +139,25 @@ class AttendanceController extends Controller
                                             (select name from users where id=a.`employee_id`) as employee_name 
                                             FROM `attendances` a where a.employee_id='.$employee_id.'
                                             GROUP BY client_name,employee_name,date,client_id,employee_id
+                                            ORDER BY check_out DESC
                                              ');
         return view('backend.pages.attendance_list',compact('attendance_lists'));
     }
     public function checkin(Request $request)
     {
-        $request->validate([
-            'image' => 'required',
-            'client_id' => 'required',
-            'latitude' => 'required',
-            'longitude' => 'required',
-        ]);
+        $rule = ['image' => 'required',
+                'client_id' => 'required',
+                'latitude' => 'required',
+                'longitude' => 'required'
+                ];
+        $msg = ['image.required' => 'Something is wrong with your camera',
+                'client_id.required' => 'Please Select Client First',
+                'latitude.required' => 'Location Error',
+                'longitude.required' => 'Location Error'
+                ];
+        $this->validate($request, $rule, $msg);
 
         //Have to check this validation could be already validated from above validate method
-
         if(!$request->get('image')){
             return redirect()->back()->withErrors('No Photo');
         }
@@ -193,8 +186,11 @@ class AttendanceController extends Controller
             //Save User Log In Image 
             if($check_in){
                 $image = Image::make($request->get('image'));
-                Storage::disk('local')->makeDirectory('public/employee_login/'.Auth::user()->id);
-                $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
+                $path = public_path('files'.DS.'employee_login'.DS.Auth::user()->id);
+                if (!file_exists($path)) {
+                    \File::makeDirectory($path, 666, true);
+                }
+                $image->save($path.DS.$filename);
             }
         }
         else{
@@ -227,9 +223,11 @@ class AttendanceController extends Controller
             $now = strtotime(date('H:i:s'));
             $filename = 'check_out_'.Auth::user()->id.'_'.$now.'.png';
             $image = Image::make($request->get('image'));
-            Storage::disk('local')->makeDirectory('public/employee_login/'.Auth::user()->id);
-                $image->save(storage_path('app/public/employee_login/'.Auth::user()->id.'/'.$filename));
-
+            $path = public_path('files'.DS.'employee_login'.DS.Auth::user()->id);
+            if (!file_exists($path)) {
+                \File::makeDirectory($path, 666, true);
+            }
+            $image->save($path.DS.$filename);                
 
             $check_in = Attendance::where('id',$update_id )->update(['check_out'=>$current_date_time, 'check_out_location'=>$location, 'check_out_image'=>$filename]);
         }
@@ -281,8 +279,8 @@ class AttendanceController extends Controller
                                 ->whereDate('attendances.check_in',$date)
                                 ->join('users','attendances.employee_id','=','users.id')
                                 ->get();
-        // return $attendance_details;
-        return view('backend.pages.attendance_details', compact('attendance_details'));
+        $client_name = User::find($client_id)->name;
+        return view('backend.pages.attendance_details', compact('attendance_details','client_name'));
     }
      public function ajax_in_out_stat(Request $request)
     {

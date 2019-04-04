@@ -1,30 +1,3 @@
-.check_in_btn, .check_out_btn{
-	margin: 10px;
-	font-weight: 600;
-	font-size: 25px;
-	padding: 15px 10px;
-	border-radius: 40px;
-	height: 70px;
-	width: 70px;
-	color: white;
-}
-.check_in_btn{
-	border: 3px solid #338000;
-	background-color: #63b929;
-}
-.check_out_btn{
-    border: 3px solid #940000;
-    background-color: #e20000;
-}
-.check_in_btn_container{
-	margin-top: 20px;
-}
-.check_in_body{
-	text-align: center;
-}
-.check_in_out_client{
-	width: 300px !important;
-}
 .custom_error_msg, .custom_success_msg, .access_error_msg{
 	text-align: center;
 }
@@ -53,4 +26,13 @@ div#tblRosterVariation_wrapper {
 }
 div#mapid, div#mapid2 {
     height: 300px;
+}
+select {
+  text-align: center;
+  text-align-last: center;
+  /* webkit*/
+  }
+option {
+text-align: left;
+/* reset to left*/
 }

@@ -36,7 +36,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
       @endif
       <div class="box box-primary">
         <div class="box-header with-border">
-          <h3 class="box-title">Employee Information</h3>
+          <h3 class="box-title">Add {{$title}}</h3>
         </div>
         <form role="form" action="{{route('user.store')}}" method="POST" data-toggle="validator" enctype="multipart/form-data">
           @csrf

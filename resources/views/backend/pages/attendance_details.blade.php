@@ -37,9 +37,23 @@
     }
     table tr th, table tr td{
       text-align: center;
+      vertical-align: middle !important;
     }
     table{
       margin-bottom: 0px !important;
+    }
+    strong{
+      font-size: 1.7rem;
+    }
+    #display_check_in_out_photo .modal-dialog{
+      margin: 200px auto;
+      width: 320px;
+    }
+    #display_check_in_out_photo .modal-body{
+      padding: 0px;
+    }
+    .expand_map:hover, .check_in_out_image:hover{
+      cursor: pointer;
     }
   </style>
 @endpush
@@ -47,81 +61,79 @@
 
 
 @php  
-  $check_in_date = $check_in = \Carbon\Carbon::parse($attendance_details[0]->check_in); 
+  $check_in_date = \Carbon\Carbon::parse($attendance_details[0]->check_in); 
   $employee_id = $attendance_details[0]->employee_id; 
 @endphp
 
-    <section class="content location_history" style="padding-top: 50px;">
-      <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-          <div class="box box-widget widget-user-2">
-            <!-- Add the bg color to the header using any of the bg-* classes -->
-            <div class="widget-user-header bg-green">
-              <div class="widget-user-image">
-              @if(file_exists(public_path('files/users/'.$employee_id.'/dp_user_'.$employee_id.'.png')))
-                <img class="img-circle" src="{{ asset('files/users/'.$employee_id.'/dp_user_'.$employee_id.'.png') }}" alt="User Avatar">
-              @else
-                <img class="img-circle" src="{{ asset('backend/img/user_default.png') }}" alt="User Avatar">
-              @endif
-              </div>
-              <!-- /.widget-user-image -->
-
-              <h3 class="widget-user-username">{{strtoupper($attendance_details[0]->name)}}</h3>
-              <h5 class="widget-user-desc">DATE : {{$check_in_date->format('d M Y')}}</h5>
-            </div>
-            <div class="box-footer no-padding">
-              <table class="table table-striped user_attendance_table">
+  <section class="content location_history" style="padding-top: 50px;">
+    <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+        <div class="box box-widget widget-user">
+          <div class="widget-user-header bg-green">
+            <h3 class="widget-user-username">{{strtoupper($attendance_details[0]->name)}}</h3>
+            <h5 class="widget-user-desc">CLIENT : {{$client_name}}</h5>
+            <h5 class="widget-user-desc">DATE : {{$check_in_date->format('d M Y')}}</h5>
+          </div>
+          <div class="widget-user-image">
+            @if(file_exists(public_path('files/users/'.$employee_id.'/dp_user_'.$employee_id.'.png')))
+              <img class="img-circle" src="{{ asset('files/users/'.$employee_id.'/dp_user_'.$employee_id.'.png') }}" alt="User Avatar">
+            @else
+              <img class="img-circle" src="{{ asset('backend/img/user_default.png') }}" alt="User Avatar">
+            @endif
+          </div>
+          <div class="box-footer">
+            <div class="row">
+              <table class="table table-hover user_attendance_table">
                 <tr>
                   <th>CHECKED IN</th>
                   <th>CHECKED OUT</th>
                 </tr>
                 @foreach($attendance_details as $attendance_detail)
                   @php 
+                    $check_in_time = \Carbon\Carbon::parse($attendance_detail->check_in)->timezone('Asia/Kathmandu'); 
+                    $check_out_time = \Carbon\Carbon::parse($attendance_detail->check_out)->timezone('Asia/Kolkata'); 
                     list($latitude1, $longitude1) = explode(",", $attendance_detail->check_in_location);
                   @endphp
                 <tr>
                   <td>
                     <span>
-                      <img class="img-circle" src="{{asset('storage/employee_login/'.$attendance_detail->employee_id.'/'.$attendance_detail->check_in_image)}}" alt="User Avatar">
+                      <img class="img-circle check_in_out_image" src="{{asset('files/employee_login/'.$attendance_detail->employee_id.'/'.$attendance_detail->check_in_image)}}" alt="User Avatar">
                     </span>
                     
-                    <span><strong>Date : </strong> {{$attendance_detail->check_in}}</span>
-                    <span>
+                    <span><strong>{{$check_in_time->format('H:i')}}</strong></span>
+                    <span class="expand_map">
                       <i class="fa fa-map" data-toggle="modal" data-target="#display_check_in_map_{{$attendance_detail->id}}"></i>
-
-                      <div class="modal fade" id="display_check_in_map_{{$attendance_detail->id}}">
-                        <div class="modal-dialog">
-                          <div class="modal-content">
-                            <div class="modal-body map_area" id="check_in_map_area_{{$attendance_detail->id}}">
-                              {{-- MAP GOES HERE --}}
-                            </div>
+                    </span>
+                    <div class="modal fade" id="display_check_in_map_{{$attendance_detail->id}}">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-body map_area" id="check_in_map_area_{{$attendance_detail->id}}">
+                            {{-- MAP GOES HERE --}}
                           </div>
                         </div>
                       </div>
-                    </span>
-                    
+                    </div>
                   </td>
                   <td>
                     @if($attendance_detail->check_out!=null)
                     <span>
-                      <img class="img-circle" src="{{asset('storage/employee_login/'.$attendance_detail->employee_id.
+                      <img class="img-circle check_in_out_image" src="{{asset('files/employee_login/'.$attendance_detail->employee_id.
                       '/'.$attendance_detail->check_out_image)}}" alt="User Avatar">
                     </span>
                     
-                    <span><strong>Date : </strong> {{$attendance_detail->check_out}}</span>
-                    <span>
+                    <span><strong>{{$check_out_time->format('H:i')}}</strong></span>
+                    <span class="expand_map">
                       <i class="fa fa-map" data-toggle="modal" data-target="#display_check_out_map_{{$attendance_detail->id}}"></i>
-
-                      <div class="modal fade" id="display_check_out_map_{{$attendance_detail->id}}">
-                        <div class="modal-dialog">
-                          <div class="modal-content">
-                            <div class="modal-body map_area" id="check_out_map_area_{{$attendance_detail->id}}">
-                              {{-- MAP GOES HERE --}}
-                            </div>
+                    </span>
+                    <div class="modal fade" id="display_check_out_map_{{$attendance_detail->id}}">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-body map_area" id="check_out_map_area_{{$attendance_detail->id}}">
+                            {{-- MAP GOES HERE --}}
                           </div>
                         </div>
                       </div>
-                    </span>
+                    </div>
                     @else
                       <span><strong>NOT LOGGED OUT</strong></span>
                     @endif
@@ -131,15 +143,22 @@
                 @endforeach    
               </table>
             </div>
+            <!-- /.row -->
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-
-
-
-
+<div class="modal fade" id="display_check_in_out_photo" >
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <img src="">
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 @push('scripts')
 
@@ -194,6 +213,13 @@
         }, 10);
       });
 
+      $('.check_in_out_image').on('click',function(e){
+        e.preventDefault();
+        var img_src = $(this).attr('src');
+        console.log(img_src);
+        $('#display_check_in_out_photo img').attr('src',img_src);
+        $('#display_check_in_out_photo').modal('show');
+      })
     @endforeach
 
   </script>
