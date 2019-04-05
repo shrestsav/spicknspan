@@ -48,7 +48,7 @@
           </ul>
         </li>
 
-        {{-- <li class="treeview">
+        <li class="treeview">
           <a href="#">
             <i class="fa fa-folder"></i> <span>Operations</span>
             <span class="pull-right-container">
@@ -65,7 +65,7 @@
             <li class="@if ($title === 'Question Template') active @endif"><a href="{{route('question.index')}}"><i class="fa fa-circle-o"></i> <span>Question Template</span></a>
             </li>
           </ul>
-        </li> --}}
+        </li>
         
         
         <li class="@if ($title === 'Sites') active @endif"><a href="{{route('site.index')}}"><i class="fa fa-dashboard"></i> <span>Sites</span></a>
