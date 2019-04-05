@@ -83,7 +83,7 @@ class UserController extends Controller
             'date_of_birth' => 'required',
             'employment_start_date' => 'required',
         ]);
-
+        
         $user = User::create([
             'name' => $request['name'],
             'email' => $request['email'],
@@ -92,10 +92,19 @@ class UserController extends Controller
         ]);
 
         $user_id = $user->id;
-        
+
+        //Save User Photo 
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+            $fileName = 'dp_user_'.$user_id.'.'.$photo->getClientOriginalExtension();
+            $uploadDirectory = public_path('files'.DS.'users'.DS.$user_id);
+            $photo->move($uploadDirectory, $fileName);
+        }
+
+        //Update User Details Table
         UserDetail::create([
             'user_id' => $user_id,
-            'photo' => 'Test Data Only',
+            'photo' => $fileName,
             'address' => $request['address'],
             'gender' => $request['gender'],
             'contact' => $request['contact'],
@@ -105,6 +114,7 @@ class UserController extends Controller
             'date_of_birth' => $request['date_of_birth'],
             'employment_start_date' => $request['employment_start_date'],
         ]);
+
         return redirect()->back()->with('message', 'Added Successfully');
     }
 
@@ -127,7 +137,25 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        //
+        $user = User::select(
+                                'users.id',
+                                'users.name',
+                                'users.email',
+                                'users.user_type',
+                                'user_details.photo',
+                                'user_details.address',
+                                'user_details.gender',
+                                'user_details.contact',
+                                'user_details.hourly_rate',
+                                'user_details.annual_salary',
+                                'user_details.description',
+                                'user_details.date_of_birth',
+                                'user_details.employment_start_date',
+                                'user_details.documents')
+                        ->join('user_details','user_details.user_id','=','users.id')
+                        ->where('users.id','=',$id)->first();
+        // return $user;
+        return view('backend.pages.edit_people',compact('user'));
     }
 
     /**
@@ -139,7 +167,30 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $update_user = User::where('id','=',$id)->update(['name' => $request->name,
+                                                          'email' => $request->email
+                                                            ]);
+        $update_user_details = UserDetail::where('user_id','=',$id)
+                                         ->update([
+                                                    'gender' => $request->gender,
+                                                    'hourly_rate' => $request->hourly_rate,
+                                                    'address' => $request->address,
+                                                    'contact' => $request->contact,
+                                                    'date_of_birth' => $request->date_of_birth,
+                                                    'photo' => $request->photo,
+                                                    'annual_salary' => $request->annual_salary,
+                                                    'description' => $request->description,
+                                                    'employment_start_date' => $request->employment_start_date
+                                                 ]);
+        if($request->user_type=='employee')
+            $route = 'user_employee.index';
+        if($request->user_type=='client')
+            $route =  'user_client.index';
+        if($request->user_type=='contractor')
+            $route =  'user_contractor.index';
+
+        return redirect()->route($route)->with('message', 'Updated Successfully');
+
     }
 
     /**
@@ -150,6 +201,8 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        User::where('id','=',$id)->delete();
+        UserDetail::where('user_id','=',$id)->delete();
+        return redirect()->back()->with('message','Deleted Successfully');
     }
 }

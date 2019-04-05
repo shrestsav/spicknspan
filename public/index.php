@@ -9,6 +9,14 @@
 
 define('LARAVEL_START', microtime(true));
 
+/**
+ * Use the DS to separate the directories in other defines
+ */
+
+if (!defined('DS')) {
+    define('DS', DIRECTORY_SEPARATOR);
+}
+
 /*
 |--------------------------------------------------------------------------
 | Register The Auto Loader

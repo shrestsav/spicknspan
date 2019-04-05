@@ -15,6 +15,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/test', function () {
+	var_dump('the current time is '. date('Y m d H:i:s'));
+});
+
 Auth::routes();
 
 Route::middleware(['auth'])->group(function () {
@@ -23,9 +27,10 @@ Route::middleware(['auth'])->group(function () {
 	Route::get('/check_in_out', 'AttendanceController@index')->name('attendance.index');
 	Route::get('/attendance', 'AttendanceController@list')->name('attendance.list');
 	Route::post('/attendance', 'AttendanceController@store')->name('attendance.store');
-	Route::get('/attendance/details/{id}', 'AttendanceController@details')->name('attendance.details');
+	Route::get('/attendance/details/{client_id}/{employee_id}/{date}', 'AttendanceController@details')->name('attendance.details');
 	Route::post('/checkin', 'AttendanceController@checkin')->name('attendance.checkin');
 	Route::post('/checkout', 'AttendanceController@checkout')->name('attendance.checkout');
+	Route::post('/ajax_in_out_stat', 'AttendanceController@ajax_in_out_stat')->name('ajax.in_out_stat');
 
 	Route::get('/mail', 'MailController@index')->name('mail.index');
 	Route::get('/compose', 'MailController@composeMail')->name('mail.compose');
@@ -37,6 +42,9 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/contractors', 'UserController@index')->name('user_contractor.index');
 		Route::get('/clients', 'UserController@index')->name('user_client.index');
 		Route::post('/add_user', 'UserController@store')->name('user.store');
+		Route::get('/edit_user/{id}', 'UserController@edit')->name('user.edit');
+		Route::post('/update_user/{id}', 'UserController@update')->name('user.update');
+		Route::get('/delete_user/{id}', 'UserController@destroy')->name('user.delete');
 
 		Route::get('/wages','WagesController@index')->name('wages.index');
 		Route::post('/wages','WagesController@store')->name('wages.store');
@@ -55,13 +63,14 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/generate_qr/{id}', 'SiteController@generate_qr')->name('generate.qr');
 		Route::post('/site/delete_room/{id}','SiteController@delete_room')->name('room.destroy');
 		
-
 		Route::get('/scanner', function(){
 			return view('backend.pages.scanner');
 		})->name('scanner');
 
 		Route::get('/siteAttendance','AttendanceController@site_attendance')->name('site.attendance');
 		Route::post('/qr_login', 'AttendanceController@ajax_qr_login')->name('ajax.qrLogin');
+
+		Route::get('/export_excel/{id}', 'CoreController@export_to_excel')->name('export_to_excel');
 		
 		Route::get('/questionTemplate','QuestionTemplateController@index')->name('question.index');
 		Route::get('/questionTemplate/add','QuestionTemplateController@addMore')->name('question.add');
