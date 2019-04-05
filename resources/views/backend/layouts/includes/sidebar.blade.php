@@ -45,6 +45,8 @@
             </li>
             <li class="@if ($title === 'Clients') active @endif"><a href="{{route('user_client.index')}}"><i class="fa fa-user"></i> <span>Clients</span></a>
             </li>
+            <li class="@if ($title === 'Sites') active @endif"><a href="{{route('site.index')}}"><i class="fa fa-dashboard"></i> <span>Sites</span></a>
+            </li>
           </ul>
         </li>
 
@@ -68,8 +70,7 @@
         </li>
         
         
-        <li class="@if ($title === 'Sites') active @endif"><a href="{{route('site.index')}}"><i class="fa fa-dashboard"></i> <span>Sites</span></a>
-        </li>
+
 
       @endcan
 

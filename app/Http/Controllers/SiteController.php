@@ -18,8 +18,16 @@ class SiteController extends Controller
     {
         $buildings = Building::all();
         $questionTemplate = QuestionTemplate::all();
-        $rooms = Room::select('rooms.id','rooms.name','rooms.description','rooms.building_id','rooms.question_id','buildings.building_no','rooms.room_no')->join('buildings','rooms.building_id','=','buildings.id')->join('question_template','rooms.question_id','=','question_template.id')->get();
-        // return $rooms;
+        $rooms = Room::select(
+                            'rooms.id',
+                            'rooms.name',
+                            'rooms.description',
+                            'rooms.building_id',
+                            'rooms.question_id',
+                            'buildings.building_no',
+                            'rooms.room_no')
+                        ->join('buildings','rooms.building_id','=','buildings.id')
+                        ->join('question_template','rooms.question_id','=','question_template.id')->get();
         return view('backend.pages.sites',compact('buildings','rooms', 'questionTemplate'));
     }
 
