@@ -17,6 +17,7 @@ Route::get('/', function () {
 
 Route::get('/test', function () {
 	var_dump('the current time is '. date('Y m d H:i:s'));
+	return session()->all();
 });
 
 Auth::routes();

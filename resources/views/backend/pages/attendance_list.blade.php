@@ -30,8 +30,8 @@
                 @php $dataArr = []; @endphp
                 @foreach($attendance_lists as $attendance_list)
                   @php  
-                      $check_in = \Carbon\Carbon::parse($attendance_list->check_in);
-                      $check_out = \Carbon\Carbon::parse($attendance_list->check_out);
+                      $check_in = \Carbon\Carbon::parse($attendance_list->check_in)->timezone(Session::get('timezone')); 
+                      $check_out = \Carbon\Carbon::parse($attendance_list->check_out)->timezone(Session::get('timezone')); 
                       // $hours = $check_out->diffInHours($check_in);
                   @endphp
                   <tr>
@@ -39,9 +39,9 @@
                     <td>{{$attendance_list->employee_name}}</td>
                     <td>{{$attendance_list->client_name}}</td>
                     <td>{{$attendance_list->total_time}}</td>
-                    <td>{{$check_in->format('H:i')}} - 
+                    <td>{{$check_in->format('g:i A')}} - 
                         @if($attendance_list->check_out!=null || $attendance_list->check_out!='')
-                          {{$check_out->format('H:i')}}@else NOT LOGGED OUT @endif</td>
+                          {{$check_out->format('g:i A')}}@else NOT LOGGED OUT @endif</td>
                     <td>
                       <a class="view_att_details btn btn-success" href="{{ url('attendance/details').'/'.$attendance_list->client_id.'/'.$attendance_list->employee_id.'/'.$attendance_list->date}}">Details
                       </a>

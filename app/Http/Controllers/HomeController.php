@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\User;
+use Auth;
 
 class HomeController extends Controller
 {
@@ -23,6 +25,8 @@ class HomeController extends Controller
      */
     public function index()
     {
+        $timezone = Auth::user()->detail->timezone;
+        session(['timezone' => $timezone]);
         return view('backend.pages.dashboard');
     }
 }

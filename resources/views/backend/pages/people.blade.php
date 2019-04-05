@@ -73,7 +73,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
               <div class="form-group">
                 <label for="contact">Phone Number</label>
-                <input type="text" name="contact" class="form-control" id="contact" placeholder="Enter Phone Number">
+                <input type="text" name="contact" class="form-control" id="contact" placeholder="Enter Phone Number" required>
               </div>
               <div class="form-group">
                 <label for="email">Email address</label>
@@ -89,7 +89,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
             <div class="col-md-6">
               <div class="form-group">
                 <label for="photo">Photo</label>
-                <input type="file" name="photo" class="form-control" id="photo" required>
+                <input type="file" name="photo" class="form-control" id="photo">
                 <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
@@ -98,12 +98,19 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
               <div class="form-group">
                 <label for="description">Description</label>
-                <textarea name="description" class="form-control" id="description" placeholder="Enter Description" required>
+                <textarea name="description" class="form-control" id="description" placeholder="Enter Description">
                 </textarea><div class="help-block with-errors"></div>
+              </div> 
+              <div class="form-group">
+                <label for="timezone">TimeZone</label>
+                <select class="select2" id="timezone" name="timezone" required>
+                  {{-- Timezones will be filled by moment js --}}
+                </select>
+                <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
                 <label for="employment_start_date">Employment Start Date</label>
-                <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Enployment Start Date" required>
+                <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Enployment Start Date">
                 <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
@@ -183,15 +190,23 @@ elseif(Route::current()->getName() == 'user_client.index'){
     buttons: true,
     dangerMode: true,
   })
-  .then((willDelete) => {
-    if (willDelete) {
-      var user_id = $(this).data('user_id');
-      alert(user_id);
-      window.location.href = "{{url('delete_user/')}}/"+user_id;
-    } 
-  });
+    .then((willDelete) => {
+      if (willDelete) {
+        var user_id = $(this).data('user_id');
+        alert(user_id);
+        window.location.href = "{{url('delete_user/')}}/"+user_id;
+      } 
+    });
   });
 
+//To load all the timezones provided by moment-timezone-data
+  var timezone = moment.tz.names();
+  for (var i = 0; i < timezone.length; i++) {
+    $('#timezone').append('<option value="' + timezone[i] + '">' + timezone[i] + '</option>');
+  }
+ //Guesses the current timezone automatically 
+  var guess_current_timezone = moment.tz.guess();
+  $("#timezone").val(guess_current_timezone).change();
 </script>
   
 @endpush

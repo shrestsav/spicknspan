@@ -340,12 +340,14 @@
               if(check_out_stat==null){
                 $('.check_in_btn_container').hide(); 
                 $('.check_out_btn_container').show(); 
-                $('.last_check_in_out').html('Last Login : '+check_in_stat);
+                let localTime = moment.utc(check_in_stat).tz('{{Session::get('timezone')}}').format('YYYY-MM-DD HH:mm');
+                $('.last_check_in_out').html('Last Login : '+localTime);
               }
               else if(check_out_stat!=null){
+                let localTime = moment.utc(check_out_stat).tz('{{Session::get('timezone')}}').format('YYYY-MM-DD HH:mm');
                 $('.check_out_btn_container').hide(); 
                 $('.check_in_btn_container').show(); 
-                $('.last_check_in_out').html('Last Logout : '+check_out_stat);
+                $('.last_check_in_out').html('Last Logout : '+localTime);
               }
               console.log(check_in_stat);
             }

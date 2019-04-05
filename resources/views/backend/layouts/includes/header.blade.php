@@ -60,11 +60,11 @@
                 </div>
               </li> --}}
               <!-- Menu Footer-->
-              <li class="user-footer">
+              <li class="user-footer" style="text-align: center;">
                 {{-- <div class="pull-left">
                   <a href="#" class="btn btn-default btn-flat">Profile</a>
                 </div> --}}
-                <div class="pull-right">
+                <div class="">
                   <a class="btn btn-default btn-flat" href="{{ route('logout') }}"
                      onclick="event.preventDefault();
                                    document.getElementById('logout-form').submit();">

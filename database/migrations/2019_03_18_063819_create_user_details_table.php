@@ -16,16 +16,17 @@ class CreateUserDetailsTable extends Migration
         Schema::create('user_details', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('user_id');
-            $table->string('photo');
             $table->text('address');
-            $table->string('gender')->nullable();
-            $table->string('contact')->nullable();
+            $table->string('gender');
+            $table->date('date_of_birth');
+            $table->string('contact');
+            $table->string('photo')->nullable();
             $table->integer('hourly_rate')->default('0');
             $table->integer('annual_salary')->default('0');
-            $table->text('description');
-            $table->date('date_of_birth');
-            $table->date('employment_start_date');
+            $table->text('description')->nullable();
+            $table->date('employment_start_date')->nullable();
             $table->text('documents')->nullable();
+            $table->string('timezone')->default('Australia/Sydney');
             $table->timestamps();
         });
     }

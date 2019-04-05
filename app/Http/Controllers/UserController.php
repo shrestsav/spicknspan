@@ -77,11 +77,11 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users|max:255',
             'password' => 'required|string|min:8|confirmed',
-            'photo' => 'required',
             'address' => 'required',
-            'description' => 'required',
+            'gender' => 'required',
+            'contact' => 'required',
             'date_of_birth' => 'required',
-            'employment_start_date' => 'required',
+            'timezone' => 'required',
         ]);
         
         $user = User::create([
@@ -113,6 +113,7 @@ class UserController extends Controller
             'description' => $request['description'],
             'date_of_birth' => $request['date_of_birth'],
             'employment_start_date' => $request['employment_start_date'],
+            'timezone' => $request['timezone'],
         ]);
 
         return redirect()->back()->with('message', 'Added Successfully');

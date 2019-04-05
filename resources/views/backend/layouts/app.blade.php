@@ -172,8 +172,14 @@
 <script src="{{ asset('backend/js/dataTables.bootstrap.min.js') }}"></script>
 <script src="{{ asset('backend/js/sweetalert.min.js') }}"></script>
 <script src="{{ asset('backend/js/validator.min.js') }}"></script>
+
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.23/moment-timezone.min.js"></script>
+<script src="{{ asset('backend/js/moment-timezone-with-data-2012-2022.min.js') }}"></script>
+<script type="text/javascript">
+  var timeZones = moment.tz.names();
+  console.log(timeZones);
+</script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js"></script>
 

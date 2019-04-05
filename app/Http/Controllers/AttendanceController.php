@@ -23,7 +23,7 @@ class AttendanceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $clients = User::all()->where('user_type','=','client');
 
