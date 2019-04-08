@@ -16,13 +16,13 @@ class CreateUserDetailsTable extends Migration
         Schema::create('user_details', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('user_id');
-            $table->text('address');
+            $table->text('address')->nullable();
             $table->string('gender');
-            $table->date('date_of_birth');
+            $table->date('date_of_birth')->nullable();
             $table->string('contact');
             $table->string('photo')->nullable();
-            $table->integer('hourly_rate')->default('0');
-            $table->integer('annual_salary')->default('0');
+            $table->integer('hourly_rate')->default('0')->nullable();
+            $table->integer('annual_salary')->default('0')->nullable();
             $table->text('description')->nullable();
             $table->date('employment_start_date')->nullable();
             $table->text('documents')->nullable();

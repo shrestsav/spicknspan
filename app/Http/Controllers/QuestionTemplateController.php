@@ -114,8 +114,8 @@ class QuestionTemplateController extends Controller
      */
     public function destroy($id)
     {
-        $qTemp = QuestionTemplate::find($id); 
-        $qTemp->delete(); //delete the id
+        QuestionTemplate::where('id','=',$id)->delete();
+        Question::where('template_id','=',$id)->delete();
         return redirect()->back()->with('message','Question Template Deleted Successfully');
     }
 }

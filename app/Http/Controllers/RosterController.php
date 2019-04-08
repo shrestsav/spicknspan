@@ -19,6 +19,12 @@ class RosterController extends Controller
      */
     public function index()
     {
+        
+        if(isset($_GET['full_date'])){
+            $date_filter = $_GET['full_date'];
+        } else {
+            $date_filter = '2019-04';
+        }
         $employee = 'employee';
         $employee = User::select(
                                 'users.id',
@@ -35,13 +41,24 @@ class RosterController extends Controller
                                 'users.user_type')
                         ->where('users.user_type','=',$client)->get();
 
-        $rosters = Roster::all();
-        $rosters = json_decode($rosters, true);
+        $rosters = Roster::all()->where('full_date','=',$date_filter);
+        $n_rosters = json_decode($rosters, true);
+
+        if($n_rosters == []) {
+            // echo 'empty';
+            $arr_rosters = '';
+        } else {
+            // echo 'not empty';
+            foreach($rosters as $abcd)
+            {
+                $arr_rosters[] = $abcd->toArray();
+            }
+        }
         
         $rostersTimetable = RosterTimetable::all();
         $rostersTimetable = json_decode($rostersTimetable, true);
 
-        return view('backend.pages.roster',compact('rosters', 'rostersTimetable', 'employee', 'client'));
+        return view('backend.pages.roster',compact('arr_rosters', 'rostersTimetable', 'employee', 'client'));
     }
 
     /**
@@ -62,56 +79,53 @@ class RosterController extends Controller
      */
     public function store(Request $request)
     {
-        $arr_employee_id   = $request['employee_id'];
-        $arr_client_id     = $request['client_id'];
-        // print_r($arr_employee_id);
-        // print_r($arr_client_id);
-        // die();
         $j = 0;
         $x = 0;
+        $arr_employee_id   = $request['employee_id'];
+        $arr_client_id     = $request['client_id'];
+        $full_date         = $request['full_date_add'];
+        $month_part        = explode('-', $full_date);
+        $month             = $month_part[1];
+
+        if(($month == '01') || ($month == '03') || ($month == '05') || ($month == '07') || ($month == '08') || ($month == '10') || ($month == '12')){
+            $k = 31;
+        }
+        elseif(($month == '04') || ($month == '06') || ($month == '09') || ($month == '11')){
+            $k = 30;
+        }
+        elseif($month == '02'){
+            $k = 28;
+        }
+
         foreach ($arr_employee_id as $emp_id) {
-            // echo $j;
-            // die();
-            $full_date  =  $request['full_date'];
-            $month_part = explode('-', $full_date);
-            $month = $month_part[1];
-
-            if(($month == '01') || ($month == '03') || ($month == '05') || ($month == '07') || ($month == '08') || ($month == '10') || ($month == '12')){
-                $k = 31;
-            }
-            elseif(($month == '04') || ($month == '06') || ($month == '09') || ($month == '11')){
-                $k = 30;
-            }
-            else{
-                $k = 28;
-            }
-
             //check if the same data is added already
-            $check   = DB::table('rosters')
+            $check  = DB::table('rosters')
                             ->where('rosters.employee_id', '=', $emp_id)
                             ->where('rosters.client_id', '=', $arr_client_id[$j])
                             ->where('rosters.full_date', '=', $full_date)
                             ->get();
-            $check = json_decode($check, true);
+            $check  = json_decode($check, true);
 
             //add the data if it is new
             if(empty($check)){
                 echo 'new record';
-                Roster::create(['employee_id'=> $emp_id,'client_id'=>$arr_client_id[$j],'full_date'=>$request['full_date']]);
+                // die();
+                Roster::create(['employee_id'=> $emp_id,'client_id'=>$arr_client_id[$j],'full_date'=>$full_date]);
                 $last_id = DB::getPdo()->lastInsertId();
 
                 for ($i = 1; $i <= $k; $i++) {
                     $start_time    = $request['start_time_'.$i];
                     $end_time      = $request['end_time_'.$i];
-                    $full_date     =  $request['full_date'].'-'.$i;
                     $timeIn        = \Carbon\Carbon::parse($start_time);
                     $timeOut       = \Carbon\Carbon::parse($end_time);
                     $diffInHours   = round($timeOut->diffInMinutes($timeIn) / 60);
                     
+                    $full_dates  = \Carbon\Carbon::parse($full_date.'-'.$i);
+                    $full_dates  = $full_dates->toDateString();
+
                     $roster_arr = [
                         'rosters_id'    => $last_id,
-                        $full_date      =  $request['full_date'],
-                        'full_date'     => $full_date.'-'.$i,
+                        'full_date'     => $full_dates,
                         'start_time'    => $request['start_time_'.$i],
                         'end_time'      => $request['end_time_'.$i],
                         'total_hours'   => $diffInHours
@@ -121,29 +135,30 @@ class RosterController extends Controller
             }
             else{
                 //edit the current data
-                // echo 'old record';
                 $old_rosters_id = $request['old_rosters_id'];
-                // echo $x;
-                print_r($old_rosters_id[$x]);
+                $rosters_id     = $old_rosters_id[$x];
+                echo 'old record';
                 // die();
-                $full_date      = $request['full_date'];
-
                 for ($i = 1; $i <= $k; $i++) {
-                    $start_time    = $request['start_time_'.($i-1)];
-                    $end_time      = $request['end_time_'.($i-1)];
-                    $full_date     =  $request['full_date'].'-'.$i;
+                    $start_time    = $request['start_time_'.($i-1)][$j];
+                    $end_time      = $request['end_time_'.($i-1)][$j];
                     $timeIn        = \Carbon\Carbon::parse($start_time);
                     $timeOut       = \Carbon\Carbon::parse($end_time);
                     $diffInHours   = round($timeOut->diffInMinutes($timeIn) / 60);
-                    
-                    $full_date      =  $request['full_date'];
 
-                    RosterTimetable::where('rosters_id', '=', $old_rosters_id[$x])
-                    ->where('full_date', '=', $full_date.'-'.$i)
-                    ->update(['start_time' => $start_time, 'end_time' => $end_time, 'total_hours' => $diffInHours]);
-                } 
-            }
-            $j++; $x++;
+                    $full_dates  = \Carbon\Carbon::parse($full_date.'-'.$i);
+                    $full_dates  = $full_dates->toDateString();
+
+                    echo $rosters_id.'<br>'.$full_dates.'<br>'.$start_time.'<br>'.$end_time.'<br>'.$diffInHours;
+
+                    // die();
+                    RosterTimetable::where('rosters_id', '=', $rosters_id)
+                        ->whereDate('full_date', '=', $full_dates)
+                        ->update(['start_time' => $start_time, 'end_time' => $end_time, 'total_hours' => $diffInHours]);
+                 
+                }
+            } $x++;
+            $j++;
         }
         return redirect()->back()->with('message', 'Roster Added Successfully');
     }

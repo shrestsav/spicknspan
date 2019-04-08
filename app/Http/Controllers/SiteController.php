@@ -95,14 +95,14 @@ class SiteController extends Controller
     {
         // return $request->all();
         Room::create($request->all());
-        return redirect()->back()->with('message', 'Room Added Successfully');
+        return redirect()->back()->with('message', 'Area/Division Added Successfully');
     }
 
     public function delete_room(Request $request, $id)
     {
         $room = Room::find($id); 
         $room->delete(); //delete the id
-        return redirect()->back()->with('message', 'Room Deleted Successfully');
+        return redirect()->back()->with('message', 'Area/Division Deleted Successfully');
     }
 
     public function generate_qr($id)

@@ -88,7 +88,7 @@
     <div class="col-md-6">
       <div class="box box-primary">
         <div class="box-header with-border">
-          <h3 class="box-title">Add Rooms</h3>
+          <h3 class="box-title">Create Division/Area</h3>
         </div>
         <form role="form" action="{{route('room.store')}}" method="POST">
           @csrf

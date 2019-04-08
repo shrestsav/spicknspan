@@ -16,6 +16,14 @@ elseif(Route::current()->getName() == 'user_client.index'){
 
 @extends('backend.layouts.app',['title'=> $title])
 
+@push('styles')
+<style type="text/css">
+  label.checkbox.mark_default {
+    padding-left: 20px;
+  }
+</style>
+@endpush
+
 @section('content')
 
 <!-- Main content -->
@@ -45,7 +53,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
             <input type="hidden" class="form-control" name="user_type" value="{{$user_type}}">
             <div class="col-md-6">
               <div class="form-group">
-                <label for="name">Name</label>
+                <label for="name"><?php echo ($user_type == 'client')?'Client Name *':'Full Name *';?></label>
                 <input type="text" name="name" class="form-control" id="name" placeholder="Enter Name" required>
                 <div class="help-block with-errors"></div>
               </div>
@@ -68,21 +76,21 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
               <div class="form-group">
                 <label for="address">Address</label>
-                <input type="text" name="address" class="form-control" id="address" placeholder="Enter Address" required>
+                <input type="text" name="address" class="form-control" id="address" placeholder="Enter Address">
                 <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
-                <label for="contact">Phone Number</label>
+                <label for="contact"><?php echo ($user_type == 'client')?'Client Phone Number *':'Phone Number *';?></label>
                 <input type="text" name="contact" class="form-control" id="contact" placeholder="Enter Phone Number" required>
               </div>
               <div class="form-group">
-                <label for="email">Email address</label>
+                <label for="email"><?php echo ($user_type == 'client')?'Client E-mail address *':'E-mail address *';?></label>
                 <input type="email" name="email" class="form-control" id="email" placeholder="Enter email" required>
                 <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
                 <label for="date_of_birth">Date of Birth</label>
-                <input type="date" name="date_of_birth" class="form-control" id="date_of_birth" placeholder="Enter Date of Birth" required>
+                <input type="date" name="date_of_birth" class="form-control" id="date_of_birth" placeholder="Enter Date of Birth">
                 <div class="help-block with-errors"></div>
               </div>
             </div>
@@ -98,28 +106,34 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
               <div class="form-group">
                 <label for="description">Description</label>
-                <textarea name="description" class="form-control" id="description" placeholder="Enter Description">
-                </textarea><div class="help-block with-errors"></div>
+                <textarea name="description" class="form-control" id="description" placeholder="Enter Description"></textarea><div class="help-block with-errors"></div>
               </div> 
               <div class="form-group">
-                <label for="timezone">TimeZone</label>
+                <label for="timezone">Timezone</label>
                 <select class="select2" id="timezone" name="timezone" required>
                   {{-- Timezones will be filled by moment js --}}
                 </select>
                 <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
-                <label for="employment_start_date">Employment Start Date</label>
-                <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Enployment Start Date">
+                <label for="employment_start_date"><?php echo ($user_type == 'client')?'Contract Start Date *':'Start Date *';?></label>
+                <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Start Date" required>
                 <div class="help-block with-errors"></div>
               </div>
+              <?php if($user_type=='client'){?>
+                <div class="form-group">
+                  <label class="checkbox mark_default">
+                    <input type="checkbox" name="mark_default" value="1">Mark as default client ?
+                  </label>
+                </div>
+              <?php } ?>
               <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">Password *</label>
                 <input type="password" name="password" data-minlength="6" class="form-control" id="password" placeholder="Enter Password" required>
                 <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
-                <label for="password">Confirm Password</label>
+                <label for="password">Confirm Password *</label>
                 <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" placeholder="Confirm Password" data-match="#password" data-match-error="Passwords don't match"  required>
                 <div class="help-block with-errors"></div>
               </div>

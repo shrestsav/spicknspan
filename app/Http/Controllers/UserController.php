@@ -76,11 +76,10 @@ class UserController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users|max:255',
-            'password' => 'required|string|min:8|confirmed',
-            'address' => 'required',
+            'password' => 'required|string|min:6|confirmed',
             'gender' => 'required',
             'contact' => 'required',
-            'date_of_birth' => 'required',
+            'employment_start_date' => 'required',
             'timezone' => 'required',
         ]);
         
@@ -89,6 +88,7 @@ class UserController extends Controller
             'email' => $request['email'],
             'password' => Hash::make($request['password']),
             'user_type' => $request['user_type'],
+            'mark_default' => $request['mark_default'],
         ]);
 
         $user_id = $user->id;
@@ -99,6 +99,8 @@ class UserController extends Controller
             $fileName = 'dp_user_'.$user_id.'.'.$photo->getClientOriginalExtension();
             $uploadDirectory = public_path('files'.DS.'users'.DS.$user_id);
             $photo->move($uploadDirectory, $fileName);
+        } else {
+          $fileName = 'no_image';
         }
 
         //Update User Details Table
@@ -168,30 +170,29 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $update_user = User::where('id','=',$id)->update(['name' => $request->name,
-                                                          'email' => $request->email
-                                                            ]);
+        $update_user = User::where('id','=',$id)
+                      ->update(['name' => $request->name,
+                                'email' => $request->email
+                                  ]);
         $update_user_details = UserDetail::where('user_id','=',$id)
-                                         ->update([
-                                                    'gender' => $request->gender,
-                                                    'hourly_rate' => $request->hourly_rate,
-                                                    'address' => $request->address,
-                                                    'contact' => $request->contact,
-                                                    'date_of_birth' => $request->date_of_birth,
-                                                    'photo' => $request->photo,
-                                                    'annual_salary' => $request->annual_salary,
-                                                    'description' => $request->description,
-                                                    'employment_start_date' => $request->employment_start_date
-                                                 ]);
+               ->update([
+                          'gender' => $request->gender,
+                          'hourly_rate' => $request->hourly_rate,
+                          'address' => $request->address,
+                          'contact' => $request->contact,
+                          'date_of_birth' => $request->date_of_birth,
+                          'photo' => $request->photo,
+                          'annual_salary' => $request->annual_salary,
+                          'description' => $request->description,
+                          'employment_start_date' => $request->employment_start_date
+                       ]);
         if($request->user_type=='employee')
             $route = 'user_employee.index';
         if($request->user_type=='client')
             $route =  'user_client.index';
         if($request->user_type=='contractor')
             $route =  'user_contractor.index';
-
         return redirect()->route($route)->with('message', 'Updated Successfully');
-
     }
 
     /**

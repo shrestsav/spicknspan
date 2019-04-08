@@ -129,10 +129,10 @@
                     </div>
                   </div>
                   <div class="col-md-12">
-                    <select class="select2 check_in_out_client" name="client_id" required>
+                    <select class="select2 check_in_out_client" name="client_id" id="mark_default" required>
                         <option value="">--</option>
                       @foreach($clients as $client)
-                        <option value="{{$client->id}}">{{$client->name}}</option>
+                        <option value="{{$client->id}}" <?php if ($client->id == 1) echo "selected='selected'";?>>{{$client->name}}</option>
                       @endforeach
                     </select>
                   </div>
@@ -167,6 +167,9 @@
     $(function () {
       var last_check_in_client = '{{$last_check_in_out_client}}';
       $(".check_in_out_client").val(last_check_in_client).change();
+
+      var mark_default = document.getElementById("mark_default");
+      mark_default.options[mark_default.options.selectedIndex].selected = true;
     });
     var height = 240;
     var width = 320;
