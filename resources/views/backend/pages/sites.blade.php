@@ -118,14 +118,18 @@
               <label for="r_image">Image</label>
               <input type="file" name="image" class="form-control" id="r_image">
             </div>
-            <div class="form-group">
-              <label for="r_image">Select Questionare</label><br>
-              <select class="select2" name="question_id">
-                @foreach($questionTemplate as $qT)
-                  <option value="{{$qT->id}}">{{$qT->template_title}}</option>
-                @endforeach
-              </select>
-            </div>
+
+              <?php if(Auth::check() && Auth::user()->user_type == "admin" && Auth::user()->inspection == '1'){ ?>
+                  <div class="form-group">
+                    <label for="r_image">Select Questionare</label><br>
+                    <select class="select2" name="question_id">
+                      @foreach($questionTemplate as $qT)
+                        <option value="{{$qT->id}}">{{$qT->template_title}}</option>
+                      @endforeach
+                    </select>
+                  </div>
+              <?php } ?>
+
           </div>
           <div class="box-footer">
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -147,24 +151,28 @@
               <th>Name</th>
               <th>Room No</th>
               <th>Building No</th>
-              <th>Question Template</th>
+              <?php if(Auth::check() && Auth::user()->user_type == "admin" && Auth::user()->inspection == '1'){ ?>
+                  <th>Question Template</th>
+              <?php } ?>
               <th>QR</th>
               <th>Action</th>
             </tr>
             </thead>
             <tbody>
-              <?php $count=1; ?>
+              <?php $count = 1; ?>
             @foreach($rooms as $room)
               <tr>
                 <td>{{$count}}</td>
                 <td>{{$room->name}}</td>
                 <td>{{$room->room_no}}</td>
                 <td>{{$room->building_no}}</td>
-                @foreach($questionTemplate as $qT)
-                <?php if($qT->id == $room->question_id){ ?>
-                <td>{{$qT->template_title}}</td>
+                <?php if(Auth::check() && Auth::user()->user_type == "admin" && Auth::user()->inspection == '1'){ ?>
+                    @foreach($questionTemplate as $qT)
+                    @php if($qT->id == $room->question_id){ @endphp
+                    <td>{{$qT->template_title}}</td>
+                    @php } @endphp
+                    @endforeach
                 <?php } ?>
-                @endforeach
                 <td><a href="{{route('generate.qr',$room->id)}}" target="_blank">Show QR</a></td>
                 <form action="{{ url('/site/delete_room/').'/'.$room->id}}" method="POST">
                   {{ csrf_field() }}

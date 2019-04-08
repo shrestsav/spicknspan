@@ -21,6 +21,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('user_type')->default('employee')->nullable();
             $table->integer('mark_default')->default('0')->nullable();
+            $table->integer('inspection')->default('0')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

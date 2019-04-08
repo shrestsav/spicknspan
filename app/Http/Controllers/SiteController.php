@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use Illuminate\Http\Request;
 use App\Building;
 use App\QuestionTemplate;
@@ -17,10 +18,11 @@ class SiteController extends Controller
     public function index()
     {
         $buildings = Building::all();
+        $users = User::all();
         $questionTemplate = QuestionTemplate::all();
-        $rooms = Room::select('rooms.id','rooms.name','rooms.description','rooms.building_id','rooms.question_id','buildings.building_no','rooms.room_no')->join('buildings','rooms.building_id','=','buildings.id')->join('question_template','rooms.question_id','=','question_template.id')->get();
+        $rooms = Room::select('rooms.id','rooms.name','rooms.description','rooms.building_id','rooms.question_id','buildings.building_no','rooms.room_no')->join('buildings','rooms.building_id','=','buildings.id')->leftJoin('question_template','rooms.question_id','=','question_template.id')->get();
         // return $rooms;
-        return view('backend.pages.sites',compact('buildings','rooms', 'questionTemplate'));
+        return view('backend.pages.sites',compact('buildings','rooms', 'users', 'questionTemplate'));
     }
 
     /**
