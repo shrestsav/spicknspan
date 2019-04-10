@@ -19,11 +19,14 @@ class WagesController extends Controller
     public function index()
     {
 
+    $s_user_id   = session('user_id');
+    $s_added_by  = session('added_by');
+
     $wages = Wages::select(
         'id',
         'employee_id',
         'client_id',
-        'hourly_rate')->get();
+        'hourly_rate')->where('wages.added_by','=',$s_user_id)->get();
 
     $employee = 'employee';
     $employee = User::select(
@@ -31,7 +34,8 @@ class WagesController extends Controller
                             'users.name',
                             'users.email',
                             'users.user_type')
-                    ->where('users.user_type','=',$employee)->get();
+                    ->where('users.user_type','=',$employee)
+                    ->where('users.added_by','=',$s_user_id)->get();
 
     $client = 'client';
     $client = User::select(
@@ -39,7 +43,8 @@ class WagesController extends Controller
                             'users.name',
                             'users.email',
                             'users.user_type')
-                    ->where('users.user_type','=',$client)->get();
+                    ->where('users.user_type','=',$client)
+                    ->where('users.added_by','=',$s_user_id)->get();
 
     return view('backend.pages.wages',compact('wages', 'employee', 'client'));
     }
@@ -62,10 +67,14 @@ class WagesController extends Controller
      */
     public function store(Request $request)
     {
+        $s_user_id   = session('user_id');
+        $s_added_by  = session('added_by');
+
         Wages::create([
             'employee_id'   => $request['employee_id'],
             'client_id'     => $request['client_id'],
-            'hourly_rate'   => $request['hourly_rate']
+            'hourly_rate'   => $request['hourly_rate'],
+            'added_by'      => $s_user_id,
         ]);
         return redirect()->back()->with('message', 'Added Successfully');
     }

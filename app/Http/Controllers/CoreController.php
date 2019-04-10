@@ -19,6 +19,9 @@ class CoreController extends Controller
     	
     	if($page=='user_employee.index' || $page=='user_contractor.index' || $page=='user_client.index'){
 
+    		if($page=='user_company.index'){
+	    		$user_type = 'company';
+	    	}
     		if($page=='user_employee.index'){
     			$user_type = 'employee';
 	    	}

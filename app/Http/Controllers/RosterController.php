@@ -203,8 +203,25 @@ class RosterController extends Controller
      * @param  \App\Roster  $roster
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Roster $roster)
+    public function destroy($id)
     {
-        //
+        DB::table("rosters")->delete($id);
+
+        return response()->json(['success'=>"Roster Deleted successfully.", 'tr'=>'tr_'.$id]);
+    }
+
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function deleteAll(Request $request)
+    {
+        $ids = $request->ids;
+        // echo $ids;
+        // die();
+        DB::table("rosters")->whereIn('id',explode(",",$ids))->delete();
+        return response()->json(['success'=>"Rosters Deleted successfully."]);
     }
 }

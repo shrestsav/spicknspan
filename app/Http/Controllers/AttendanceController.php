@@ -25,7 +25,11 @@ class AttendanceController extends Controller
      */
     public function index(Request $request)
     {
-        $clients = User::all()->where('user_type','=','client');
+        $s_user_id   = session('user_id');
+        $s_added_by  = session('added_by');
+        // echo $s_added_by;
+        // die();
+        $clients = User::all()->where('user_type','=','client')->where('added_by','=',$s_added_by);
 
         // Check Users last login status
         $last_check_in_out_client = Attendance::select('check_in', 'check_out', 'client_id')
@@ -108,6 +112,9 @@ class AttendanceController extends Controller
     }
     public function list()
     {
+        $s_user_id   = session('user_id');
+        $s_added_by  = session('added_by');
+
         if(isset($_GET['employee_id'])){
             $filtEmpId = $_GET['employee_id'];
         } else {
@@ -162,8 +169,8 @@ class AttendanceController extends Controller
                                             ORDER BY check_out DESC
                                              ');
 
-        $employees = User::all()->where('user_type','=','employee');
-        $clients = User::all()->where('user_type','=','client');
+        $employees = User::all()->where('user_type','=','employee')->where('added_by','=',$s_added_by);
+        $clients = User::all()->where('user_type','=','client')->where('added_by','=',$s_added_by);
 
         return view('backend.pages.attendance_list',compact('attendance_lists', 'clients', 'employees'));
     }
@@ -212,7 +219,7 @@ class AttendanceController extends Controller
                 $image = Image::make($request->get('image'));
                 $path = public_path('files'.DS.'employee_login'.DS.Auth::user()->id);
                 if (!file_exists($path)) {
-                    \File::makeDirectory($path, 666, true);
+                    \File::makeDirectory($path, 755, true);
                 }
                 $image->save($path.DS.$filename);
             }
@@ -251,7 +258,7 @@ class AttendanceController extends Controller
             $image = Image::make($request->get('image'));
             $path = public_path('files'.DS.'employee_login'.DS.Auth::user()->id);
             if (!file_exists($path)) {
-                \File::makeDirectory($path, 666, true);
+                \File::makeDirectory($path, 755, true);
             }
             $image->save($path.DS.$filename);                
 

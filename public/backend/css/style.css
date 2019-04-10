@@ -36,3 +36,6 @@ option {
 text-align: left;
 /* reset to left*/
 }
+.box-roster.row {
+    width: auto;
+}

@@ -97,7 +97,7 @@ class SiteController extends Controller
     {
         // return $request->all();
         Room::create($request->all());
-        return redirect()->back()->with('message', 'Area/Division Added Successfully');
+        return redirect(route('site.index') . '#area_division')->with('message', 'Area/Division Added Successfully');
     }
 
     public function delete_room(Request $request, $id)

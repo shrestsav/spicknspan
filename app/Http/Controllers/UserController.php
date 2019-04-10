@@ -25,8 +25,11 @@ class UserController extends Controller
         // if(!\Gate::allows('isAdmin')){
         //     abort(403,"Sorry, You can do this action");
         // }
-        
-        if(\Route::current()->getName() == 'user_employee.index'){
+
+        if(\Route::current()->getName() == 'user_company.index'){
+            $user_type = 'company';
+        }
+        elseif(\Route::current()->getName() == 'user_employee.index'){
             $user_type = 'employee';
         }
         elseif(\Route::current()->getName() == 'user_contractor.index'){
@@ -73,6 +76,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        $s_user_id   = session('user_id');
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users|max:255',
@@ -89,6 +94,7 @@ class UserController extends Controller
             'password' => Hash::make($request['password']),
             'user_type' => $request['user_type'],
             'mark_default' => $request['mark_default'],
+            'added_by' => $s_user_id,
         ]);
 
         $user_id = $user->id;
@@ -192,6 +198,8 @@ class UserController extends Controller
             $route =  'user_client.index';
         if($request->user_type=='contractor')
             $route =  'user_contractor.index';
+        if($request->user_type=='company')
+            $route =  'user_company.index';
         return redirect()->route($route)->with('message', 'Updated Successfully');
     }
 

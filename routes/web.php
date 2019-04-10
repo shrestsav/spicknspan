@@ -38,7 +38,8 @@ Route::middleware(['auth'])->group(function () {
 	Route::get('/view', 'MailController@viewMail')->name('mail.view');
 
 	//Allow these routes for admin only
-	Route::middleware(['can:isAdmin'])->group(function () {
+	// Route::middleware(['can:isAdmin'])->group(function () {
+		Route::get('/company', 'UserController@index')->name('user_company.index');
 		Route::get('/employees', 'UserController@index')->name('user_employee.index');
 		Route::get('/contractors', 'UserController@index')->name('user_contractor.index');
 		Route::get('/clients', 'UserController@index')->name('user_client.index');
@@ -53,6 +54,8 @@ Route::middleware(['auth'])->group(function () {
 
 		Route::get('/roster','RosterController@index')->name('roster.index');
 		Route::post('/add_roster','RosterController@store')->name('roster.store');
+		Route::delete('/roster_delete/{id}','RosterController@destroy')->name('roster.destroy');
+		Route::delete('/rosterDeleteAll','RosterController@deleteAll')->name('roster.destroyAll');
 
 		Route::get('/roster-variation','RosterVariationController@index')->name('roster_variation.index');
 		Route::post('/roster-variation/accept/{id}','RosterVariationController@statusAccept')->name('roster_variation.approve_status');
@@ -77,6 +80,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/questionTemplate/add','QuestionTemplateController@addMore')->name('question.add');
 		Route::post("/questionTemplate/add","QuestionTemplateController@addMorePost");
 		Route::get('/questionTemplate/{id}','QuestionTemplateController@destroy')->name('question.destroy');
-	});
+	// });
+
 	
 });

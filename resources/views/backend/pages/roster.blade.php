@@ -69,7 +69,8 @@
                       }
                 ?>
                   <tr role="row">
-                      <th style="width: 24px; padding-right: 0px !important;" class="sorting_disabled" rowspan="1" colspan="1"><span title="Check All"><input id="contentSection_chkCheckAll" type="checkbox" name="ctl00$contentSection$chkCheckAll" onclick="javascript:setTimeout('__doPostBack(\'ctl00$contentSection$chkCheckAll\',\'\')', 0)"></span></th>
+                      <th width="50px"><input type="checkbox" id="master"></th>
+                      <!-- <th>Action</th> -->
                       <th style="width: 100px;" class="sorting_disabled" rowspan="1" colspan="1">Employee</th>
                       <th style="width: 100px;" class="sorting_disabled" rowspan="1" colspan="1">Client</th>
 
@@ -83,6 +84,7 @@
               <tbody class="roster-list">
 
               <?php 
+              if(empty($arr_rosters)){ $empty_val = 'true'; }
               if(!empty($arr_rosters)){
 
               $k = count($arr_rosters); $x = 0; ?>
@@ -90,16 +92,32 @@
               @for ($j=0; $j<$k; $j++)
 
               <?php
+                  $id   = $arr_rosters[$j]['id'];
+                  // echo 'asd'.$id;
+                  // die();
                   $employee_id   = $arr_rosters[$j]['employee_id'];
                   $client_id     = $arr_rosters[$j]['client_id'];
               ?>
 
-              <tr style="text-align: center;" role="row" class="odd">
+              <tr style="text-align: center;" role="row" class="odd" id="tr_{{$id}}">
                 <input type="hidden" name="counter" value="0">
                   <td>
-                      <span class="chkRow"><input id="check_row_id" type="checkbox" name="roster_check"></span>
+                      <input type="checkbox" class="sub_chk" data-id="{{$id}}">
                   </td>
-
+                  <!-- <td>
+                       <a href="{{ url('roster',$id) }}" class="btn btn-danger btn-sm"
+                         data-tr="tr_{{$id}}"
+                         data-toggle="confirmation"
+                         data-btn-ok-label="Delete" data-btn-ok-icon="fa fa-remove"
+                         data-btn-ok-class="btn btn-sm btn-danger"
+                         data-btn-cancel-label="Cancel"
+                         data-btn-cancel-icon="fa fa-chevron-circle-left"
+                         data-btn-cancel-class="btn btn-sm btn-default"
+                         data-title="Are you sure you want to delete ?"
+                         data-placement="left" data-singleton="true">
+                          Delete
+                      </a>
+                  </td> -->
                   <td>
                       <select name="employee_id[]" id="emp_name" class="form-control select2 select2-hidden-accessible" style="width: 100%;" tabindex="-1" aria-hidden="true">
                           
@@ -132,15 +150,19 @@
                                           ->where('full_date', '=', $date_filter)
                                           ->get();
                       $working_time = json_decode($working_time, true);
-
+                      // print_r($working_time[$j]['id']);
+                      // echo '<br>';
+                      // die();
                       $time_table = DB::table('rosters_timetable')
-                                          ->where('rosters_id','=', $working_time)
+                                          ->where('rosters_id','=', $working_time[$j]['id'])
                                           ->get()
                                           ->toArray();
 
-                      $full_date  =  $time_table[$j]->full_date;
+                      // print_r($time_table);
+                      // die();
+                      $full_date  =  $time_table[0]->full_date;
                 ?>
-                  <input type="hidden" name="old_rosters_id[]" value="<?php echo $working_time[$j]['id'];?>">
+                  <input type="hidden" name="old_rosters_id[]" value="<?php echo $working_time[0]['id'];?>">
 
                   @for ($i = 0; $i<$m_days; $i++)
                       <td>
@@ -157,12 +179,13 @@
           </table>
 
           <div class="container box-roster row">
-            <div class="box-footer-left">
+            <div class="box-footer-left col-md-11">
               <button type="submit" class="btn btn-primary">Update</button>
-              <button type="" class="btn btn-danger">Delete</button>
+              <button class="btn btn-danger delete_all" data-url="{{ url('rosterDeleteAll') }}">Delete All Selected</button>
+              <!-- <button type="" class="btn btn-danger delete_all">Delete</button> -->
             </div>
-            <div class="box-footer-right">
-              <button id="addrow" class="btn btn-primary">Add Row</button>
+            <div class="box-footer-right col-md-1">
+              <button id="addrow" class="btn btn-success">Add Row</button>
             </div>
           </div>
 
@@ -175,6 +198,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-confirmation/1.0.5/bootstrap-confirmation.min.js"></script>
 <script type="text/javascript">
   $(function () {
     $('#tblRoster').DataTable( {
@@ -190,12 +214,13 @@
     var counter = 1;
     $("#addrow").on("click", function () {
         event.preventDefault();
+        <?php $empty_val = 'false';?>
         var newRow = $("<tr style='text-align: center;' role='row' class='odd'>");
         var cols = "";
         // cols += '<td><span class="chkRow"><input type="checkbox" name="roster_check"></span></td>';
         cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger" value="X"></td>';
-        cols += '<td><select name="employee_id[]" class="form-control select2" style="width: 100%;" tabindex="-1" aria-hidden="true"><?php if ($employee->count()){?><option selected disabled>Select Employee</option><?php foreach($employee as $user){?><option value="<?php echo $user->id;?>"><?php echo $user->name;?></option><?php } } ?></select></td>';
-        cols += '<td><select name="client_id[]" id="client_name" class="form-control select2" style="width: 100%;" tabindex="-1" aria-hidden="true"><?php if ($client->count()){?><option selected disabled>Select Client</option><?php foreach($client as $user){?><option value="<?php echo $user->id;?>"><?php echo $user->name;?></option><?php } } ?></select></td>';
+        cols += '<td><select name="employee_id[]" class="form-control select2" style="width: 100%;" tabindex="-1" aria-hidden="true" required><?php if ($employee->count()){?><option value="" selected disabled>Select Employee</option><?php foreach($employee as $user){?><option value="<?php echo $user->id;?>"><?php echo $user->name;?></option><?php } } ?></select></td>';
+        cols += '<td><select name="client_id[]" id="client_name" class="form-control select2" style="width: 100%;" tabindex="-1" aria-hidden="true" required><?php if ($client->count()){?><option value="" selected disabled>Select Client</option><?php foreach($client as $user){?><option value="<?php echo $user->id;?>"><?php echo $user->name;?></option><?php } } ?></select></td>';
         cols += '<?php for ($i = 1; $i <= $m_days; $i++){?><td><input name="start_time_<?php echo $i;?>" type="text" id="start_time" class="timepicker txtTime" style="width:40px;"><br>to<br><input name="end_time_<?php echo $i;?>" type="text" id="end_time" class="timepicker txtTime" style="width:40px;"></td><?php } ?>';
         newRow.append(cols);
         $("tbody.roster-list").append(newRow);
@@ -211,7 +236,94 @@
     
     $('.select2').select2();
 
-  })
+    //delete roster rows
+    $('#master').on('click', function(e) {
+     if($(this).is(':checked',true))  
+     {
+        $(".sub_chk").prop('checked', true);  
+     } else {  
+        $(".sub_chk").prop('checked',false);  
+     }  
+    });
+
+    $('.delete_all').on('click', function(e) {
+
+        var allVals = [];  
+        $(".sub_chk:checked").each(function() {  
+            allVals.push($(this).attr('data-id'));
+        });  
+
+        if(allVals.length <= 0)  
+        {  
+            alert("Please select row.");
+            e.preventDefault();
+        }  
+        else {
+            var check = confirm("Are you sure you want to delete this row?");  
+            if(check == true){  
+              var join_selected_values = allVals.join(",");
+
+                $.ajax({
+                    url: $(this).data('url'),
+                    type: 'DELETE',
+                    data: 'ids='+join_selected_values,
+                    success: function (data) {
+                        if (data['success']) {
+                            $(".sub_chk:checked").each(function() {  
+                                $(this).parents("tr").remove();
+                            });
+                            alert(data['success']);
+                        } else if (data['error']) {
+                            alert(data['error']);
+                        } else {
+                            alert('Whoops Something went wrong!!');
+                        }
+                    },
+                    error: function (data) {
+                        alert(data.responseText);
+                    }
+                });
+
+              $.each(allVals, function( index, value ) {
+                  $('table tr').filter("[data-row-id='" + value + "']").remove();
+              });
+            }  
+        }  
+    });
+
+    $('[data-toggle=confirmation]').confirmation({
+        rootSelector: '[data-toggle=confirmation]',
+        onConfirm: function (event, element) {
+            element.trigger('confirm');
+        }
+    });
+
+    $(document).on('confirm', function (e) {
+        var ele = e.target;
+        e.preventDefault();
+
+        $.ajax({
+            url: ele.href,
+            type: 'DELETE',
+            success: function (data) {
+                if (data['success']) {
+                    $("#" + data['tr']).slideUp("slow");
+                    alert(data['success']);
+                } else if (data['error']) {
+                    alert(data['error']);
+                } else {
+                    alert('Whoops Something went wrong!!');
+                }
+            },
+            error: function (data) {
+                alert(data.responseText);
+            }
+        });
+
+
+        return false;
+    });
+  });
 </script>
   
 @endpush

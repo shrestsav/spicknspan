@@ -1,5 +1,9 @@
 @php
-if(Route::current()->getName() == 'user_employee.index'){
+if(Route::current()->getName() == 'user_company.index'){
+  $title = 'Company';
+  $user_type = 'company';
+}
+elseif(Route::current()->getName() == 'user_employee.index'){
   $title = 'Employees';
   $user_type = 'employee';
 }
