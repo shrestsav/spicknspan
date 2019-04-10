@@ -115,11 +115,10 @@ class SiteController extends Controller
 
     public function generate_qr($id)
     {   
-        // $rooms = Room::where('id',$id)->pluck('building_id')->first();
         $pngImage = \QrCode::format('png')
-                            ->size(500)
+                            ->size(400)
                             ->generate($id);
- 
-        return response($pngImage)->header('Content-type','image/png');
+        return view('backend.pages.printqr',compact('pngImage'));
+        // return response($pngImage)->header('Content-type','image/png');
     }
 }
