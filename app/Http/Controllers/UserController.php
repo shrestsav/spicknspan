@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\UserDetail;
+use App\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -21,10 +22,6 @@ class UserController extends Controller
      */
     public function index()
     {   
-        //Check if Admin
-        // if(!\Gate::allows('isAdmin')){
-        //     abort(403,"Sorry, You can do this action");
-        // }
 
         if(\Route::current()->getName() == 'user_company.index'){
             $user_type = 'company';
@@ -123,6 +120,13 @@ class UserController extends Controller
             'employment_start_date' => $request['employment_start_date'],
             'timezone' => $request['timezone'],
         ]);
+
+        $roles = Role::pluck('name','id');
+        foreach($roles as $role_id => $role){
+          if($role==$request['user_type']){
+            $user->attachRole($role_id);
+          }
+        }
 
         return redirect()->back()->with('message', 'Added Successfully');
     }

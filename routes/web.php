@@ -15,14 +15,19 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/test', function () {
-	var_dump('the current time is '. date('Y m d H:i:s'));
-	return session()->all();
-});
 
 Auth::routes();
 
+
+
+
 Route::middleware(['auth'])->group(function () {
+
+	Route::group(['prefix' => 'admin', 'middleware' => ['role:superAdmin']], function() {
+		Route::resource('roles','RoleController');
+		Route::resource('users','UserRoleController');
+	});
+
 	Route::get('/home', 'HomeController@index')->name('home');
 	Route::get('/', 'HomeController@index')->name('dashboard');
 	Route::get('/check_in_out', 'AttendanceController@index')->name('attendance.index');
@@ -37,11 +42,16 @@ Route::middleware(['auth'])->group(function () {
 	Route::get('/compose', 'MailController@composeMail')->name('mail.compose');
 	Route::get('/view', 'MailController@viewMail')->name('mail.view');
 
-	//Allow these routes for admin only
-	// Route::middleware(['can:isAdmin'])->group(function () {
+	//Allow these routes for admin and contractor only
+	Route::middleware(['role:superAdmin|contractor'])->group(function () {
+
 		Route::get('/company', 'UserController@index')->name('user_company.index');
 		Route::get('/employees', 'UserController@index')->name('user_employee.index');
-		Route::get('/contractors', 'UserController@index')->name('user_contractor.index');
+
+		Route::middleware(['role:superAdmin'])->group(function () {
+			Route::get('/contractors', 'UserController@index')->name('user_contractor.index');
+		});
+
 		Route::get('/clients', 'UserController@index')->name('user_client.index');
 		Route::post('/add_user', 'UserController@store')->name('user.store');
 		Route::get('/edit_user/{id}', 'UserController@edit')->name('user.edit');
@@ -80,7 +90,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/questionTemplate/add','QuestionTemplateController@addMore')->name('question.add');
 		Route::post("/questionTemplate/add","QuestionTemplateController@addMorePost");
 		Route::get('/questionTemplate/{id}','QuestionTemplateController@destroy')->name('question.destroy');
-	// });
+	});
 
 	
 });

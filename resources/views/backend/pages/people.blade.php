@@ -57,7 +57,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
             <input type="hidden" class="form-control" name="user_type" value="{{$user_type}}">
             <div class="col-md-6">
               <div class="form-group">
-                <label for="name"><?php echo ($user_type == 'client')?'Client Name *':'Full Name *';?></label>
+                <label for="name">{{($user_type == 'client')?'Client Name *':'Full Name *'}}</label>
                 <input type="text" name="name" class="form-control" id="name" placeholder="Enter Name" required>
                 <div class="help-block with-errors"></div>
               </div>
@@ -84,11 +84,11 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
-                <label for="contact"><?php echo ($user_type == 'client')?'Client Phone Number *':'Phone Number *';?></label>
+                <label for="contact">{{($user_type == 'client')?'Client Phone Number *':'Phone Number *'}}</label>
                 <input type="text" name="contact" class="form-control" id="contact" placeholder="Enter Phone Number" required>
               </div>
               <div class="form-group">
-                <label for="email"><?php echo ($user_type == 'client')?'Client E-mail address *':'E-mail address *';?></label>
+                <label for="email">{{($user_type == 'client')?'Client E-mail address *':'E-mail address *'}}</label>
                 <input type="email" name="email" class="form-control" id="email" placeholder="Enter email" required>
                 <div class="help-block with-errors"></div>
               </div>
@@ -120,7 +120,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <div class="help-block with-errors"></div>
               </div>
               <div class="form-group">
-                <label for="employment_start_date"><?php echo ($user_type == 'client')?'Contract Start Date *':'Start Date *';?></label>
+                <label for="employment_start_date">{{($user_type == 'client')?'Contract Start Date *':'Start Date *'}}</label>
                 <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Start Date" required>
                 <div class="help-block with-errors"></div>
               </div>

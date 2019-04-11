@@ -29,8 +29,7 @@
 
       {{-- Allow these menus for admin only --}}
 
-      <?php $user = Auth::user()->user_type;
-            if(($user == 'admin') || ($user == 'contractor')){?>
+      @role(['superAdmin','contractor'])
         <li class="header">SETTINGS</li>
         <li class="treeview @if ($title === 'Employees' || $title === 'Contractors' || $title === 'Clients' || $title === 'Company') active @endif">
           <a href="#">
@@ -44,10 +43,10 @@
             </li> -->
             <li class="@if ($title === 'Employees') active @endif"><a href="{{route('user_employee.index')}}"><i class="fa fa-users"></i> <span>Employees</span></a>
             </li>
-            <?php if($user == 'admin'){?>
+          @role('superAdmin')
             <li class="@if ($title === 'Contractors') active @endif"><a href="{{route('user_contractor.index')}}"><i class="fa fa-pencil-square-o"></i> <span>Contractors</span></a>
             </li>
-            <?php } ?>
+          @endrole
             <li class="@if ($title === 'Clients') active @endif"><a href="{{route('user_client.index')}}"><i class="fa fa-user"></i> <span>Clients</span></a>
             </li>
             <li class="@if ($title === 'Sites') active @endif"><a href="{{route('site.index')}}"><i class="fa fa-dashboard"></i> <span>Sites</span></a>
@@ -73,11 +72,7 @@
             </li>
           </ul>
         </li>
-        
-        
-
-
-      <?php } ?>
+      @endrole
 
        {{--  <li class="@if ($title === 'Mail') active @endif"><a href="{{route('mail.index')}}"><i class="fa fa-dashboard"></i> <span>Mail</span></a>
         </li>
@@ -85,4 +80,3 @@
 
       </ul>
     </section>
-    <!-- /.sidebar -->

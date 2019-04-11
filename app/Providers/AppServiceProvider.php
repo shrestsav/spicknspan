@@ -14,7 +14,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        //This needs to be uncomment while on deployment in server
+        // $this->app->bind('path.public', function() {
+        //     return realpath(base_path().'/../');
+        // });
     }
 
     /**

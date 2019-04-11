@@ -25,6 +25,7 @@ class AttendanceController extends Controller
      */
     public function index(Request $request)
     {
+        // return $request->session()->all();
         $s_user_id   = session('user_id');
         $s_added_by  = session('added_by');
         // echo $s_added_by;
