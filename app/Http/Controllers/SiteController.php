@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Building;
 use App\QuestionTemplate;
 use App\Room;
+use Auth;
 
 class SiteController extends Controller
 {
@@ -17,12 +18,17 @@ class SiteController extends Controller
     public function index()
     {
 
-        $s_user_id   = session('user_id');
-        $s_added_by  = session('added_by');
-        
-        $buildings = Building::all()->where('added_by','=',$s_user_id);
-        $questionTemplate = QuestionTemplate::all()->where('added_by','=',$s_user_id);
+        $userId   = Auth::id();
+        $userType = Auth::user()->user_type;
 
+        $buildings = Building::all();
+        if($userType == 'contractor'){
+            $buildings = $buildings ->where('added_by','=',$userId);
+        }
+        $questionTemplate = QuestionTemplate::all();
+        if($userType == 'contractor'){
+            $questionTemplate = $questionTemplate ->where('added_by','=',$userId);
+        }
         $rooms = Room::select(
                             'rooms.id',
                             'rooms.name',
@@ -56,10 +62,9 @@ class SiteController extends Controller
      */
     public function store(Request $request)
     {
-        $s_user_id   = session('user_id');
-        $s_added_by  = session('added_by');
-        // print_r([$request->all(), 'added_by'=>$s_added_by]);
-        // die();
+        $userId   = Auth::id();
+        $userType = Auth::user()->user_type;
+
         Building::create([
             'name'              => $request['name'],
             'building_no'       => $request['building_no'],
@@ -67,7 +72,7 @@ class SiteController extends Controller
             'description'       => $request['description'],
             'image'             => $request['image'],
             'gps_coordinates'   => $request['gps_coordinates'],
-            'added_by'          => $s_user_id] );
+            'added_by'          => $userId] );
         return redirect()->back()->with('message', 'Building Added Successfully');
 
     }
@@ -119,9 +124,8 @@ class SiteController extends Controller
 
     public function store_room(Request $request)
     {
-        // return $request->all();
-        $s_user_id   = session('user_id');
-        $s_added_by  = session('added_by');
+        $userId   = Auth::id();
+        $userType = Auth::user()->user_type;
         
         Room::create([
             'building_id'       => $request['building_id'],
@@ -130,7 +134,7 @@ class SiteController extends Controller
             'description'       => $request['description'],
             'image'             => $request['image'],
             'question_id'       => $request['question_id'],
-            'added_by'          => $s_user_id] );
+            'added_by'          => $userId] );
         return redirect(route('site.index') . '#area_division')->with('message', 'Room Added Successfully');
     }
 

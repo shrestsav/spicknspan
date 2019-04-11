@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\User;
 use App\UserDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Input;
 
 class UserController extends Controller
 {
@@ -165,6 +167,49 @@ class UserController extends Controller
                         ->where('users.id','=',$id)->first();
         // return $user;
         return view('backend.pages.edit_people',compact('user'));
+    }
+
+    public function profile_edit($id)
+    {
+        $user = User::select(
+                                'users.id',
+                                'users.name',
+                                'users.email',
+                                'users.user_type',
+                                'user_details.photo',
+                                'user_details.address',
+                                'user_details.gender',
+                                'user_details.contact',
+                                'user_details.hourly_rate',
+                                'user_details.annual_salary',
+                                'user_details.description',
+                                'user_details.date_of_birth',
+                                'user_details.employment_start_date',
+                                'user_details.documents')
+                        ->join('user_details','user_details.user_id','=','users.id')
+                        ->where('users.id','=',$id)->first();
+
+        return view('backend.pages.edit_people',compact('user'));
+    }
+
+    public function password_edit($id)
+    {
+        return view('backend.pages.edit_password');
+    }
+
+    public function password_update(Request $request, $id)
+    {
+        $user_old_password = \Auth::user()->getAuthPassword();
+        if( Hash::check(Input::get('old_password'), $user_old_password)) { 
+            $validatedData = $request->validate([
+                'password' => 'required|string|min:8|confirmed'
+            ]);
+            $update_user = User::where('id','=',$id)
+                          ->update(['password' => Hash::make($request['password'])]);
+            return redirect()->back()->with('message','Password Updated Successfully');
+        } else {
+            return redirect()->back()->with('message','Old & New Password do not match.');
+      }
     }
 
     /**

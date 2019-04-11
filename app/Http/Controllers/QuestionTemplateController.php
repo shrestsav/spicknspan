@@ -6,6 +6,7 @@ use App\QuestionTemplate;
 use App\Question;
 use App\User;
 use DB;
+use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -20,10 +21,13 @@ class QuestionTemplateController extends Controller
 
     public function index()
     {
-        $s_user_id   = session('user_id');
-        $s_added_by  = session('added_by');
+        $userId   = Auth::id();
+        $userType = Auth::user()->user_type;
 
-        $qTemplate = QuestionTemplate::all()->where('added_by', '=', $s_user_id);
+        $qTemplate = QuestionTemplate::all();
+        if($userType == 'contractor'){
+            $qTemplate = $qTemplate ->where('added_by', '=', $userId);
+        }
         return view('backend.pages.question_template.list', compact('qTemplate'));
     }
 
@@ -35,8 +39,8 @@ class QuestionTemplateController extends Controller
 
     public function addMorePost(Request $request)
     {
-        $s_user_id   = session('user_id');
-        $s_added_by  = session('added_by');
+        $userId   = Auth::id();
+        $userType = Auth::user()->user_type;
 
         $rules = [];
         foreach($request->input('name') as $key => $value) {
@@ -45,7 +49,7 @@ class QuestionTemplateController extends Controller
         $validator = Validator::make($request->all(), $rules);
 
         $template_title = $request->input('question_template_title');
-        QuestionTemplate::create(['template_title'=>$template_title, 'added_by'=>$s_user_id]);
+        QuestionTemplate::create(['template_title'=>$template_title, 'added_by'=>$userId]);
         $last_id = DB::getPdo()->lastInsertId();
 
         if ($validator->passes()) {
