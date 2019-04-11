@@ -18,6 +18,7 @@ class CreateRosterTable extends Migration
             $table->integer('employee_id');
             $table->integer('client_id');
             $table->string('full_date')->nullable();
+            $table->string('added_by')->nullable();
             $table->timestamps();
         });
     }

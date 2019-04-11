@@ -22,6 +22,7 @@ class CreateRoomsTable extends Migration
             $table->text('description');
             $table->string('image')->nullable();
             $table->string('qr_image')->nullable();
+            $table->string('added_by')->nullable();
             $table->timestamps();
         });
     }
