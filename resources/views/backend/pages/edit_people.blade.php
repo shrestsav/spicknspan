@@ -67,7 +67,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
               <div class="form-group">
                 <label for="address">Address</label>
-                <input type="text" name="address" class="form-control" id="address" placeholder="Enter Address" value="{{$user->address}}" required>
+                <input type="text" name="address" class="form-control" id="address" placeholder="Enter Address" value="{{$user->address}}">
               </div>
               <div class="form-group">
                 <label for="contact">Phone Number</label>
@@ -79,13 +79,13 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
               <div class="form-group">
                 <label for="date_of_birth">Date of Birth</label>
-                <input type="date" name="date_of_birth" class="form-control" id="date_of_birth" placeholder="Enter Date of Birth" value="{{$user->date_of_birth}}" required>
+                <input type="date" name="date_of_birth" class="form-control" id="date_of_birth" placeholder="Enter Date of Birth" value="{{$user->date_of_birth}}">
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-group">
                 <label for="photo">Photo</label>
-                <input type="file" name="photo" class="form-control" id="photo" value="{{$user->photo}}" required>
+                <input type="file" name="photo" class="form-control" id="photo" value="{{$user->photo}}">
               </div>
               <div class="form-group">
                 <label for="annual_salary">Annual Salary</label>
@@ -93,7 +93,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
               <div class="form-group">
                 <label for="description">Description</label>
-                <textarea name="description" class="form-control" id="description" placeholder="Enter Description" required>{{$user->description}}</textarea>
+                <textarea name="description" class="form-control" id="description" placeholder="Enter Description">{{$user->description}}</textarea>
               </div>
               <div class="form-group">
                 <label for="employment_start_date">Employment Start Date</label>

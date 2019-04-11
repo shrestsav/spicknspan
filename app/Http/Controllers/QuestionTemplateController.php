@@ -20,7 +20,10 @@ class QuestionTemplateController extends Controller
 
     public function index()
     {
-        $qTemplate = QuestionTemplate::all();
+        $s_user_id   = session('user_id');
+        $s_added_by  = session('added_by');
+
+        $qTemplate = QuestionTemplate::all()->where('added_by', '=', $s_user_id);
         return view('backend.pages.question_template.list', compact('qTemplate'));
     }
 
@@ -32,6 +35,9 @@ class QuestionTemplateController extends Controller
 
     public function addMorePost(Request $request)
     {
+        $s_user_id   = session('user_id');
+        $s_added_by  = session('added_by');
+
         $rules = [];
         foreach($request->input('name') as $key => $value) {
             $rules["name.{$key}"] = 'required';
@@ -39,7 +45,7 @@ class QuestionTemplateController extends Controller
         $validator = Validator::make($request->all(), $rules);
 
         $template_title = $request->input('question_template_title');
-        QuestionTemplate::create(['template_title'=>$template_title]);
+        QuestionTemplate::create(['template_title'=>$template_title, 'added_by'=>$s_user_id]);
         $last_id = DB::getPdo()->lastInsertId();
 
         if ($validator->passes()) {
@@ -114,8 +120,8 @@ class QuestionTemplateController extends Controller
      */
     public function destroy($id)
     {
-        $qTemp = QuestionTemplate::find($id); 
-        $qTemp->delete(); //delete the id
+        QuestionTemplate::where('id','=',$id)->delete();
+        Question::where('template_id','=',$id)->delete();
         return redirect()->back()->with('message','Question Template Deleted Successfully');
     }
 }

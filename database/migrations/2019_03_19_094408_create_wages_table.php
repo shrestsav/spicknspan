@@ -18,6 +18,7 @@ class CreateWagesTable extends Migration
             $table->integer('employee_id');
             $table->string('client_id');
             $table->text('hourly_rate')->nullable();
+            $table->string('added_by')->nullable();
             $table->timestamps();
         });
     }

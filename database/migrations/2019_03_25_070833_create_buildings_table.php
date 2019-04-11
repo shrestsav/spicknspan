@@ -21,6 +21,7 @@ class CreateBuildingsTable extends Migration
             $table->text('description');
             $table->string('image')->nullable();
             $table->text('gps_coordinates')->nullable();
+            $table->string('added_by')->nullable();
             $table->timestamps();
         });
     }

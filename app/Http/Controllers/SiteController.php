@@ -16,8 +16,13 @@ class SiteController extends Controller
      */
     public function index()
     {
-        $buildings = Building::all();
-        $questionTemplate = QuestionTemplate::all();
+
+        $s_user_id   = session('user_id');
+        $s_added_by  = session('added_by');
+        
+        $buildings = Building::all()->where('added_by','=',$s_user_id);
+        $questionTemplate = QuestionTemplate::all()->where('added_by','=',$s_user_id);
+
         $rooms = Room::select(
                             'rooms.id',
                             'rooms.name',
@@ -27,7 +32,9 @@ class SiteController extends Controller
                             'buildings.building_no',
                             'rooms.room_no')
                         ->join('buildings','rooms.building_id','=','buildings.id')
-                        ->join('question_template','rooms.question_id','=','question_template.id')->get();
+
+                        ->join('question_template','rooms.question_id','=','question_template.id')
+                        ->get();
         return view('backend.pages.sites',compact('buildings','rooms', 'questionTemplate'));
     }
 
@@ -49,7 +56,18 @@ class SiteController extends Controller
      */
     public function store(Request $request)
     {
-        Building::create($request->all());
+        $s_user_id   = session('user_id');
+        $s_added_by  = session('added_by');
+        // print_r([$request->all(), 'added_by'=>$s_added_by]);
+        // die();
+        Building::create([
+            'name'              => $request['name'],
+            'building_no'       => $request['building_no'],
+            'address'           => $request['address'],
+            'description'       => $request['description'],
+            'image'             => $request['image'],
+            'gps_coordinates'   => $request['gps_coordinates'],
+            'added_by'          => $s_user_id] );
         return redirect()->back()->with('message', 'Building Added Successfully');
 
     }
@@ -102,15 +120,25 @@ class SiteController extends Controller
     public function store_room(Request $request)
     {
         // return $request->all();
-        Room::create($request->all());
-        return redirect()->back()->with('message', 'Room Added Successfully');
+        $s_user_id   = session('user_id');
+        $s_added_by  = session('added_by');
+        
+        Room::create([
+            'building_id'       => $request['building_id'],
+            'name'              => $request['name'],
+            'room_no'           => $request['room_no'],
+            'description'       => $request['description'],
+            'image'             => $request['image'],
+            'question_id'       => $request['question_id'],
+            'added_by'          => $s_user_id] );
+        return redirect(route('site.index') . '#area_division')->with('message', 'Room Added Successfully');
     }
 
     public function delete_room(Request $request, $id)
     {
         $room = Room::find($id); 
         $room->delete(); //delete the id
-        return redirect()->back()->with('message', 'Room Deleted Successfully');
+        return redirect(route('site.index') . '#area_division')->with('message', 'Room Deleted Successfully');
     }
 
     public function generate_qr($id)

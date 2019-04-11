@@ -18,6 +18,7 @@ class CreateQuestionTemplateTable extends Migration
             $table->string('template_title')->nullable();
             $table->integer('category_id')->nullable();
             $table->string('name')->nullable();
+            $table->string('added_by')->nullable();
             $table->timestamps();
         });
     }

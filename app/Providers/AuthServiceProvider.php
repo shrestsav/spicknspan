@@ -49,5 +49,11 @@ class AuthServiceProvider extends ServiceProvider
         $gate->define('isClient',function($user){
             return $user->user_type == 'client';
         });
+
+        //Check for Company
+        //Return true if auth user type is company
+        $gate->define('isCompany',function($user){
+            return $user->user_type == 'company';
+        });
     }
 }
