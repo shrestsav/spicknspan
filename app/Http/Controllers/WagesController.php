@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Wages;
 use App\User;
-// use App\UserDetail;
+use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -19,32 +19,42 @@ class WagesController extends Controller
     public function index()
     {
 
-    $s_user_id   = session('user_id');
-    $s_added_by  = session('added_by');
+    $userId   = Auth::id();
+    $userType = Auth::user()->user_type;
+    // echo $userId;
+    // die();
+    $wages = Wages::select('id', 'employee_id', 'client_id', 'hourly_rate');
 
-    $wages = Wages::select(
-        'id',
-        'employee_id',
-        'client_id',
-        'hourly_rate')->where('wages.added_by','=',$s_user_id)->get();
+    if($userType == 'contractor'){
+        $wages =  $wages ->where('wages.added_by','=',$userId);
+    }
 
-    $employee = 'employee';
+    $wages = $wages->get();
+
     $employee = User::select(
                             'users.id',
                             'users.name',
                             'users.email',
-                            'users.user_type')
-                    ->where('users.user_type','=',$employee)
-                    ->where('users.added_by','=',$s_user_id)->get();
+                            'users.user_type')->where('users.user_type','=','employee');
 
-    $client = 'client';
+    if($userType == 'contractor'){
+        $employee =  $employee ->where('users.added_by','=',$userId);
+    }
+
+    $employee = $employee->get();
+
     $client = User::select(
                             'users.id',
                             'users.name',
                             'users.email',
                             'users.user_type')
-                    ->where('users.user_type','=',$client)
-                    ->where('users.added_by','=',$s_user_id)->get();
+                    ->where('users.user_type','=','client');
+
+    if($userType == 'contractor'){
+        $client =  $client ->where('users.added_by','=',$userId);
+    }
+
+    $client = $client->get();
 
     return view('backend.pages.wages',compact('wages', 'employee', 'client'));
     }
@@ -67,14 +77,14 @@ class WagesController extends Controller
      */
     public function store(Request $request)
     {
-        $s_user_id   = session('user_id');
-        $s_added_by  = session('added_by');
+        $userId   = Auth::id();
+        $userType = Auth::user()->user_type;
 
         Wages::create([
             'employee_id'   => $request['employee_id'],
             'client_id'     => $request['client_id'],
             'hourly_rate'   => $request['hourly_rate'],
-            'added_by'      => $s_user_id,
+            'added_by'      => $userId,
         ]);
         return redirect()->back()->with('message', 'Added Successfully');
     }

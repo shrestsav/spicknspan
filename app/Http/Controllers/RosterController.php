@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Roster;
 use App\RosterTimetable;
 use DB;
+use Auth;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -19,29 +20,43 @@ class RosterController extends Controller
      */
     public function index()
     {
+
+        $userId   = Auth::id();
+        $userType = Auth::user()->user_type;
         
         if(isset($_GET['full_date'])){
             $date_filter = $_GET['full_date'];
         } else {
             $date_filter = '2019-04';
         }
-        $employee = 'employee';
+
         $employee = User::select(
                                 'users.id',
                                 'users.name',
                                 'users.email',
                                 'users.user_type')
-                        ->where('users.user_type','=',$employee)->get();
+                        ->where('users.user_type','=','employee');
+        if($userType == 'contractor'){
+            $employee = $employee ->where('users.added_by','=',$userId);
+        }
+        $employee = $employee->get();
 
-        $client = 'client';
         $client = User::select(
                                 'users.id',
                                 'users.name',
                                 'users.email',
                                 'users.user_type')
-                        ->where('users.user_type','=',$client)->get();
+                        ->where('users.user_type','=','client');
+        if($userType == 'contractor'){
+            $client = $client ->where('users.added_by','=',$userId);
+        }
+        $client = $client->get();
 
         $rosters = Roster::all()->where('full_date','=',$date_filter);
+        if($userType == 'contractor'){
+            $rosters = $rosters ->where('added_by','=',$userId);
+        }
+
         $n_rosters = json_decode($rosters, true);
 
         if($n_rosters == []) {
@@ -81,9 +96,16 @@ class RosterController extends Controller
     {
         $j = 0;
         $x = 0;
+        $full_dates = '';
+
+        $userId   = Auth::id();
+        $userType = Auth::user()->user_type;
+
         $arr_employee_id   = $request['employee_id'];
         $arr_client_id     = $request['client_id'];
         $full_date         = $request['full_date_add'];
+        // echo $full_date;
+        // die();
         $month_part        = explode('-', $full_date);
         $month             = $month_part[1];
 
@@ -110,7 +132,7 @@ class RosterController extends Controller
             if(empty($check)){
                 echo 'new record';
                 // die();
-                Roster::create(['employee_id'=> $emp_id,'client_id'=>$arr_client_id[$j],'full_date'=>$full_date]);
+                Roster::create(['employee_id'=> $emp_id,'client_id'=>$arr_client_id[$j],'full_date'=>$full_date,'added_by'=>$userId]);
                 $last_id = DB::getPdo()->lastInsertId();
 
                 for ($i = 1; $i <= $k; $i++) {
@@ -140,25 +162,30 @@ class RosterController extends Controller
                 echo 'old record';
                 // die();
                 for ($i = 1; $i <= $k; $i++) {
-                    $start_time    = $request['start_time_'.($i-1)][$j];
-                    $end_time      = $request['end_time_'.($i-1)][$j];
+
+                    $start_time    = $request['start_time_'.($j)][$i-'1'];
+                    $end_time      = $request['end_time_'.($j)][$i-'1'];
+                    // if($i == 1){
+                    //     echo $request['start_time_'.'0']['2'];
+                    //     die();
+                    // }
                     $timeIn        = \Carbon\Carbon::parse($start_time);
                     $timeOut       = \Carbon\Carbon::parse($end_time);
                     $diffInHours   = round($timeOut->diffInMinutes($timeIn) / 60);
+                    // echo $full_dates; die();
 
                     $full_dates  = \Carbon\Carbon::parse($full_date.'-'.$i);
                     $full_dates  = $full_dates->toDateString();
 
-                    echo $rosters_id.'<br>'.$full_dates.'<br>'.$start_time.'<br>'.$end_time.'<br>'.$diffInHours;
-
-                    // die();
+                    // echo '<br>'.$rosters_id.'<br>'.$full_dates.'<br>'.$start_time.'<br>'.$end_time.'<br>'.$diffInHours.'<br>';
+                    
                     RosterTimetable::where('rosters_id', '=', $rosters_id)
                         ->whereDate('full_date', '=', $full_dates)
                         ->update(['start_time' => $start_time, 'end_time' => $end_time, 'total_hours' => $diffInHours]);
-                 
+                    // echo $full_dates; die();
                 }
-            } $x++;
-            $j++;
+            } 
+            $x++; $j++;
         }
         return redirect()->back()->with('message', 'Roster Added Successfully');
     }

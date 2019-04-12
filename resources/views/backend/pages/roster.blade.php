@@ -104,20 +104,6 @@
                   <td>
                       <input type="checkbox" class="sub_chk" data-id="{{$id}}">
                   </td>
-                  <!-- <td>
-                       <a href="{{ url('roster',$id) }}" class="btn btn-danger btn-sm"
-                         data-tr="tr_{{$id}}"
-                         data-toggle="confirmation"
-                         data-btn-ok-label="Delete" data-btn-ok-icon="fa fa-remove"
-                         data-btn-ok-class="btn btn-sm btn-danger"
-                         data-btn-cancel-label="Cancel"
-                         data-btn-cancel-icon="fa fa-chevron-circle-left"
-                         data-btn-cancel-class="btn btn-sm btn-default"
-                         data-title="Are you sure you want to delete ?"
-                         data-placement="left" data-singleton="true">
-                          Delete
-                      </a>
-                  </td> -->
                   <td>
                       <select name="employee_id[]" id="emp_name" class="form-control select2 select2-hidden-accessible" style="width: 100%;" tabindex="-1" aria-hidden="true">
                           
@@ -150,11 +136,12 @@
                                           ->where('full_date', '=', $date_filter)
                                           ->get();
                       $working_time = json_decode($working_time, true);
-                      // print_r($working_time[$j]['id']);
+                      $r_id = $working_time[0]['id'];
+                      // echo $working_time[$j]['id'];
                       // echo '<br>';
                       // die();
                       $time_table = DB::table('rosters_timetable')
-                                          ->where('rosters_id','=', $working_time[$j]['id'])
+                                          ->where('rosters_id','=', $working_time[0]['id'])
                                           ->get()
                                           ->toArray();
 
@@ -166,9 +153,9 @@
 
                   @for ($i = 0; $i<$m_days; $i++)
                       <td>
-                          <input name="start_time_<?php echo $i;?>[]" type="text" id="start_time" class="timepicker txtTime" style="width:40px;" value="<?php echo $time_table[$i]->start_time;?>">
+                          <input name="start_time_<?php echo $j;?>[<?php echo $i;?>]" type="text" id="start_time" class="timepicker txtTime" style="width:40px;" value="<?php echo $time_table[$i]->start_time;?>">
                             <br>to<br>
-                          <input name="end_time_<?php echo $i;?>[]" type="text" id="end_time" class="timepicker txtTime" style="width:40px;" value="<?php echo $time_table[$i]->end_time;?>">
+                          <input name="end_time_<?php echo $j;?>[<?php echo $i;?>]" type="text" id="end_time" class="timepicker txtTime" style="width:40px;" value="<?php echo $time_table[$i]->end_time;?>">
                       </td>
                   @endfor
 
@@ -227,11 +214,13 @@
         $('.timepicker').timepicker({ 'timeFormat': 'H:i' });
 
         counter++;
+        $('#addrow').hide();
     });
 
     $("tbody.roster-list").on("click", ".ibtnDel", function (event) {
         $(this).closest("tr").remove();       
-        counter -= 1
+        counter -= 1;
+        $('#addrow').show();
     });
     
     $('.select2').select2();

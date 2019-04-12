@@ -55,6 +55,11 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/clients', 'UserController@index')->name('user_client.index');
 		Route::post('/add_user', 'UserController@store')->name('user.store');
 		Route::get('/edit_user/{id}', 'UserController@edit')->name('user.edit');
+
+		// Route::get('/profile/{id}', 'UserController@profile_edit')->name('profile.edit');
+		Route::get('/edit-password/{id}', 'UserController@password_edit')->name('password.edit');
+		Route::post('/update-password/{id}', 'UserController@password_update')->name('password.update');
+
 		Route::post('/update_user/{id}', 'UserController@update')->name('user.update');
 		Route::get('/delete_user/{id}', 'UserController@destroy')->name('user.delete');
 

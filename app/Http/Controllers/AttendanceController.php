@@ -25,12 +25,11 @@ class AttendanceController extends Controller
      */
     public function index(Request $request)
     {
-        // return $request->session()->all();
-        $s_user_id   = session('user_id');
-        $s_added_by  = session('added_by');
-        // echo $s_added_by;
-        // die();
-        $clients = User::all()->where('user_type','=','client')->where('added_by','=',$s_added_by);
+        $userId   = Auth::id();
+        $userType = Auth::user()->user_type;
+        $addedBy  = Auth::user()->added_by;
+
+        $clients = User::all()->where('user_type','=','client')->where('added_by','=',$addedBy);
 
         // Check Users last login status
         $last_check_in_out_client = Attendance::select('check_in', 'check_out', 'client_id')
@@ -40,8 +39,7 @@ class AttendanceController extends Controller
                                         ->first();
         if($last_check_in_out_client){
             $last_check_in_out_client = $last_check_in_out_client->client_id;
-        }
-                                        
+        }                                        
 
         return view('backend.pages.check_in_out',compact('clients','last_check_in_out_client'));
     }
@@ -113,8 +111,9 @@ class AttendanceController extends Controller
     }
     public function list()
     {
-        $s_user_id   = session('user_id');
-        $s_added_by  = session('added_by');
+        $userId   = Auth::id();
+        $userType = Auth::user()->user_type;
+        $addedBy  = Auth::user()->added_by;
 
         if(isset($_GET['employee_id'])){
             $filtEmpId = $_GET['employee_id'];
@@ -170,8 +169,14 @@ class AttendanceController extends Controller
                                             ORDER BY check_out DESC
                                              ');
 
-        $employees = User::all()->where('user_type','=','employee')->where('added_by','=',$s_added_by);
-        $clients = User::all()->where('user_type','=','client')->where('added_by','=',$s_added_by);
+        $employees = User::all()->where('user_type','=','employee');
+        if($userType != 'admin'){
+            $employees = $employees->where('added_by','=',$addedBy);
+        }
+        $clients = User::all()->where('user_type','=','client');
+        if($userType != 'admin'){
+            $clients = $clients->where('added_by','=',$addedBy);
+        }
 
         return view('backend.pages.attendance_list',compact('attendance_lists', 'clients', 'employees'));
     }
