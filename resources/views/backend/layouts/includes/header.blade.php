@@ -1,7 +1,7 @@
     <!-- Logo -->
     <a href="{{url('/')}}" class="logo">
       <div class="logo-lg">
-        <img src="{{ asset('backend/img/trackncheck.png') }}" width="200px;">
+        <img src="{{ asset('backend/img/company-logo.png') }}" width="200px;">
       </div>
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini"><span class="logo-mini_green">T</span><b>&</b><span class="logo-mini_blue">C</span></span>
