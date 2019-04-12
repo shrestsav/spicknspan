@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Auth;
 use App\User;
 use App\UserDetail;
+use App\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -23,10 +24,6 @@ class UserController extends Controller
      */
     public function index()
     {   
-        //Check if Admin
-        // if(!\Gate::allows('isAdmin')){
-        //     abort(403,"Sorry, You can do this action");
-        // }
 
         $userId   = Auth::id();
         $userType = Auth::user()->user_type;
@@ -134,6 +131,13 @@ class UserController extends Controller
             'timezone' => $request['timezone'],
         ]);
 
+        $roles = Role::pluck('name','id');
+        foreach($roles as $role_id => $role){
+          if($role==$request['user_type']){
+            $user->attachRole($role_id);
+          }
+        }
+
         return redirect()->back()->with('message', 'Added Successfully');
     }
 
@@ -200,9 +204,9 @@ class UserController extends Controller
         return view('backend.pages.edit_people',compact('user'));
     }
 
-    public function password_edit($id)
+    public function password_edit()
     {
-        return view('backend.pages.edit_password');
+        return view('backend.pages.change_password');
     }
 
     public function password_update(Request $request, $id)

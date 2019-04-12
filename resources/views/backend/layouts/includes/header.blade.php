@@ -61,10 +61,10 @@
               </li> --}}
               <!-- Menu Footer-->
               <li class="user-footer" style="text-align: center;">
-                {{-- <div class="pull-left">
-                  <a href="#" class="btn btn-default btn-flat">Profile</a>
-                </div> --}}
-                <div class="">
+                <div class="pull-left">
+                  <a href="{{route('password.edit')}}" class="btn btn-default btn-flat">Change Password</a>
+                </div>
+                <div class="pull-right">
                   <a class="btn btn-default btn-flat" href="{{ route('logout') }}"
                      onclick="event.preventDefault();
                                    document.getElementById('logout-form').submit();">

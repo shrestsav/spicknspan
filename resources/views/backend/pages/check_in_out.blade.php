@@ -79,6 +79,7 @@
 </style>
 @endpush
 
+@permission('check_in_out')
 @section('content')
  
     <!-- Main content -->
@@ -105,7 +106,7 @@
             {{ \Session::get('message') }}
         </div>
       @endif
-      
+  
       <form method='POST' action='' class='check_in_form'>
         @csrf
         <div class="row">
@@ -364,3 +365,4 @@
 
   </script>
 @endpush
+@endpermission

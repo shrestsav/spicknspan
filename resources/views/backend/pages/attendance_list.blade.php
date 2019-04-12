@@ -132,6 +132,7 @@
                       $check_out = \Carbon\Carbon::parse($attendance_list->check_out)->timezone(Session::get('timezone')); 
                       // $hours = $check_out->diffInHours($check_in);
                   @endphp
+                  @if($attendance_list->client_name!=''||$attendance_list->client_name!=null)
                   <tr>
                     <td>{{$attendance_list->date}}</td>                   
                     <td>{{$attendance_list->employee_name}}</td>
@@ -145,6 +146,7 @@
                       </a>
                     </td>
                   </tr>
+                  @endif
                 <?php } ?>
                 @endforeach
                 <?php
