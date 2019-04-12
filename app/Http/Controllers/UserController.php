@@ -28,6 +28,9 @@ class UserController extends Controller
         //     abort(403,"Sorry, You can do this action");
         // }
 
+        $userId   = Auth::id();
+        $userType = Auth::user()->user_type;
+
         if(\Route::current()->getName() == 'user_company.index'){
             $user_type = 'company';
         }
@@ -56,7 +59,12 @@ class UserController extends Controller
                                 'user_details.employment_start_date',
                                 'user_details.documents')
                         ->join('user_details','user_details.user_id','=','users.id')
-                        ->where('users.user_type','=',$user_type)->get();
+                        ->where('users.user_type','=',$user_type);
+        if($userType == 'contractor'){
+            $users = $users->where('added_by','=',$userId);
+        }
+        $users = $users->get();
+
         return view('backend.pages.people',compact('users'));
     }
 
@@ -78,7 +86,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $s_user_id   = session('user_id');
+        $userId   = Auth::id();
 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
@@ -96,7 +104,7 @@ class UserController extends Controller
             'password' => Hash::make($request['password']),
             'user_type' => $request['user_type'],
             'mark_default' => $request['mark_default'],
-            'added_by' => $s_user_id,
+            'added_by' => $userId,
         ]);
 
         $user_id = $user->id;

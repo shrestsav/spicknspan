@@ -29,10 +29,7 @@ class AttendanceController extends Controller
         $userType = Auth::user()->user_type;
         $addedBy  = Auth::user()->added_by;
 
-        $clients = User::all()->where('user_type','=','client');
-        if($userType == 'contractor'){
-            $clients = $clients ->where('added_by','=',$addedBy);
-        }
+        $clients = User::all()->where('user_type','=','client')->where('added_by','=',$addedBy);
 
         // Check Users last login status
         $last_check_in_out_client = Attendance::select('check_in', 'check_out', 'client_id')
@@ -42,8 +39,7 @@ class AttendanceController extends Controller
                                         ->first();
         if($last_check_in_out_client){
             $last_check_in_out_client = $last_check_in_out_client->client_id;
-        }
-                                        
+        }                                        
 
         return view('backend.pages.check_in_out',compact('clients','last_check_in_out_client'));
     }
@@ -174,12 +170,12 @@ class AttendanceController extends Controller
                                              ');
 
         $employees = User::all()->where('user_type','=','employee');
-        if($userType == 'contractor'){
-            $employees = $employees ->where('added_by','=',$addedBy);
+        if($userType != 'admin'){
+            $employees = $employees->where('added_by','=',$addedBy);
         }
         $clients = User::all()->where('user_type','=','client');
-        if($userType == 'contractor'){
-            $clients = $clients ->where('added_by','=',$addedBy);
+        if($userType != 'admin'){
+            $clients = $clients->where('added_by','=',$addedBy);
         }
 
         return view('backend.pages.attendance_list',compact('attendance_lists', 'clients', 'employees'));

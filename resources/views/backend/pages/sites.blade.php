@@ -119,7 +119,7 @@
               <input type="file" name="image" class="form-control" id="r_image">
             </div>
 
-              <?php if(Auth::check() && Auth::user()->user_type == "admin" && Auth::user()->inspection == '1'){ ?>
+              <?php if(Auth::check() && (Auth::user()->user_type == "admin" || Auth::user()->user_type == "contractor") && Auth::user()->inspection == '1'){ ?>
                   <div class="form-group">
                     <label for="r_image">Select Questionare</label><br>
                     <select class="select2" name="question_id">
@@ -151,7 +151,7 @@
               <th>Name</th>
               <th>Room No</th>
               <th>Building No</th>
-              <?php if(Auth::check() && Auth::user()->user_type == "admin" && Auth::user()->inspection == '1'){ ?>
+              <?php if(Auth::check() && (Auth::user()->user_type == "admin" || Auth::user()->user_type == "contractor") && Auth::user()->inspection == '1'){ ?>
                   <th>Question Template</th>
               <?php } ?>
               <th>QR</th>
@@ -166,7 +166,7 @@
                 <td>{{$room->name}}</td>
                 <td>{{$room->room_no}}</td>
                 <td>{{$room->building_no}}</td>
-                <?php if(Auth::check() && Auth::user()->user_type == "admin" && Auth::user()->inspection == '1'){ ?>
+                <?php if(Auth::check() && (Auth::user()->user_type == "admin" || Auth::user()->user_type == "contractor") && Auth::user()->inspection == '1'){ ?>
                     @foreach($questionTemplate as $qT)
                     @php if($qT->id == $room->question_id){ @endphp
                     <td>{{$qT->template_title}}</td>

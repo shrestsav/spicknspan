@@ -37,8 +37,9 @@ class RosterController extends Controller
                                 'users.user_type')
                         ->where('users.user_type','=','employee');
         if($userType == 'contractor'){
-            $employee = $employee ->where('added_by','=',$userId);
+            $employee = $employee ->where('users.added_by','=',$userId);
         }
+        $employee = $employee->get();
 
         $client = User::select(
                                 'users.id',
@@ -47,8 +48,9 @@ class RosterController extends Controller
                                 'users.user_type')
                         ->where('users.user_type','=','client');
         if($userType == 'contractor'){
-            $client = $client ->where('added_by','=',$userId);
+            $client = $client ->where('users.added_by','=',$userId);
         }
+        $client = $client->get();
 
         $rosters = Roster::all()->where('full_date','=',$date_filter);
         if($userType == 'contractor'){
@@ -175,8 +177,7 @@ class RosterController extends Controller
                     $full_dates  = \Carbon\Carbon::parse($full_date.'-'.$i);
                     $full_dates  = $full_dates->toDateString();
 
-                    echo '<br>'.$rosters_id.'<br>'.$full_dates.'<br>'.$start_time.'<br>'.$end_time.'<br>'.$diffInHours.'<br>';
-
+                    // echo '<br>'.$rosters_id.'<br>'.$full_dates.'<br>'.$start_time.'<br>'.$end_time.'<br>'.$diffInHours.'<br>';
                     
                     RosterTimetable::where('rosters_id', '=', $rosters_id)
                         ->whereDate('full_date', '=', $full_dates)
