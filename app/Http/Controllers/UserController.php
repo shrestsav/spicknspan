@@ -204,9 +204,9 @@ class UserController extends Controller
         return view('backend.pages.edit_people',compact('user'));
     }
 
-    public function password_edit($id)
+    public function password_edit()
     {
-        return view('backend.pages.edit_password');
+        return view('backend.pages.change_password');
     }
 
     public function password_update(Request $request, $id)

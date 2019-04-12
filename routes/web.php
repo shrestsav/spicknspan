@@ -57,7 +57,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/edit_user/{id}', 'UserController@edit')->name('user.edit');
 
 		// Route::get('/profile/{id}', 'UserController@profile_edit')->name('profile.edit');
-		Route::get('/edit-password/{id}', 'UserController@password_edit')->name('password.edit');
+		Route::get('/edit-password', 'UserController@password_edit')->name('password.edit');
 		Route::post('/update-password/{id}', 'UserController@password_update')->name('password.update');
 
 		Route::post('/update_user/{id}', 'UserController@update')->name('user.update');

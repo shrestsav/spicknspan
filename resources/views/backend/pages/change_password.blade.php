@@ -1,6 +1,6 @@
 @php $userID = Auth::id(); @endphp
 
-@extends('backend.layouts.app',['title'=> 'Edit Password'])
+@extends('backend.layouts.app',['title'=> 'Change Password'])
 
 @section('content')
 
