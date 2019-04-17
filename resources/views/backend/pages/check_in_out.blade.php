@@ -107,7 +107,7 @@
         </div>
       @endif
   
-      <form method='POST' action='' class='check_in_form'>
+      <form method='POST' action='' class='check_in_form' name="check_in_out_form">
         @csrf
         <div class="row">
           <div class="col-md-12">
@@ -268,11 +268,16 @@
           var longitude = check_in_Position.coords.longitude;
           var action = "{{route('attendance.checkin')}}";
           var image = document.getElementById("CANVAS").toDataURL();
-          $('#user_image').val(image);
-          $('#latitude').val(latitude);
-          $('#longitude').val(longitude);
-          $('form').attr('action',action);
-          $('form').submit();
+          // $('#user_image').val(image);
+          // $('#latitude').val(latitude);
+          // $('#longitude').val(longitude);
+          // $('form').attr('action',action);
+          // $('form').submit();
+          document.getElementById("user_image").value = image;
+          document.getElementById("latitude").value = latitude;
+          document.getElementById("longitude").value = longitude;
+          document.check_in_out_form.action = action;  
+          document.check_in_out_form.submit();
         }, function(){
           $('.access_error_msg').html('You Cannot Login Without Giving Location Access');
           $('.access_error_msg').slideDown("slow");
@@ -292,11 +297,16 @@
             var longitude = check_out_Position.coords.longitude;
             var action = "{{route('attendance.checkout')}}";
             var image = document.getElementById("CANVAS").toDataURL();
-            $('#user_image').val(image);
-            $('#latitude').val(latitude);
-            $('#longitude').val(longitude);
-            $('form').attr('action',action);
-            $('form').submit();
+            // $('#user_image').val(image);
+            // $('#latitude').val(latitude);
+            // $('#longitude').val(longitude);
+            // $('form').attr('action',action);
+            // $('form').submit();
+            document.getElementById("user_image").value = image;
+            document.getElementById("latitude").value = latitude;
+            document.getElementById("longitude").value = longitude;
+            document.check_in_out_form.action = action;  
+            document.check_in_out_form.submit();
           }, function(){
             $('.access_error_msg').html('You Cannot Login Without Giving Location Access');
             $('.access_error_msg').slideDown("slow");
@@ -363,6 +373,15 @@
       });
 
 
+  </script>
+  <script type="text/javascript">
+    // IOS Bhanney jantu ko lagi hack
+        // Hacks for Mobile Safari
+    video.setAttribute("playsinline", true);
+    video.setAttribute("controls", true);
+    setTimeout(() => {
+        video.removeAttribute("controls");
+    });
   </script>
 @endpush
 @endpermission

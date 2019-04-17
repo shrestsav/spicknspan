@@ -19,7 +19,10 @@ Route::get('/', function () {
 Auth::routes();
 
 
-
+//This route is for testing purpose only, please delete this in deployed application or leave it as it is
+Route::get('testing',function(){
+	return 'This route has been created for testing puroses only';
+});
 
 Route::middleware(['auth'])->group(function () {
 
@@ -95,7 +98,5 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/questionTemplate/add','QuestionTemplateController@addMore')->name('question.add');
 		Route::post("/questionTemplate/add","QuestionTemplateController@addMorePost");
 		Route::get('/questionTemplate/{id}','QuestionTemplateController@destroy')->name('question.destroy');
-	});
-
-	
+	});	
 });

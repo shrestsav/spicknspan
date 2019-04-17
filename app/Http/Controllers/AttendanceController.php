@@ -138,37 +138,44 @@ class AttendanceController extends Controller
         // If User is Admin
         if(Auth::check() && Auth::user()->user_type == "admin"){
 
-            $attendance_lists = \DB::select('SELECT
-                                            SEC_TO_TIME(SUM(TIME_TO_SEC(CAST(TIMEDIFF(`check_out`,`check_in`) AS TIME)))) AS total_time,
-                                            min(a.check_in) as check_in,
-                                            max(a.check_out) as check_out,
-                                            CAST(a.check_in AS date) AS date,
-                                            a.client_id,
-                                            a.employee_id,
-                                            (select name from users where id=a.client_id) as client_name,  
-                                            (select name from users where id=a.`employee_id`) as employee_name 
-                                            FROM `attendances` a
-                                            GROUP BY client_name,employee_name,date,client_id,employee_id
-                                            ORDER BY check_out DESC
-                                            ');
-            // print_r($attendance_lists);
-            // die();
-        }
-        else
-            $attendance_lists = \DB::select('SELECT
-                                            SEC_TO_TIME(SUM(TIME_TO_SEC(CAST(TIMEDIFF(`check_out`,`check_in`) AS TIME)))) AS total_time,
-                                            min(a.check_in) as check_in,
-                                            max(a.check_out) as check_out,
-                                            CAST(a.check_in AS date) AS date,
-                                            a.client_id,
-                                            a.employee_id,
-                                            (select name from users where id=a.client_id) as client_name,  
-                                            (select name from users where id=a.`employee_id`) as employee_name 
-                                            FROM `attendances` a where a.employee_id='.$employee_id.'
-                                            GROUP BY client_name,employee_name,date,client_id,employee_id
-                                            ORDER BY check_out DESC
-                                             ');
+            $attendance_lists = Attendance::select(
+                                    DB::raw("SEC_TO_TIME(SUM(TIME_TO_SEC(CAST(TIMEDIFF(`check_out`,`check_in`) AS TIME)))) AS total_time"),
+                                    DB::raw("min(check_in) as check_in"),
+                                    DB::raw("max(check_out) as check_out"),
+                                    DB::raw("CAST(check_in AS date) AS date"),
+                                    'attendances.client_id',
+                                    'attendances.employee_id',
+                                    'client.name as client_name',
+                                    'employee.name as employee_name'
+                                        )
+                                ->join('users as employee','attendances.employee_id','=','employee.id')
+                                ->join('users as client','attendances.client_id','=','client.id')
+                                ->groupBy('client_name','employee_name','date','client_id','employee_id')
+                                ->orderBy('check_out','desc')
+                                ->get();
 
+        }
+        else {
+            
+            $attendance_lists = Attendance::select(
+                                    DB::raw("SEC_TO_TIME(SUM(TIME_TO_SEC(CAST(TIMEDIFF(`check_out`,`check_in`) AS TIME)))) AS total_time"),
+                                    DB::raw("min(check_in) as check_in"),
+                                    DB::raw("max(check_out) as check_out"),
+                                    DB::raw("CAST(check_in AS date) AS date"),
+                                    'attendances.client_id',
+                                    'attendances.employee_id',
+                                    'client.name as client_name',
+                                    'employee.name as employee_name'
+                                        )
+                                ->join('users as employee','attendances.employee_id','=','employee.id')
+                                ->join('users as client','attendances.client_id','=','client.id')
+                                ->where('attendances.employee_id','=',$employee_id)
+                                ->groupBy('client_name','employee_name','date','client_id','employee_id')
+                                ->orderBy('check_out','desc')
+                                ->get();
+
+        }
+            
         $employees = User::all()->where('user_type','=','employee');
         if($userType != 'admin'){
             $employees = $employees->where('added_by','=',$addedBy);
@@ -311,15 +318,17 @@ class AttendanceController extends Controller
                                             'attendances.check_out',
                                             'attendances.check_out_location',
                                             'attendances.check_out_image',
-                                            'users.name',
-                                            'users.email')
+                                            'employee.name as employee_name',
+                                            'employee.email',
+                                            'client.name as client_name')
                                 ->where('attendances.client_id',$client_id)
                                 ->where('attendances.employee_id',$employee_id)
                                 ->whereDate('attendances.check_in',$date)
-                                ->join('users','attendances.employee_id','=','users.id')
+                                ->join('users as employee','attendances.employee_id','=','employee.id')
+                                ->join('users as client','attendances.client_id','=','client.id')
                                 ->get();
-        $client_name = User::find($client_id)->name;
-        return view('backend.pages.attendance_details', compact('attendance_details','client_name'));
+
+        return view('backend.pages.attendance_details', compact('attendance_details'));
     }
      public function ajax_in_out_stat(Request $request)
     {
