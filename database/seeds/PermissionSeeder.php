@@ -24,6 +24,11 @@ class PermissionSeeder extends Seeder
                 'description' => 'Login to Building Rooms using QR Scanner'
             ],
             [
+                'name' => 'view_all_data',
+                'display_name' => 'View All Data',
+                'description' => 'View Everything Present in System. One Click Super admin Permission'
+            ],
+            [
                 'name' => 'view_site_attendance',
                 'display_name' => 'View Site Attendance',
                 'description' => 'View Records of Site Attendance by Employees'

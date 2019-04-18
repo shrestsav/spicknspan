@@ -273,6 +273,8 @@
           // $('#longitude').val(longitude);
           // $('form').attr('action',action);
           // $('form').submit();
+
+          //This way works in iPhones ..
           document.getElementById("user_image").value = image;
           document.getElementById("latitude").value = latitude;
           document.getElementById("longitude").value = longitude;
@@ -302,6 +304,8 @@
             // $('#longitude').val(longitude);
             // $('form').attr('action',action);
             // $('form').submit();
+
+            //This way works in iPhones ..
             document.getElementById("user_image").value = image;
             document.getElementById("latitude").value = latitude;
             document.getElementById("longitude").value = longitude;
@@ -376,7 +380,6 @@
   </script>
   <script type="text/javascript">
     // IOS Bhanney jantu ko lagi hack
-        // Hacks for Mobile Safari
     video.setAttribute("playsinline", true);
     video.setAttribute("controls", true);
     setTimeout(() => {

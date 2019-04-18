@@ -7,6 +7,7 @@ use App\RosterTimetable;
 use DB;
 use Auth;
 use App\User;
+use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -22,7 +23,6 @@ class RosterController extends Controller
     {
 
         $userId   = Auth::id();
-        $userType = Auth::user()->user_type;
         
         if(isset($_GET['full_date'])){
             $date_filter = $_GET['full_date'];
@@ -36,26 +36,24 @@ class RosterController extends Controller
                                 'users.email',
                                 'users.user_type')
                         ->where('users.user_type','=','employee');
-        if($userType == 'contractor'){
-            $employee = $employee ->where('users.added_by','=',$userId);
-        }
-        $employee = $employee->get();
-
+        
         $client = User::select(
                                 'users.id',
                                 'users.name',
                                 'users.email',
                                 'users.user_type')
                         ->where('users.user_type','=','client');
-        if($userType == 'contractor'){
-            $client = $client ->where('users.added_by','=',$userId);
-        }
-        $client = $client->get();
 
         $rosters = Roster::all()->where('full_date','=',$date_filter);
-        if($userType == 'contractor'){
+
+        if(Entrust::hasRole('contractor')){
+            $client = $client ->where('users.added_by','=',$userId);
+            $employee = $employee ->where('users.added_by','=',$userId);
             $rosters = $rosters ->where('added_by','=',$userId);
         }
+
+        $employee = $employee->get();
+        $client = $client->get();
 
         $n_rosters = json_decode($rosters, true);
 
@@ -99,7 +97,6 @@ class RosterController extends Controller
         $full_dates = '';
 
         $userId   = Auth::id();
-        $userType = Auth::user()->user_type;
 
         $arr_employee_id   = $request['employee_id'];
         $arr_client_id     = $request['client_id'];

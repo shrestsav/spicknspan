@@ -44,9 +44,13 @@ class CoreController extends Controller
 								'user_details.description',
 								'user_details.employment_start_date')
 						->join('user_details','user_details.user_id','=','users.id')
-						->where('users.user_type','=',$user_type)->get();
+						->whereHas('roles', function ($query) use ($user_type) {
+                                $query->where('name', '=', $user_type);
+                             })
+						->get();
+			return $data;
     		$head = ['NAME','ROLE','EMAIL','GENDER','ADDRESS','CONTACT','DOB','HOURLY RATE','ANNUAL SALARY','DESCRIPTION','START DATE'];
     	}
-    	return Excel::download(new DataExport($data,$head), 'Users.xlsx');
+    	return Excel::download(new DataExport($data,$head), $user_type.'s.xlsx');
     }
 }

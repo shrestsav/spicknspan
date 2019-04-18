@@ -2,18 +2,22 @@
 if(Route::current()->getName() == 'user_company.index'){
   $title = 'Company';
   $user_type = 'company';
+  $user_type_key = 'eyJpdiI6IlwvVHBUVVBRR0lZaGVGT0dxblFXczB3PT0iLCJ2YWx1ZSI6InRxbkZleGtEU1l2V2JLcXZOMUZ6U1E9PSIsIm1hYyI6ImUzMDYwNzIwMmNhOWJjM2I4YzIzZDRlYWQzYjBlN2Q3Nzg1ZjEyYTY2ZmZlYjJhYTA5MjhmYmZhNzhlYTE4YTkifQ==';
 }
 elseif(Route::current()->getName() == 'user_employee.index'){
   $title = 'Employees';
   $user_type = 'employee';
+  $user_type_key = 'eyJpdiI6Ijk5RXBBS25abTVINGhuMVJSYzBiWEE9PSIsInZhbHVlIjoiY1NjVk43a1FnRkxLd0FLNnFEcm9CUT09IiwibWFjIjoiYjZiN2Y0MmUwODZjNzc0ODQwZDM2NDg2NTljNjMzN2Y0MDBiZTM5Y2RkNTk5MDA5ODlhN2M3NTVkNzFhNDUzYSJ9';
 }
 elseif(Route::current()->getName() == 'user_contractor.index'){
   $title = 'Contractors';
   $user_type = 'contractor';
+  $user_type_key = 'eyJpdiI6ImQyNWI2U3dvNm9iWnNqMlBwanhQTWc9PSIsInZhbHVlIjoiUGJhc05wYndFWDJsclRReXgzXC9qUFdrdHZocUlVUnZhZGVvdlo0eDlcL01FPSIsIm1hYyI6ImIwZjNjYmEzYWZjYjgwMTgzNzRiY2MyOGJkZGY1NzhiODAyZGE0YWZkNzhmZDUzYzZhZjA1MDFlNDYyZjgwMTUifQ==';
 }
 elseif(Route::current()->getName() == 'user_client.index'){
   $title = 'Clients';
   $user_type = 'client';
+  $user_type_key = 'eyJpdiI6IlBMdzdwRUExdlN1OXQxNzVpTXNDckE9PSIsInZhbHVlIjoiZVwvNDluR2RGNk0rZGk1czlwMGw3N3c9PSIsIm1hYyI6IjZlZWQ4NGIwYzYzNGZhZDg2YTFmMGRjNGVmMmIzODg0ZDkyOWJhMzFkYjFjNzc5Mjk4MjZmOTM1NjE4ZDM5MWUifQ==';
 }
 
 @endphp
@@ -54,7 +58,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
           @csrf
           <div class="box-body pad">
             {{-- Hidden Fields --}}
-            <input type="hidden" class="form-control" name="user_type" value="{{$user_type}}">
+            <input type="hidden" class="form-control" name="utilisateur" value="{{$user_type_key}}">
             <div class="col-md-6">
               <div class="form-group">
                 <label for="name">{{($user_type == 'client')?'Client Name *':'Full Name *'}}</label>

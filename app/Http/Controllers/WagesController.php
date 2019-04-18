@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Wages;
 use App\User;
 use Auth;
+use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -20,12 +21,10 @@ class WagesController extends Controller
     {
 
     $userId   = Auth::id();
-    $userType = Auth::user()->user_type;
-    // echo $userId;
-    // die();
+    
     $wages = Wages::select('id', 'employee_id', 'client_id', 'hourly_rate');
 
-    if($userType == 'contractor'){
+    if(Entrust::hasRole('contractor')){
         $wages =  $wages ->where('wages.added_by','=',$userId);
     }
 
@@ -37,7 +36,7 @@ class WagesController extends Controller
                             'users.email',
                             'users.user_type')->where('users.user_type','=','employee');
 
-    if($userType == 'contractor'){
+    if(Entrust::hasRole('contractor')){
         $employee =  $employee ->where('users.added_by','=',$userId);
     }
 
@@ -50,7 +49,7 @@ class WagesController extends Controller
                             'users.user_type')
                     ->where('users.user_type','=','client');
 
-    if($userType == 'contractor'){
+    if(Entrust::hasRole('contractor')){
         $client =  $client ->where('users.added_by','=',$userId);
     }
 
@@ -78,7 +77,6 @@ class WagesController extends Controller
     public function store(Request $request)
     {
         $userId   = Auth::id();
-        $userType = Auth::user()->user_type;
 
         Wages::create([
             'employee_id'   => $request['employee_id'],
