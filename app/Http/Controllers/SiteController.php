@@ -7,6 +7,7 @@ use App\Building;
 use App\QuestionTemplate;
 use App\Room;
 use Auth;
+use Entrust;
 
 class SiteController extends Controller
 {
@@ -19,16 +20,15 @@ class SiteController extends Controller
     {
 
         $userId   = Auth::id();
-        $userType = Auth::user()->user_type;
 
         $buildings = Building::all();
-        if($userType == 'contractor'){
-            $buildings = $buildings ->where('added_by','=',$userId);
-        }
         $questionTemplate = QuestionTemplate::all();
-        if($userType == 'contractor'){
+
+        if(Entrust::hasRole('contractor')){
+            $buildings = $buildings ->where('added_by','=',$userId);
             $questionTemplate = $questionTemplate ->where('added_by','=',$userId);
         }
+        
         $rooms = Room::select(
                             'rooms.id',
                             'rooms.name',
@@ -38,7 +38,6 @@ class SiteController extends Controller
                             'buildings.building_no',
                             'rooms.room_no')
                         ->join('buildings','rooms.building_id','=','buildings.id')
-
                         ->join('question_template','rooms.question_id','=','question_template.id')
                         ->get();
         return view('backend.pages.sites',compact('buildings','rooms', 'questionTemplate'));
@@ -63,7 +62,6 @@ class SiteController extends Controller
     public function store(Request $request)
     {
         $userId   = Auth::id();
-        $userType = Auth::user()->user_type;
 
         Building::create([
             'name'              => $request['name'],
@@ -125,16 +123,16 @@ class SiteController extends Controller
     public function store_room(Request $request)
     {
         $userId   = Auth::id();
-        $userType = Auth::user()->user_type;
-        
+
         Room::create([
-            'building_id'       => $request['building_id'],
-            'name'              => $request['name'],
-            'room_no'           => $request['room_no'],
-            'description'       => $request['description'],
-            'image'             => $request['image'],
-            'question_id'       => $request['question_id'],
-            'added_by'          => $userId] );
+                    'building_id'  => $request['building_id'],
+                    'name'         => $request['name'],
+                    'room_no'      => $request['room_no'],
+                    'description'  => $request['description'],
+                    'image'        => $request['image'],
+                    'question_id'  => $request['question_id'],
+                    'added_by'     => $userId] );
+
         return redirect(route('site.index') . '#area_division')->with('message', 'Room Added Successfully');
     }
 

@@ -6,6 +6,7 @@ use Auth;
 use App\User;
 use App\UserDetail;
 use App\Role;
+use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -26,7 +27,6 @@ class UserController extends Controller
     {   
 
         $userId   = Auth::id();
-        $userType = Auth::user()->user_type;
 
         if(\Route::current()->getName() == 'user_company.index'){
             $user_type = 'company';
@@ -41,23 +41,26 @@ class UserController extends Controller
             $user_type = 'client';
         }
         $users = User::select(
-                                'users.id',
-                                'users.name',
-                                'users.email',
-                                'users.user_type',
-                                'user_details.photo',
-                                'user_details.address',
-                                'user_details.gender',
-                                'user_details.contact',
-                                'user_details.hourly_rate',
-                                'user_details.annual_salary',
-                                'user_details.description',
-                                'user_details.date_of_birth',
-                                'user_details.employment_start_date',
-                                'user_details.documents')
+                              'users.id',
+                              'users.name',
+                              'users.email',
+                              'users.user_type',
+                              'user_details.photo',
+                              'user_details.address',
+                              'user_details.gender',
+                              'user_details.contact',
+                              'user_details.hourly_rate',
+                              'user_details.annual_salary',
+                              'user_details.description',
+                              'user_details.date_of_birth',
+                              'user_details.employment_start_date',
+                              'user_details.documents')
                         ->join('user_details','user_details.user_id','=','users.id')
-                        ->where('users.user_type','=',$user_type);
-        if($userType == 'contractor'){
+                        ->whereHas('roles', function ($query) use ($user_type) {
+                                $query->where('name', '=', $user_type);
+                             });
+
+        if(Entrust::hasRole('contractor')){
             $users = $users->where('added_by','=',$userId);
         }
         $users = $users->get();
@@ -95,11 +98,13 @@ class UserController extends Controller
             'timezone' => 'required',
         ]);
         
+        //Decrypt User_type
+        $decrypt_user_type = decrypt($request['utilisateur']);
         $user = User::create([
             'name' => $request['name'],
             'email' => $request['email'],
             'password' => Hash::make($request['password']),
-            'user_type' => $request['user_type'],
+            'user_type' => $decrypt_user_type,
             'mark_default' => $request['mark_default'],
             'added_by' => $userId,
         ]);
@@ -133,7 +138,7 @@ class UserController extends Controller
 
         $roles = Role::pluck('name','id');
         foreach($roles as $role_id => $role){
-          if($role==$request['user_type']){
+          if($role==$decrypt_user_type){
             $user->attachRole($role_id);
           }
         }
@@ -161,43 +166,42 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::select(
-                                'users.id',
-                                'users.name',
-                                'users.email',
-                                'users.user_type',
-                                'user_details.photo',
-                                'user_details.address',
-                                'user_details.gender',
-                                'user_details.contact',
-                                'user_details.hourly_rate',
-                                'user_details.annual_salary',
-                                'user_details.description',
-                                'user_details.date_of_birth',
-                                'user_details.employment_start_date',
-                                'user_details.documents')
+                              'users.id',
+                              'users.name',
+                              'users.email',
+                              'users.user_type',
+                              'user_details.photo',
+                              'user_details.address',
+                              'user_details.gender',
+                              'user_details.contact',
+                              'user_details.hourly_rate',
+                              'user_details.annual_salary',
+                              'user_details.description',
+                              'user_details.date_of_birth',
+                              'user_details.employment_start_date',
+                              'user_details.documents')
                         ->join('user_details','user_details.user_id','=','users.id')
                         ->where('users.id','=',$id)->first();
-        // return $user;
         return view('backend.pages.edit_people',compact('user'));
     }
 
     public function profile_edit($id)
     {
         $user = User::select(
-                                'users.id',
-                                'users.name',
-                                'users.email',
-                                'users.user_type',
-                                'user_details.photo',
-                                'user_details.address',
-                                'user_details.gender',
-                                'user_details.contact',
-                                'user_details.hourly_rate',
-                                'user_details.annual_salary',
-                                'user_details.description',
-                                'user_details.date_of_birth',
-                                'user_details.employment_start_date',
-                                'user_details.documents')
+                            'users.id',
+                            'users.name',
+                            'users.email',
+                            'users.user_type',
+                            'user_details.photo',
+                            'user_details.address',
+                            'user_details.gender',
+                            'user_details.contact',
+                            'user_details.hourly_rate',
+                            'user_details.annual_salary',
+                            'user_details.description',
+                            'user_details.date_of_birth',
+                            'user_details.employment_start_date',
+                            'user_details.documents')
                         ->join('user_details','user_details.user_id','=','users.id')
                         ->where('users.id','=',$id)->first();
 

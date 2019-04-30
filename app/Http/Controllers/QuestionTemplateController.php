@@ -7,6 +7,7 @@ use App\Question;
 use App\User;
 use DB;
 use Auth;
+use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -22,10 +23,9 @@ class QuestionTemplateController extends Controller
     public function index()
     {
         $userId   = Auth::id();
-        $userType = Auth::user()->user_type;
 
         $qTemplate = QuestionTemplate::all();
-        if($userType == 'contractor'){
+        if(Entrust::hasRole('contractor')){
             $qTemplate = $qTemplate ->where('added_by', '=', $userId);
         }
         return view('backend.pages.question_template.list', compact('qTemplate'));
@@ -40,7 +40,6 @@ class QuestionTemplateController extends Controller
     public function addMorePost(Request $request)
     {
         $userId   = Auth::id();
-        $userType = Auth::user()->user_type;
 
         $rules = [];
         foreach($request->input('name') as $key => $value) {

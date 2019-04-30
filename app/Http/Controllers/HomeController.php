@@ -3,9 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\User;
-use Auth;
-use Session;
 
 class HomeController extends Controller
 {
@@ -24,13 +21,8 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
-    {
-        $userId   = Auth::id();
-        $userType = Auth::user()->user_type;
-        $addedBy  = Auth::user()->added_by;        
-        $timezone = Auth::user()->detail->timezone;
-        session(['timezone' => $timezone, 'user_id' => $userId, 'user_type' => $userType, 'added_by' => $addedBy]);
+    public function index(Request $request)
+    {    
         return view('backend.pages.dashboard');
     }
 }
