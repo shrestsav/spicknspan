@@ -20,6 +20,11 @@
             {{ \Session::get('message') }}
         </div>
       @endif
+      @if (\Session::has('error'))
+        <div class="alert alert-error custom_success_msg">
+            {{ \Session::get('error') }}
+        </div>
+      @endif
       <div class="box box-primary">
         <div class="box-header with-border">
           <h3 class="box-title">Employee Information</h3>

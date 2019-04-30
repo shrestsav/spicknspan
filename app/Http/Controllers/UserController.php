@@ -220,7 +220,7 @@ class UserController extends Controller
                           ->update(['password' => Hash::make($request['password'])]);
             return redirect()->back()->with('message','Password Updated Successfully');
         } else {
-            return redirect()->back()->with('message','Old & New Password do not match.');
+            return redirect()->back()->with('error','Old & New Password do not match.');
       }
     }
 

@@ -15,11 +15,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
 Auth::routes();
-
-
-
 
 Route::middleware(['auth'])->group(function () {
 
@@ -97,5 +93,4 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/questionTemplate/{id}','QuestionTemplateController@destroy')->name('question.destroy');
 	});
 
-	
 });

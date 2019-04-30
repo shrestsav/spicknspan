@@ -119,6 +119,10 @@ class RosterController extends Controller
             $k = 28;
         }
 
+        if(empty($arr_employee_id)){
+            return redirect()->back()->with('error', 'No any rows to add/update.');
+        }
+
         foreach ($arr_employee_id as $emp_id) {
             //check if the same data is added already
             $check  = DB::table('rosters')

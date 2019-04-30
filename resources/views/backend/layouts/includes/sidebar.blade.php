@@ -74,6 +74,28 @@
         </li>
       @endrole
 
+      <li class="treeview">
+          <a href="#">
+            <i class="fa fa-cog"></i> <span>Settings</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            @php $userID = Auth::id(); @endphp
+        {{--<li class="@if ($title === 'Edit Profile') active @endif">
+              <a href="{{route('profile.edit', $userID)}}">
+                <i class="fa fa-pencil-square-o" aria-hidden="true"></i><span>Edit Profile</span>
+              </a>          
+            </li>--}}
+            <li class="@if ($title === 'Edit Passsword') active @endif">
+              <a href="{{route('password.edit', $userID)}}">
+                <i class="fa fa-pencil-square-o" aria-hidden="true"></i><span>Change Password</span>
+              </a>          
+            </li>
+          </ul>
+        </li>
+
        {{--  <li class="@if ($title === 'Mail') active @endif"><a href="{{route('mail.index')}}"><i class="fa fa-dashboard"></i> <span>Mail</span></a>
         </li> --}}
         
