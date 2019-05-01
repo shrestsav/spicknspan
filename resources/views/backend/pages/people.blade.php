@@ -22,18 +22,26 @@ elseif(Route::current()->getName() == 'user_client.index'){
 @extends('backend.layouts.app',['title'=> $title])
 
 @push('styles')
+ <link rel="stylesheet" href="{{ asset('backend/css/jquery-filestyle.min.css') }}">
 <style type="text/css">
   label.checkbox.mark_default {
     padding-left: 20px;
+  }
+  .export_to_excel{
+    position: absolute;
+    top: 7px;
+    right: 227px;
+    z-index: 1000;
   }
 </style>
 @endpush
 
 @section('content')
 
-<!-- Main content -->
+
 <section class="content">
   <div class="row">
+
     <div class="col-md-12">
       @if ($errors->any())
           <div class="alert alert-danger">
@@ -47,6 +55,38 @@ elseif(Route::current()->getName() == 'user_client.index'){
             {{ \Session::get('message') }}
         </div>
       @endif
+    </div>
+
+    <div class="col-lg-12">
+      <div class="box box-default collapsed-box box-solid">
+        <div class="box-header">
+          <h3 class="box-title">IMPORT FROM EXCEL
+            <small>Format: xlsx</small>
+          </h3>
+          <div class="pull-right box-tools">
+            <button type="button" class="btn btn-info btn-sm" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
+              <i class="fa fa-plus"></i></button>
+            <button type="button" class="btn btn-info btn-sm" data-widget="remove" data-toggle="tooltip" title="" data-original-title="Remove">
+              <i class="fa fa-times"></i></button>
+          </div>
+        </div>
+        <div class="box-body">
+          <form action="{{ route('import_from_excel') }}" method="POST" enctype="multipart/form-data" data-toggle="validator">
+            @csrf
+            <input type="hidden" name="user_type" class="form-control" value="{{$user_type}}">
+            <div class="col-md-12" style="text-align: center;">
+              <div class="form-group">
+                <label for="file">Please Use this feature carefully (Contact Admin for xlsx Format)</label><br><br>
+                <input type="file" name="file" class="form-control jfilestyle" required>
+                <div class="help-block with-errors"></div>
+                <button class="btn btn-success" type="submit">Import User Data</button>
+              </div>
+            </div>  
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12">
       <div class="box box-primary">
         <div class="box-header with-border">
           <h3 class="box-title">Add {{$title}}</h3>
@@ -54,7 +94,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
         <form role="form" action="{{route('user.store')}}" method="POST" data-toggle="validator" enctype="multipart/form-data">
           @csrf
           <div class="box-body pad">
-            {{-- Hidden Fields --}}
             <input type="hidden" class="form-control" name="utilisateur" value="{{encrypt($user_type)}}">
             <div class="col-md-6">
               <div class="form-group">
@@ -152,11 +191,9 @@ elseif(Route::current()->getName() == 'user_client.index'){
     </div>
     <div class="col-md-12">
       <div class="box"> 
-        <a href="{{ route('export_to_excel',Route::current()->getName()) }}"><button class="btn btn-success">Download Excel xls</button></a>
-       {{--  <div class="box-header">
-          <h3 class="box-title">Data Table With Full Features</h3>
-        </div> --}}
-        <!-- /.box-header -->
+        <a href="{{ route('export_to_excel',Route::current()->getName()) }}" class="export_to_excel">
+          <button class="btn btn-success">Export to Excel</button>
+        </a>
         <div class="box-body">
           <table id="users_table" class="table table-bordered table-striped">
             <thead>
@@ -189,7 +226,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
             </tbody>
           </table>
         </div>
-        <!-- /.box-body -->
       </div>
     </div>
   </div>
@@ -197,6 +233,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
 
 @endsection
 @push('scripts')
+<script src="{{ asset('backend/js/jquery-filestyle.min.js') }}"></script>
 <script type="text/javascript">
   $(function () {
     $('#users_table').DataTable()

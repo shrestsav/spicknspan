@@ -83,6 +83,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('/site/delete_room/{id}','SiteController@delete_room')->name('room.destroy');
 		
 		Route::get('/export_excel/{id}', 'CoreController@export_to_excel')->name('export_to_excel');
+		Route::post('/import_excel', 'CoreController@import_from_excel')->name('import_from_excel');
 		
 		Route::get('/questionTemplate','QuestionTemplateController@index')->name('question.index');
 		Route::get('/questionTemplate/add','QuestionTemplateController@addMore')->name('question.add');

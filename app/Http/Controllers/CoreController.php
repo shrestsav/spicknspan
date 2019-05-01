@@ -7,12 +7,18 @@ use App\User;
 use App\UserDetail;
 use Excel;
 use App\Exports\DataExport;
+use App\Imports\DataImport;
 use Illuminate\Http\Request;
 
 class CoreController extends Controller
 {
     public function import_from_excel(Request $request){
-    	return 'import excel';
+    	$request->validate([
+            'file' => 'required|mimes:xlsx'
+        ]);
+    	$user_type = $request->user_type;
+    	Excel::import(new DataImport($user_type),request()->file('file'));
+    	return back()->with('message','Successfully Imported');
     }
 
     public function export_to_excel($page){
@@ -48,7 +54,6 @@ class CoreController extends Controller
                                 $query->where('name', '=', $user_type);
                              })
 						->get();
-			return $data;
     		$head = ['NAME','ROLE','EMAIL','GENDER','ADDRESS','CONTACT','DOB','HOURLY RATE','ANNUAL SALARY','DESCRIPTION','START DATE'];
     	}
     	return Excel::download(new DataExport($data,$head), $user_type.'s.xlsx');
