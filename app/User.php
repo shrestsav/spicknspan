@@ -43,4 +43,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserDetail::class);
     }
+
+    public function site_attendance()
+    {
+        return $this->hasMany(SiteAttendance::class);
+    }
 }

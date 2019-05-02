@@ -99,6 +99,13 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <label for="employment_start_date">Employment Start Date</label>
                 <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Enployment Start Date" value="{{$user->employment_start_date}}" required>
               </div>
+              <div class="form-group">
+                <label for="timezone">Timezone</label><br>
+                <select class="select2" id="timezone" name="timezone" required>
+                  {{-- Timezones will be filled by moment js --}}
+                </select>
+                <div class="help-block with-errors"></div>
+              </div>
             </div>
           </div>
           <div class="box-footer">
@@ -111,3 +118,16 @@ elseif(Route::current()->getName() == 'user_client.index'){
 </section>
 
 @endsection
+
+@push('scripts')
+  <script type="text/javascript">
+    //To load all the timezones provided by moment-timezone-data
+    var timezone = moment.tz.names();
+    for (var i = 0; i < timezone.length; i++) {
+      $('#timezone').append('<option value="' + timezone[i] + '">' + timezone[i] + '</option>');
+    }
+    //Guesses the current timezone automatically 
+    var timezone = '{{$user->timezone}}';
+    $("#timezone").val(timezone).change();
+  </script>
+@endpush

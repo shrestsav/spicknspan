@@ -58,6 +58,10 @@
 <!-- Main content -->
 <section class="content">
   <div class="row">
+    <div class="col-md-12">
+      <div class="alert alert-danger" style="display: none;"></div>
+      <div class="alert alert-success" style="display: none;"></div>
+    </div>
     <div class="col-md-6">
       <div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam or camera enabled)</div>
       <canvas id="canvas" hidden></canvas>
@@ -123,43 +127,57 @@
           outputMessage.hidden = true;
           outputData.parentElement.hidden = false;
           outputData.innerText = code.data;
-          swal({
-            title: "Room "+code.data+" Connected",
-            text: "Do you want to Log in ?",
-            icon: "success",
-            buttons: ["Cancel", "LOG ME IN"],
-          })
-          .then((login) => {
-          if (login) {
-            swal("LOGGED INTO ROOM "+code.data+" SUCCESSFULLY !", {
-              type: "success",
-              timer: 1200
-            })
-            .then((value) => {
 
-                  $.ajax({
-                          type:'post',
-                          url:'{{ route("ajax.qrLogin") }}',
-                          dataType: 'json',
-                          data:{
-                              room_id:code.data                 
-                          },
-                          success:function(data) {
-                              console.log(data);
-                              window.location.href = "{{route('site.attendance')}}";
-                          },
-                          error: function(response){
-                          
-                          }
+          // swal({
+          //   title: "Room "+code.data+" Connected",
+          //   text: "Do you want to Log in ?",
+          //   icon: "success",
+          //   buttons: ["Cancel", "LOG ME IN"],
+          // })
+          // .then((login) => {
+          // if (login) {
+
+            
+              $.ajax({
+                  type:'post',
+                  url:'{{ route("ajax.qrLogin") }}',
+                  dataType: 'json',
+                  data:{
+                      room_id:code.data                 
+                  },
+                  success:function(data) {
+                      console.log(data);
+                      swal({
+                        title: "LOGGED INTO ROOM "+code.data+" SUCCESSFULLY",
+                        text: "",
+                        icon: "success",
+                        type: "success",
+                        timer: 2500
+                      })
+                      .then((value) => {
+                        window.location.href = "{{route('site.attendance')}}";
                       });
-               
-            });
+                  },
+                  error: function(response){
+                    $.each(response.responseJSON, function(index, val){
+                      swal({
+                        title: "Room doesnot exists in our system",
+                        text: "Make sure you are scanning the right QR Code",
+                        icon: "warning",
+                      })
+                      .then((value) => {
+                        window.location.href = "/scanner";
+                      });
+                    });
+                  }
+              });
+            
            
-          }
-          else{
-            window.location.href = "/scanner";
-          }
-        });
+          // }
+          // else{
+          //   window.location.href = "/scanner";
+          // }
+        // });
           return;
         } else {
           outputMessage.hidden = false;

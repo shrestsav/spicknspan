@@ -34,6 +34,52 @@ elseif(Route::current()->getName() == 'user_client.index'){
     z-index: 1000;
   }
 </style>
+
+
+
+
+{{-- Profile Pic CSS --}}
+<style type="text/css">
+.profile-pic {
+    max-width: 150px;
+    max-height: 150px;
+    display: block;
+}
+.file-upload {
+    display: none !important;
+}
+.circle {
+    border-radius: 1000px !important;
+    overflow: hidden;
+    width: 128px;
+    height: 128px;
+    background: #ecf0f5;
+    border: 8px solid rgba(162, 162, 162, 0.7);
+    position: relative;
+}
+.circle:img {
+    max-width: 100%;
+    height: auto;
+}
+.p-image {
+  position: absolute;
+  top: 81px;
+  left: 108px;
+  font-size: 30px;
+  color: #666666;
+  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+}
+.p-image:hover {
+  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+}
+.upload-button {
+  font-size: 1.2em;
+}
+.upload-button:hover {
+  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+  color: #999;
+}
+</style>
 @endpush
 
 @section('content')
@@ -46,7 +92,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
       @if ($errors->any())
           <div class="alert alert-danger">
               @foreach ($errors->all() as $error)
-                  {{ $error }}
+                  {{ $error }}<br>
               @endforeach
           </div>
       @endif
@@ -137,12 +183,26 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <input type="date" name="date_of_birth" class="form-control" id="date_of_birth" placeholder="Enter Date of Birth">
                 <div class="help-block with-errors"></div>
               </div>
+              <div class="form-group">
+                <label for="timezone">Timezone</label><br>
+                <select class="select2" id="timezone" name="timezone" required>
+                  {{-- Timezones will be filled by moment js --}}
+                </select>
+                <div class="help-block with-errors"></div>
+              </div>
             </div>
             <div class="col-md-6">
-              <div class="form-group">
-                <label for="photo">Photo</label>
-                <input type="file" name="photo" class="form-control" id="photo">
-                <div class="help-block with-errors"></div>
+              <div class="form-group col-md-12">
+                <div class="col-md-4 col-md-offset-4">
+                  <div class="circle">
+                    <img class="profile-pic" src="">
+                  </div>
+                  <div class="p-image">
+                    <i class="fa fa-camera upload-button"></i>
+                    <input class="file-upload" type="file" name="photo" id="photo" accept="image/*"/>
+                  </div>
+                  {{-- <label for="photo">Photo</label> --}}
+                </div>
               </div>
               <div class="form-group">
                 <label for="annual_salary">Annual Salary</label>
@@ -152,13 +212,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <label for="description">Description</label>
                 <textarea name="description" class="form-control" id="description" placeholder="Enter Description"></textarea><div class="help-block with-errors"></div>
               </div> 
-              <div class="form-group">
-                <label for="timezone">Timezone</label>
-                <select class="select2" id="timezone" name="timezone" required>
-                  {{-- Timezones will be filled by moment js --}}
-                </select>
-                <div class="help-block with-errors"></div>
-              </div>
               <div class="form-group">
                 <label for="employment_start_date">{{($user_type == 'client')?'Contract Start Date *':'Start Date *'}}</label>
                 <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Start Date" required>
@@ -180,6 +233,10 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <label for="password">Confirm Password *</label>
                 <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" placeholder="Confirm Password" data-match="#password" data-match-error="Passwords don't match"  required>
                 <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label for="documents">Documents</label><br>
+                <input type="file" name="documents[]" class="jfilestyle" multiple>
               </div>
             </div>
           </div>
@@ -263,6 +320,28 @@ elseif(Route::current()->getName() == 'user_client.index'){
  //Guesses the current timezone automatically 
   var guess_current_timezone = moment.tz.guess();
   $("#timezone").val(guess_current_timezone).change();
+
+
+{{-- Profile Pic JS --}}
+
+$(document).ready(function() {
+    var readURL = function(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('.profile-pic').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    $(".file-upload").on('change', function(){
+        readURL(this);
+    });
+    
+    $(".upload-button").on('click', function() {
+       $(".file-upload").click();
+    });
+});
 </script>
   
 @endpush

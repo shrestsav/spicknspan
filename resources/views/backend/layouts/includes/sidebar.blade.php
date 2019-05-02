@@ -31,7 +31,7 @@
         <li class="header">SETTINGS</li>
         <li class="treeview @if ($title === 'Employees' || $title === 'Contractors' || $title === 'Clients' || $title === 'Company') active @endif">
           <a href="#">
-            <i class="fa fa-user-plus"></i> <span>Create</span>
+            <i class="fa fa-user-plus"></i> <span>Manage</span>
             <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>

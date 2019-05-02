@@ -86,6 +86,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+      // return $request->all();
+     
         $userId   = Auth::id();
 
         $validatedData = $request->validate([
@@ -121,6 +123,19 @@ class UserController extends Controller
           $fileName = 'no_image';
         }
 
+        if ($request->hasFile('documents')) {
+            $documents = $request->file('documents');
+            $count = 1;
+            $db_arr = [];
+            foreach($documents as $document){
+              $documentName = $user_id.'_document_'.$count.'_'.$document->getClientOriginalName();
+              $uploadDirectory = public_path('files'.DS.'users'.DS.$user_id);
+              $document->move($uploadDirectory, $documentName);
+
+              $db_arr['document_'.$count] = $documentName;
+              $count++;
+            }  
+        }
         //Update User Details Table
         UserDetail::create([
             'user_id' => $user_id,
@@ -134,6 +149,7 @@ class UserController extends Controller
             'date_of_birth' => $request['date_of_birth'],
             'employment_start_date' => $request['employment_start_date'],
             'timezone' => $request['timezone'],
+            'documents' => json_encode($db_arr),
         ]);
 
         $roles = Role::pluck('name','id');
@@ -178,10 +194,13 @@ class UserController extends Controller
                               'user_details.annual_salary',
                               'user_details.description',
                               'user_details.date_of_birth',
+                              'user_details.timezone',
                               'user_details.employment_start_date',
                               'user_details.documents')
                         ->join('user_details','user_details.user_id','=','users.id')
-                        ->where('users.id','=',$id)->first();
+                        ->where('users.id','=',$id)
+                        ->first();
+
         return view('backend.pages.edit_people',compact('user'));
     }
 
@@ -250,6 +269,7 @@ class UserController extends Controller
                           'date_of_birth' => $request->date_of_birth,
                           'photo' => $request->photo,
                           'annual_salary' => $request->annual_salary,
+                          'timezone' => $request->timezone,
                           'description' => $request->description,
                           'employment_start_date' => $request->employment_start_date
                        ]);

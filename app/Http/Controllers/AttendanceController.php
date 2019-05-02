@@ -170,6 +170,7 @@ class AttendanceController extends Controller
 
         return view('backend.pages.attendance_list',compact('attendance_lists', 'clients', 'employees'));
     }
+
     public function checkin(Request $request)
     {
         $rule = ['image' => 'required',
@@ -327,13 +328,67 @@ class AttendanceController extends Controller
 
     public function site_attendance()
     {
-       $site_attendances = SiteAttendance::select('users.name','rooms.room_no','rooms.name as room_name','buildings.building_no','buildings.address','site_attendances.login')
+        $site_attendances = SiteAttendance::select('site_attendances.id as id',
+                                                  'users.name',
+                                                  'users.id as user_id',
+                                                  'rooms.id as room_id',
+                                                  'rooms.room_no',
+                                                  'rooms.name as room_name',
+                                                  'buildings.building_no',
+                                                  'buildings.id as building_id',
+                                                  'buildings.address',
+                                                  'site_attendances.login',
+                                                  'site_attendances.created_at as date',)
                             ->join('rooms','rooms.id','=','site_attendances.room_id')
                             ->join('buildings','buildings.id','=','rooms.building_id')
-                            ->join('users','users.id','=','site_attendances.user_id')
-                            ->get();
-       return view('backend.pages.site_attendance',compact('site_attendances'));
+                            ->join('users','users.id','=','site_attendances.user_id');
+                            
+        $site_attendances_search = $site_attendances->get();
+        $site_attendances = $site_attendances->get();
+        return view('backend.pages.site_attendance',compact('site_attendances','site_attendances_search'));
     }
+
+    public function search_site_attendance(Request $request)
+    {
+        $site_attendances = SiteAttendance::select('site_attendances.id as id',
+                                                          'users.name',
+                                                          'rooms.id as room_id',
+                                                          'rooms.room_no',
+                                                          'rooms.name as room_name',
+                                                          'buildings.building_no',
+                                                          'buildings.id as building_id',
+                                                          'buildings.address',
+                                                          'site_attendances.login',
+                                                          'site_attendances.created_at as date',)
+                            ->join('rooms','rooms.id','=','site_attendances.room_id')
+                            ->join('buildings','buildings.id','=','rooms.building_id')
+                            ->join('users','users.id','=','site_attendances.user_id');
+
+        $site_attendances_search = SiteAttendance::select('users.name',
+                                                          'users.id as user_id',
+                                                          'rooms.id as room_id',
+                                                          'rooms.room_no as room_no'
+                                                      )
+                                    ->join('rooms','rooms.id','=','site_attendances.room_id')
+                                    ->join('buildings','buildings.id','=','rooms.building_id')
+                                    ->join('users','users.id','=','site_attendances.user_id')
+                                    ->get();
+        if($request->search_by_user_id){
+            $site_attendances->where('site_attendances.user_id','=',$request->search_by_user_id);
+        }
+        if($request->search_by_room_id){
+            $site_attendances->where('site_attendances.room_id','=',$request->search_by_room_id);
+        }
+        if($request->search_by_date){
+            $search_date = date('Y-m-d',strtotime($request->search_by_date));
+            $site_attendances->whereDate('site_attendances.created_at','=',$search_date);       
+        }
+
+        $site_attendances = $site_attendances->get();
+
+        return view('backend.pages.site_attendance',compact('site_attendances','site_attendances_search'));
+    }
+
     public function ajax_qr_login(Request $request)
     {
         $room_id = $request->room_id;
@@ -348,13 +403,12 @@ class AttendanceController extends Controller
             $request->merge(['login'=>$current_date_time]);
 
             SiteAttendance::create($request->all());
-            return json_encode($request->all());
+            return response()->json(['success'=>'Logged In Successfully']);
         }
         else{
-            return json_encode('room doesnot exists');
+            return response()->json(['error'=>'Room doesnot exists in our system. Make sure you are scanning the right QR Code'],401);
         }
-        return json_encode($request->room_id);
-        $request->all();
+        
     }
 
 }

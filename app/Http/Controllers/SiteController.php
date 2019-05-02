@@ -146,7 +146,7 @@ class SiteController extends Controller
     public function generate_qr($id)
     {   
         $pngImage = \QrCode::format('png')
-                            ->size(400)
+                            ->size(100)
                             ->generate($id);
         return view('backend.pages.printqr',compact('pngImage'));
         // return response($pngImage)->header('Content-type','image/png');

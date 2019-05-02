@@ -25,7 +25,7 @@ class CreateUserDetailsTable extends Migration
             $table->integer('annual_salary')->default('0')->nullable();
             $table->text('description')->nullable();
             $table->date('employment_start_date')->nullable();
-            $table->text('documents')->nullable();
+            $table->longText('documents')->nullable();
             $table->string('timezone')->default('Australia/Sydney');
             $table->timestamps();
         });

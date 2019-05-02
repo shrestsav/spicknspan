@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
 class DataImport implements ToCollection, WithHeadingRow
@@ -21,6 +22,14 @@ class DataImport implements ToCollection, WithHeadingRow
     }
     public function collection(Collection $rows)
     {
+        Validator::make($rows->toArray(), [
+            '*.name' => ['required', 'string', 'max:255'],
+            '*.email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            '*.password' => ['required', 'string', 'min:6'],
+            '*.gender' => ['required', 'string'],
+            '*.contact' => ['required'],
+         ])->validate();
+
         foreach ($rows as $row) 
         {
             $user = User::create([
