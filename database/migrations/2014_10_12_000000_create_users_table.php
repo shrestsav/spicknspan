@@ -23,8 +23,10 @@ class CreateUsersTable extends Migration
             $table->integer('mark_default')->default('0')->nullable();
             $table->string('added_by')->nullable();
             $table->integer('inspection')->default('0')->nullable();
+            $table->string('timezone')->default('Australia/Sydney');
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

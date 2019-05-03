@@ -50,12 +50,12 @@ class DataImport implements ToCollection, WithHeadingRow
                 'user_id'               =>  $user->id,
                 'address'               =>  $row['address'],
                 'gender'                =>  $row['gender'],
-                'date_of_birth'         =>  $row['dob'],
+                'date_of_birth'         =>  \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['dob']),
                 'contact'               =>  $row['contact'],
                 'hourly_rate'           =>  $row['hourly_rate'],
                 'annual_salary'         =>  $row['annual_salary'],
                 'description'           =>  $row['description'],
-                'employment_start_date' =>  $row['start_date'],
+                'employment_start_date' =>  \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['start_date']),
             ]);
         }
     }

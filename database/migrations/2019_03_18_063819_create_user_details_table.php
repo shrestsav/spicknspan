@@ -15,7 +15,7 @@ class CreateUserDetailsTable extends Migration
     {
         Schema::create('user_details', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('user_id');
+            $table->integer('user_id')->unsigned();
             $table->text('address')->nullable();
             $table->string('gender');
             $table->date('date_of_birth')->nullable();
@@ -26,7 +26,10 @@ class CreateUserDetailsTable extends Migration
             $table->text('description')->nullable();
             $table->date('employment_start_date')->nullable();
             $table->longText('documents')->nullable();
-            $table->string('timezone')->default('Australia/Sydney');
+
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('cascade')->onDelete('cascade');
+
             $table->timestamps();
         });
     }

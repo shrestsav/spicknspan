@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Attendance;
 use App\User;
 use App\UserDetail;
+use App\SiteAttendance;
 use Excel;
 use App\Exports\DataExport;
 use App\Imports\DataImport;
@@ -55,6 +56,22 @@ class CoreController extends Controller
                              })
 						->get();
     		$head = ['NAME','ROLE','EMAIL','GENDER','ADDRESS','CONTACT','DOB','HOURLY RATE','ANNUAL SALARY','DESCRIPTION','START DATE'];
+    	}
+    	elseif($page=='site.attendance'){
+    		$user_type = 'Site Attendance Report';
+    		$data = SiteAttendance::select('users.name',
+    												   'buildings.name as building_name',
+    												   'buildings.building_no',
+    												   'rooms.name as room_name',
+    												   'rooms.room_no',
+    												   'rooms.description',
+    												   'site_attendances.login',
+	                                                   'site_attendances.created_at as date',)
+                            ->join('rooms','rooms.id','=','site_attendances.room_id')
+                            ->join('buildings','buildings.id','=','rooms.building_id')
+                            ->join('users','users.id','=','site_attendances.user_id')
+                            ->get();
+            $head = ['NAME','BUILDING NAME','BUILDING No','DIVISION / AREA','ROOM No','DESCRIPTION','LOGIN TIME','DATE'];
     	}
     	return Excel::download(new DataExport($data,$head), $user_type.'s.xlsx');
     }

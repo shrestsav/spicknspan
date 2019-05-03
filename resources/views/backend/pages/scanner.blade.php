@@ -148,7 +148,7 @@
                   success:function(data) {
                       console.log(data);
                       swal({
-                        title: "LOGGED INTO ROOM "+code.data+" SUCCESSFULLY",
+                        title: "Logged into Room No "+data.room_no+" Successfully",
                         text: "",
                         icon: "success",
                         type: "success",

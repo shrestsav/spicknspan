@@ -38,7 +38,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
         <div class="box-header with-border">
           <h3 class="box-title">Employee Information</h3>
         </div>
-        <form role="form" action="{{route('user.update',$user->id)}}" method="POST">
+        <form role="form" action="{{route('user.update',$user->id)}}" method="POST" data-toggle="validator">
           @csrf
           <div class="box-body pad">
             {{-- Hidden Fields --}}
@@ -71,7 +71,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
               <div class="form-group">
                 <label for="contact">Phone Number</label>
-                <input type="text" name="contact" class="form-control" id="contact" placeholder="Enter Phone Number" value="{{$user->contact}}">
+                <input type="text" name="contact" class="form-control" id="contact" placeholder="Enter Phone Number" value="{{$user->contact}}" required>
               </div>
               <div class="form-group">
                 <label for="email">Email address</label>

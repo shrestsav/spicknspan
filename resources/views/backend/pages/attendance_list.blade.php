@@ -29,7 +29,7 @@
             <!-- attendance filter part -->
             <div class="box-header">
               <form role="form" action="{{route('attendance.list')}}" method="GET" data-toggle="validator" enctype="multipart/form-data">
-                <?php
+                @php
                     if(isset($_GET['employee_id'])){
                         $filtEmpId = $_GET['employee_id'];
                     } else {
@@ -47,7 +47,7 @@
                     } else {
                         $filtDate = '';
                     }
-                ?>
+                @endphp
                 <div class="row">
                   <div class="col-sm-1">
                     <div class="form-group"><h4>Filter : </h4></div>
@@ -58,7 +58,7 @@
                       <select class="select2" name="employee_id" id="sel_emp">
                           <option value="">-- Select --</option>
                         @foreach($employees as $emp)
-                          <option value="{{$emp->id}}" <?php if ($emp->id == $filtEmpId) echo "selected='selected'";?>>{{$emp->name}}</option>
+                          <option value="{{$emp->id}}" @if ($emp->id == $filtEmpId) selected='selected' @endif>{{$emp->name}}</option>
                         @endforeach
                       </select>
                     </div>

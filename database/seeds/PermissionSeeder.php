@@ -29,6 +29,11 @@ class PermissionSeeder extends Seeder
                 'description' => 'View Everything Present in System. One Click Super admin Permission'
             ],
             [
+                'name' => 'import_export_excel',
+                'display_name' => 'Excel Import/Export',
+                'description' => 'Import and Export Excel .xlsx format'
+            ],
+            [
                 'name' => 'view_site_attendance',
                 'display_name' => 'View Site Attendance',
                 'description' => 'View Records of Site Attendance by Employees'

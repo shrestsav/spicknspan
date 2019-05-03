@@ -44,6 +44,10 @@ Route::middleware(['auth'])->group(function () {
 	Route::get('/compose', 'MailController@composeMail')->name('mail.compose');
 	Route::get('/view', 'MailController@viewMail')->name('mail.view');
 
+	// Route::get('/profile/{id}', 'UserController@profile_edit')->name('profile.edit');
+	Route::get('/edit-password', 'UserController@password_edit')->name('password.edit');
+	Route::post('/update-password/{id}', 'UserController@password_update')->name('password.update');
+	
 	//Allow these routes for admin and contractor only
 	Route::middleware(['role:superAdmin|contractor'])->group(function () {
 		Route::get('/company', 'UserController@index')->name('user_company.index');
@@ -56,10 +60,6 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/clients', 'UserController@index')->name('user_client.index');
 		Route::post('/add_user', 'UserController@store')->name('user.store');
 		Route::get('/edit_user/{id}', 'UserController@edit')->name('user.edit');
-
-		// Route::get('/profile/{id}', 'UserController@profile_edit')->name('profile.edit');
-		Route::get('/edit-password', 'UserController@password_edit')->name('password.edit');
-		Route::post('/update-password/{id}', 'UserController@password_update')->name('password.update');
 
 		Route::post('/update_user/{id}', 'UserController@update')->name('user.update');
 		Route::get('/delete_user/{id}', 'UserController@destroy')->name('user.delete');
@@ -83,14 +83,16 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/generate_qr/{id}', 'SiteController@generate_qr')->name('generate.qr');
 		Route::post('/site/delete_room/{id}','SiteController@delete_room')->name('room.destroy');
 		
-		Route::get('/export_excel/{id}', 'CoreController@export_to_excel')->name('export_to_excel');
-		Route::post('/import_excel', 'CoreController@import_from_excel')->name('import_from_excel');
-		
 		Route::get('/questionTemplate','QuestionTemplateController@index')->name('question.index');
 		Route::get('/questionTemplate/add','QuestionTemplateController@addMore')->name('question.add');
 		Route::post("/questionTemplate/add","QuestionTemplateController@addMorePost");
 		Route::get('/questionTemplate/{id}','QuestionTemplateController@destroy')->name('question.destroy');
 
 	});	
+	Route::middleware(['permission:import_export_excel'])->group(function () {
+		Route::get('/export_excel/{id}', 'CoreController@export_to_excel')->name('export_to_excel');
+		Route::post('/import_excel', 'CoreController@import_from_excel')->name('import_from_excel');
+	});
+
 });
 

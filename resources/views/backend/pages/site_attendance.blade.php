@@ -22,7 +22,8 @@
         transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
       }
       .search_form{
-        margin-left: 100px;
+        /*margin-left: 100px;*/
+        padding-bottom: 20px;
         display: inline-block;
       }
   </style>
@@ -34,51 +35,78 @@
     <div class="col-md-12">
       <div class="box">
         <div class="box-header">
-  
           <h3 class="box-title">Logged in Users</h3>
-          <form autocomplete="off" class="search_form pull-right" role="form" action="{{route('site.attendance.search')}}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <select class="select2 search_by_user_id" id="search_by_user_id" name="search_by_user_id">
-              <option disabled selected value>Select User</option>
-              @foreach($site_attendances_search->unique('user_id') as $site_attendance)
-               <option value="{{$site_attendance->user_id}}">{{$site_attendance->name}}</option>
-              @endforeach
-            </select>
-            <select class="select2 search_by_room_id" id="search_by_room_id" name="search_by_room_id">
-              <option disabled selected value>Select Room</option>
-              @foreach($site_attendances_search->unique('room_id') as $site_attendance)
-                <option value="{{$site_attendance->room_id}}">{{$site_attendance->room_no}}</option>
-              @endforeach
-            </select>
-
-            {{-- <select class="select2 search_by_building_id" id="timezone" name="search_by_building_id">
-              <option disabled selected value>Select Building</option>
-              @foreach($site_attendances->unique('building_no') as $site_attendance)
-                <option value="{{$site_attendance->building_id}}">{{$site_attendance->building_no}}</option>
-              @endforeach
-            </select> --}}
-            {{-- <i class="fa fa-calendar"></i> --}}
-
-            <input type="text" class="date_picker" name="search_by_date" id="datepicker" placeholder="Select Date">
-            <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-          </form>
+          @if(Request::all())
+            <a href=""><i></i></a>
+          @endif
         </div>
-
-
         <div class="box-body">
+          <div class="col-md-12">
+            {{-- Search Form --}}
+            <form autocomplete="off" class="search_form" role="form" action="{{route('site.attendance.search')}}" method="POST" enctype="multipart/form-data">
+              @csrf
+              <label>Filter&nbsp;&nbsp;</label>
+              <select class="select2 search_by_user_id" name="search_by_user_id">
+                <option disabled selected value>User Name</option>
+                @foreach($site_attendances_search->unique('user_id') as $site_attendance)
+                 <option value="{{$site_attendance->user_id}}" @if(Request::input('search_by_user_id')==$site_attendance->user_id) selected @endif>{{$site_attendance->name}}</option>
+                @endforeach
+              </select>
+              <select class="select2 search_by_building_name" name="search_by_building_id">
+                <option disabled selected value>Building Name</option>
+                @foreach($site_attendances_search->unique('building_id') as $site_attendance)
+                 <option value="{{$site_attendance->building_id}}" @if(Request::input('search_by_building_id')==$site_attendance->building_id) selected @endif>{{$site_attendance->building_name}}</option>
+                @endforeach
+              </select>
+              <select class="select2 search_by_building_no">
+                <option disabled selected value> Building No</option>
+                @foreach($site_attendances->unique('building_id') as $site_attendance)
+                  <option value="{{$site_attendance->building_id}}" @if(Request::input('search_by_building_id')==$site_attendance->building_id) selected @endif>{{$site_attendance->building_no}}</option>
+                @endforeach
+              </select>
+              <select class="select2 search_by_room_name" name="search_by_room_id">
+                <option disabled selected value>Division / Area</option>
+                @foreach($site_attendances_search->unique('room_id') as $site_attendance)
+                  <option value="{{$site_attendance->room_id}}" @if(Request::input('search_by_room_id')==$site_attendance->room_id) selected @endif>{{$site_attendance->room_name}}</option>
+                @endforeach
+              </select>
+              <select class="select2 search_by_room_no">
+                <option disabled selected value>Room No</option>
+                @foreach($site_attendances_search->unique('room_id') as $site_attendance)
+                  <option value="{{$site_attendance->room_id}}"  @if(Request::input('search_by_room_id')==$site_attendance->room_id) selected @endif>{{$site_attendance->room_no}}</option>
+                @endforeach
+              </select>
+
+              
+              {{-- <i class="fa fa-calendar"></i> --}}
+
+              <input type="text" class="date_picker" name="search_by_date" id="datepicker" placeholder="Select Date">
+              <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+            </form>
+            @permission('import_export_excel')
+              <div class="pull-right">
+                <a href="{{ route('export_to_excel',Route::current()->getName()) }}" class="export_to_excel">
+                  <button class="btn btn-success">Export to Excel</button>
+                </a>
+              </div>
+            @endpermission
+          </div>
+          
           @if(count($site_attendances))
             <table id="site_attendance_table" class="table table-bordered table-striped">
               <thead>
               <tr>
                 <th>Name</th>
-                <th>Room No</th>
+                <th>Building Name</th>
                 <th>Building No</th>
-                <th>Address</th>
+                <th>Division / Area</th>
+                <th>Room No</th>
+                <th>Description</th>
                 <th>Login Time</th>
                 <th>Date</th>
               </tr>
               </thead>
-              <tbody>     
+              <tbody>    
               @foreach($site_attendances as $site_attendance)
                 @php 
                   $date = \Carbon\Carbon::parse($site_attendance->date)->timezone(Session::get('timezone')); 
@@ -87,9 +115,11 @@
                 @endphp
                 <tr>
                   <td>{{$site_attendance->name}}</td>
-                  <td>{{$site_attendance->room_no}}</td>
+                  <td>{{$site_attendance->building_name}}</td>
                   <td>{{$site_attendance->building_no}}</td>
-                  <td>{{$site_attendance->address}}</td>
+                  <td>{{$site_attendance->room_name}}</td>
+                  <td>{{$site_attendance->room_no}}</td>
+                  <td>{{$site_attendance->description}}</td>
                   <td>{{$login_time->format('g:i A')}}</td>
                   <td>{{$date->format('d M Y')}}</td>
                 </tr>
@@ -113,14 +143,35 @@
 @push('scripts')
 <script type="text/javascript">
   $(function () {
-      //Date picker
+    //Date picker
     $('#datepicker').datepicker({
       autoclose: true
-    })
+    });
+
+
+    // Search Switch Algorithms
+    search_by_classes = {
+                          search_by_building_name:'search_by_building_no', 
+                          search_by_building_no:'search_by_building_name', 
+                          search_by_room_name:'search_by_room_no',
+                          search_by_room_no:'search_by_room_name',
+                        };
+    
+    Object.keys(search_by_classes).forEach(function(key){
+        $('.'+key).on('change', function(e) {
+          e.preventDefault();
+          var oldval = $('.'+search_by_classes[key]).val();
+          var newval = this.value;
+          if(oldval!=newval)
+              $('.'+search_by_classes[key]).val(this.value).trigger('change');
+        });
+    });
+    
 
 
     // $('#site_attendance_table').DataTable({
-    //   "pageLength": 8
+    //   "pageLength": 8,
+    //   "searching": false
     // });
   })
 </script>

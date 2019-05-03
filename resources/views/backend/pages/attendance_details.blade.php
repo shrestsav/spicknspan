@@ -73,7 +73,7 @@
           <div class="widget-user-header bg-green">
             <h3 class="widget-user-username">{{strtoupper($attendance_details[0]->employee_name)}}</h3>
             <h5 class="widget-user-desc">CLIENT : {{$attendance_details[0]->client_name}}</h5>
-            <h5 class="widget-user-desc">DATE : {{$check_in_date->format('d M Y')}}</h5>
+            <h5 class="widget-user-desc">DATE : {{\Carbon\Carbon::parse($attendance_details[0]->check_in)->format('d M Y')}}</h5>
           </div>
           <div class="widget-user-image">
             @if(file_exists(public_path('files/users/'.$employee_id.'/dp_user_'.$employee_id.'.png')))

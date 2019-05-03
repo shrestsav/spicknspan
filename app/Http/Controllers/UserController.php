@@ -25,7 +25,6 @@ class UserController extends Controller
      */
     public function index()
     {   
-
         $userId   = Auth::id();
 
         if(\Route::current()->getName() == 'user_company.index'){
@@ -44,6 +43,7 @@ class UserController extends Controller
                               'users.id',
                               'users.name',
                               'users.email',
+                              'users.user_type',
                               'users.user_type',
                               'user_details.photo',
                               'user_details.address',
@@ -64,7 +64,7 @@ class UserController extends Controller
             $users = $users->where('added_by','=',$userId);
         }
         $users = $users->get();
-
+        // return $users;
         return view('backend.pages.people',compact('users'));
     }
 
@@ -109,6 +109,7 @@ class UserController extends Controller
             'user_type' => $decrypt_user_type,
             'mark_default' => $request['mark_default'],
             'added_by' => $userId,
+            'timezone' => $request['timezone'],
         ]);
 
         $user_id = $user->id;
@@ -123,15 +124,14 @@ class UserController extends Controller
           $fileName = 'no_image';
         }
 
+        $db_arr = [];
         if ($request->hasFile('documents')) {
             $documents = $request->file('documents');
             $count = 1;
-            $db_arr = [];
             foreach($documents as $document){
               $documentName = $user_id.'_document_'.$count.'_'.$document->getClientOriginalName();
               $uploadDirectory = public_path('files'.DS.'users'.DS.$user_id);
               $document->move($uploadDirectory, $documentName);
-
               $db_arr['document_'.$count] = $documentName;
               $count++;
             }  
@@ -148,7 +148,6 @@ class UserController extends Controller
             'description' => $request['description'],
             'date_of_birth' => $request['date_of_birth'],
             'employment_start_date' => $request['employment_start_date'],
-            'timezone' => $request['timezone'],
             'documents' => json_encode($db_arr),
         ]);
 
@@ -186,6 +185,7 @@ class UserController extends Controller
                               'users.name',
                               'users.email',
                               'users.user_type',
+                              'users.timezone',
                               'user_details.photo',
                               'user_details.address',
                               'user_details.gender',
@@ -194,7 +194,6 @@ class UserController extends Controller
                               'user_details.annual_salary',
                               'user_details.description',
                               'user_details.date_of_birth',
-                              'user_details.timezone',
                               'user_details.employment_start_date',
                               'user_details.documents')
                         ->join('user_details','user_details.user_id','=','users.id')
@@ -258,7 +257,8 @@ class UserController extends Controller
     {
         $update_user = User::where('id','=',$id)
                       ->update(['name' => $request->name,
-                                'email' => $request->email
+                                'email' => $request->email,
+                                'timezone' => $request->timezone,
                                   ]);
         $update_user_details = UserDetail::where('user_id','=',$id)
                ->update([
@@ -269,7 +269,6 @@ class UserController extends Controller
                           'date_of_birth' => $request->date_of_birth,
                           'photo' => $request->photo,
                           'annual_salary' => $request->annual_salary,
-                          'timezone' => $request->timezone,
                           'description' => $request->description,
                           'employment_start_date' => $request->employment_start_date
                        ]);

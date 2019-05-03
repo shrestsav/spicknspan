@@ -47,7 +47,7 @@ class LoginController extends Controller
         if ($this->attemptLogin($request)) {
 
             //Set timezone as session
-            $timezone = Auth::user()->detail->timezone;
+            $timezone = Auth::user()->timezone;
             session(['timezone' => $timezone]);
 
             return $this->sendLoginResponse($request);
