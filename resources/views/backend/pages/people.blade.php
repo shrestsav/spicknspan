@@ -22,7 +22,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
 @extends('backend.layouts.app',['title'=> $title])
 
 @push('styles')
- <link rel="stylesheet" href="{{ asset('backend/css/jquery-filestyle.min.css') }}">
 <style type="text/css">
   label.checkbox.mark_default {
     padding-left: 20px;
@@ -87,7 +86,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
 
 <section class="content">
   <div class="row">
-
     <div class="col-md-12">
       @if ($errors->any())
           <div class="alert alert-danger">
@@ -102,7 +100,138 @@ elseif(Route::current()->getName() == 'user_client.index'){
         </div>
       @endif
     </div>
-
+    <div class="col-md-12">
+      <div class="box box-primary collapsed-box box-solid">
+        <div class="box-header with-border">
+          <h3 class="box-title">Add {{$title}}</h3>
+          <div class="pull-right box-tools">
+            <button type="button" class="btn btn-info btn-sm" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
+              <i class="fa fa-plus"></i></button>
+            <button type="button" class="btn btn-info btn-sm" data-widget="remove" data-toggle="tooltip" title="" data-original-title="Remove">
+              <i class="fa fa-times"></i></button>
+          </div>
+        </div>
+        <div class="box-body pad">
+          <form role="form" action="{{route('user.store')}}" method="POST" data-toggle="validator" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" class="form-control" name="utilisateur" value="{{encrypt($user_type)}}">
+            <div class="col-md-6">
+              <div class="form-group col-md-12">
+                <div class="col-md-4 col-md-offset-4">
+                  <div class="circle">
+                    <img class="profile-pic" src="">
+                  </div>
+                  <div class="p-image">
+                    <i class="fa fa-camera upload-button"></i>
+                    <input class="file-upload" type="file" name="photo" id="photo" accept="image/*"/>
+                  </div>
+                  {{-- <label for="photo">Photo</label> --}}
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="name">{{($user_type == 'client')?'Client Name *':'Full Name *'}}</label>
+                <input type="text" name="name" class="form-control" id="name" placeholder="Enter Name" required>
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="col-md-6 no-padding">
+                <div class="form-group">
+                  <label for="gender">Gender</label>
+                  <div class="radio">
+                    <label>
+                      <input type="radio" name="gender" id="male" value="male" checked="">
+                      Male
+                    </label>
+                    <label>
+                      <input type="radio" name="gender" id="female" value="female">
+                      Female
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 no-padding">
+                <div class="form-group">
+                  <label for="date_of_birth">Date of Birth</label>
+                  <input type="date" name="date_of_birth" class="form-control" id="date_of_birth" placeholder="Enter Date of Birth">
+                  <div class="help-block with-errors"></div>
+                </div>
+              </div>
+              <div class="col-md-6 no-padding" style="padding-right: 10px !important;">
+                <div class="form-group">
+                  <label for="contact">{{($user_type == 'client')?'Client Phone Number *':'Phone Number *'}}</label>
+                  <input type="text" name="contact" class="form-control" id="contact" placeholder="Enter Phone Number" required>
+                </div>
+              </div>
+              <div class="col-md-6 no-padding">
+                <div class="form-group">
+                  <label for="email">{{($user_type == 'client')?'Client E-mail address *':'E-mail address *'}}</label>
+                  <input type="email" name="email" class="form-control" id="email" placeholder="Enter email" required>
+                  <div class="help-block with-errors"></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" name="address" class="form-control" id="address" placeholder="Enter Address">
+                <div class="help-block with-errors"></div>
+              </div>
+              
+              <div class="form-group">
+                <label for="documents">Documents</label><br>
+                <input type="file" name="documents[]" class="jfilestyle" multiple>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="timezone">Timezone</label><br>
+                <select class="select2" id="timezone" name="timezone" required>
+                  {{-- Timezones will be filled by moment js --}}
+                </select>
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label for="hourly_rate">Base Hourly Rate</label>
+                <input type="number" name="hourly_rate" class="form-control" id="hourly_rate" placeholder="Enter Hourly Rate">
+              </div>
+              <div class="form-group">
+                <label for="annual_salary">Annual Salary</label>
+                <input type="number" name="annual_salary" class="form-control" id="annual_salary" placeholder="Enter Annual Salary">
+              </div>
+              <div class="form-group">
+                <label for="description">Description</label>
+                <textarea name="description" class="form-control" id="description" placeholder="Enter Description"></textarea><div class="help-block with-errors"></div>
+              </div> 
+              <div class="form-group">
+                <label for="employment_start_date">{{($user_type == 'client')?'Contract Start Date *':'Start Date *'}}</label>
+                <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Start Date" required>
+                <div class="help-block with-errors"></div>
+              </div>
+              @if($user_type=='client')
+                <div class="form-group">
+                  <label class="checkbox mark_default">
+                    <input type="checkbox" name="mark_default" value="1">Mark as default client ?
+                  </label>
+                </div>
+              @endif
+              <div class="form-group">
+                <label for="password">Password *</label>
+                <input type="password" name="password" data-minlength="6" class="form-control" id="password" placeholder="Enter Password" required>
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label for="password">Confirm Password *</label>
+                <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" placeholder="Confirm Password" data-match="#password" data-match-error="Passwords don't match"  required>
+                <div class="help-block with-errors"></div>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="box-footer">
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+            </div>
+          </form>
+        </div>
+        
+      </div>
+    </div>
     <div class="col-lg-12">
       <div class="box box-default collapsed-box box-solid">
         <div class="box-header">
@@ -130,120 +259,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
             </div>  
           </form>
         </div>
-      </div>
-    </div>
-    <div class="col-md-12">
-      <div class="box box-primary">
-        <div class="box-header with-border">
-          <h3 class="box-title">Add {{$title}}</h3>
-        </div>
-        <form role="form" action="{{route('user.store')}}" method="POST" data-toggle="validator" enctype="multipart/form-data">
-          @csrf
-          <div class="box-body pad">
-            <input type="hidden" class="form-control" name="utilisateur" value="{{encrypt($user_type)}}">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="name">{{($user_type == 'client')?'Client Name *':'Full Name *'}}</label>
-                <input type="text" name="name" class="form-control" id="name" placeholder="Enter Name" required>
-                <div class="help-block with-errors"></div>
-              </div>
-              <div class="form-group">
-                <label for="gender">Gender</label>
-                <div class="radio">
-                  <label>
-                    <input type="radio" name="gender" id="male" value="male" checked="">
-                    Male
-                  </label>
-                  <label>
-                    <input type="radio" name="gender" id="female" value="female">
-                    Female
-                  </label>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="hourly_rate">Base Hourly Rate</label>
-                <input type="number" name="hourly_rate" class="form-control" id="hourly_rate" placeholder="Enter Hourly Rate">
-              </div>
-              <div class="form-group">
-                <label for="address">Address</label>
-                <input type="text" name="address" class="form-control" id="address" placeholder="Enter Address">
-                <div class="help-block with-errors"></div>
-              </div>
-              <div class="form-group">
-                <label for="contact">{{($user_type == 'client')?'Client Phone Number *':'Phone Number *'}}</label>
-                <input type="text" name="contact" class="form-control" id="contact" placeholder="Enter Phone Number" required>
-              </div>
-              <div class="form-group">
-                <label for="email">{{($user_type == 'client')?'Client E-mail address *':'E-mail address *'}}</label>
-                <input type="email" name="email" class="form-control" id="email" placeholder="Enter email" required>
-                <div class="help-block with-errors"></div>
-              </div>
-              <div class="form-group">
-                <label for="date_of_birth">Date of Birth</label>
-                <input type="date" name="date_of_birth" class="form-control" id="date_of_birth" placeholder="Enter Date of Birth">
-                <div class="help-block with-errors"></div>
-              </div>
-              <div class="form-group">
-                <label for="timezone">Timezone</label><br>
-                <select class="select2" id="timezone" name="timezone" required>
-                  {{-- Timezones will be filled by moment js --}}
-                </select>
-                <div class="help-block with-errors"></div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group col-md-12">
-                <div class="col-md-4 col-md-offset-4">
-                  <div class="circle">
-                    <img class="profile-pic" src="">
-                  </div>
-                  <div class="p-image">
-                    <i class="fa fa-camera upload-button"></i>
-                    <input class="file-upload" type="file" name="photo" id="photo" accept="image/*"/>
-                  </div>
-                  {{-- <label for="photo">Photo</label> --}}
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="annual_salary">Annual Salary</label>
-                <input type="number" name="annual_salary" class="form-control" id="annual_salary" placeholder="Enter Annual Salary">
-              </div>
-              <div class="form-group">
-                <label for="description">Description</label>
-                <textarea name="description" class="form-control" id="description" placeholder="Enter Description"></textarea><div class="help-block with-errors"></div>
-              </div> 
-              <div class="form-group">
-                <label for="employment_start_date">{{($user_type == 'client')?'Contract Start Date *':'Start Date *'}}</label>
-                <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Start Date" required>
-                <div class="help-block with-errors"></div>
-              </div>
-              <?php if($user_type=='client'){?>
-                <div class="form-group">
-                  <label class="checkbox mark_default">
-                    <input type="checkbox" name="mark_default" value="1">Mark as default client ?
-                  </label>
-                </div>
-              <?php } ?>
-              <div class="form-group">
-                <label for="password">Password *</label>
-                <input type="password" name="password" data-minlength="6" class="form-control" id="password" placeholder="Enter Password" required>
-                <div class="help-block with-errors"></div>
-              </div>
-              <div class="form-group">
-                <label for="password">Confirm Password *</label>
-                <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" placeholder="Confirm Password" data-match="#password" data-match-error="Passwords don't match"  required>
-                <div class="help-block with-errors"></div>
-              </div>
-              <div class="form-group">
-                <label for="documents">Documents</label><br>
-                <input type="file" name="documents[]" class="jfilestyle" multiple>
-              </div>
-            </div>
-          </div>
-          <div class="box-footer">
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
       </div>
     </div>
     <div class="col-md-12">
@@ -290,7 +305,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
 
 @endsection
 @push('scripts')
-<script src="{{ asset('backend/js/jquery-filestyle.min.js') }}"></script>
 <script type="text/javascript">
   $(function () {
     $('#users_table').DataTable()

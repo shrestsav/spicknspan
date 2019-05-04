@@ -131,7 +131,7 @@
                   </div>
                   <div class="col-md-12">
                     <select class="select2 check_in_out_client" name="client_id" id="mark_default" required>
-                        <option value="">--</option>
+                        <option disabled selected value>Choose Client</option>
                       @foreach($clients as $client)
                         <option value="{{$client->id}}" <?php if ($client->id == 1) echo "selected='selected'";?>>{{$client->name}}</option>
                       @endforeach

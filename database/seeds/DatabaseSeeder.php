@@ -44,5 +44,28 @@ class DatabaseSeeder extends Seeder
         //5) Create Admin UserDetail
         $user_details = ['user_id' => $user->id, 'gender' => 'male', 'contact' => '9800'];
         $user_details = UserDetail::create($user_details);
+        
+        // 6) Create Other Roles
+        $other_roles = [
+                            [
+                                'name' => 'employee', 
+                                'display_name' => 'Employee', 
+                                'description' => 'Roles for Employees'
+                            ],
+                            [
+                                'name' => 'client',
+                                'display_name' => 'Client',
+                                'description' => 'Roles for Clients'
+                            ],
+                            [
+                                'name' => 'contractor',
+                                'display_name' => 'Contractor',
+                                'description' => 'Roles for Contractors'
+                            ],
+                        ];
+
+        foreach ($other_roles as $key => $value) {
+            Role::create($value);
+        }
     }
 }

@@ -2,29 +2,16 @@
 
 @push('styles')
   <style type="text/css">
-    .date_picker{
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        border-color: #d2d6de;
-        height: 34px;
-        padding: 6px 12px;
-        font-size: 14px;
-        line-height: 1.42857143;
-        color: #555;
-        background-color: #fff;
-        background-image: none;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
-        box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
-        -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
-        -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
-        transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
-      }
       .search_form{
-        /*margin-left: 100px;*/
-        padding-bottom: 20px;
         display: inline-block;
+      }
+      .filter_label{
+        padding: 20px 20px 10px 20px;
+      }
+      .search_by_date{
+        display: inline-table;
+        width: 170px; 
+        top: 14px;
       }
   </style>
 @endpush
@@ -33,19 +20,30 @@
 <section class="content">
   <div class="row">
     <div class="col-md-12">
+
+      @if(Request::all())
+        <a href="{{url('/siteAttendance')}}"><button class="btn btn-primary">Show All</button></a>
+      @endif
+
+      @permission('import_export_excel')
+        <div class="pull-right">
+          <a href="{{ route('export_to_excel',Route::current()->getName()) }}" class="export_to_excel">
+            <button class="btn btn-success">Export to Excel</button>
+          </a>
+        </div>
+      @endpermission
+
+    </div>
+    <div class="col-md-12">
       <div class="box">
         <div class="box-header">
-          <h3 class="box-title">Logged in Users</h3>
-          @if(Request::all())
-            <a href=""><i></i></a>
-          @endif
-        </div>
-        <div class="box-body">
-          <div class="col-md-12">
-            {{-- Search Form --}}
-            <form autocomplete="off" class="search_form" role="form" action="{{route('site.attendance.search')}}" method="POST" enctype="multipart/form-data">
+          {{-- <h3 class="box-title">Logged in Users</h3> --}}
+          
+          {{-- Search Form --}}
+          <div class="search_form">
+            <form autocomplete="off" role="form" action="{{route('site.attendance.search')}}" method="POST" enctype="multipart/form-data">
               @csrf
-              <label>Filter&nbsp;&nbsp;</label>
+              <label class="filter_label">Filter</label>
               <select class="select2 search_by_user_id" name="search_by_user_id">
                 <option disabled selected value>User Name</option>
                 @foreach($site_attendances_search->unique('user_id') as $site_attendance)
@@ -60,7 +58,7 @@
               </select>
               <select class="select2 search_by_building_no">
                 <option disabled selected value> Building No</option>
-                @foreach($site_attendances->unique('building_id') as $site_attendance)
+                @foreach($site_attendances_search->unique('building_id') as $site_attendance)
                   <option value="{{$site_attendance->building_id}}" @if(Request::input('search_by_building_id')==$site_attendance->building_id) selected @endif>{{$site_attendance->building_no}}</option>
                 @endforeach
               </select>
@@ -76,22 +74,18 @@
                   <option value="{{$site_attendance->room_id}}"  @if(Request::input('search_by_room_id')==$site_attendance->room_id) selected @endif>{{$site_attendance->room_no}}</option>
                 @endforeach
               </select>
-
-              
-              {{-- <i class="fa fa-calendar"></i> --}}
-
-              <input type="text" class="date_picker" name="search_by_date" id="datepicker" placeholder="Select Date">
-              <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-            </form>
-            @permission('import_export_excel')
-              <div class="pull-right">
-                <a href="{{ route('export_to_excel',Route::current()->getName()) }}" class="export_to_excel">
-                  <button class="btn btn-success">Export to Excel</button>
-                </a>
+              <div class="input-group date search_by_date">
+                <div class="input-group-addon">
+                  <i class="fa fa-calendar"></i>
+                </div>
+                <input type="text" class="form-control pull-right" name="search_by_date" id="datepicker" placeholder="Select Date" @if(Request::input('search_by_date')) value="{{Request::input('search_by_date')}}" @endif>
               </div>
-            @endpermission
+              &nbsp; &nbsp; &nbsp;
+              <button type="submit" class="btn btn-primary">Search</button>
+            </form>
           </div>
-          
+        </div>
+        <div class="box-body table-responsive">
           @if(count($site_attendances))
             <table id="site_attendance_table" class="table table-bordered table-striped">
               <thead>
@@ -109,9 +103,7 @@
               <tbody>    
               @foreach($site_attendances as $site_attendance)
                 @php 
-                  $date = \Carbon\Carbon::parse($site_attendance->date)->timezone(Session::get('timezone')); 
-                  $login_time = \Carbon\Carbon::parse($site_attendance->login)->timezone(Session::get('timezone')); 
-
+                  $date = \Carbon\Carbon::parse($site_attendance->tz_login_date); 
                 @endphp
                 <tr>
                   <td>{{$site_attendance->name}}</td>
@@ -120,7 +112,7 @@
                   <td>{{$site_attendance->room_name}}</td>
                   <td>{{$site_attendance->room_no}}</td>
                   <td>{{$site_attendance->description}}</td>
-                  <td>{{$login_time->format('g:i A')}}</td>
+                  <td>{{$site_attendance->tz_login_time}}</td>
                   <td>{{$date->format('d M Y')}}</td>
                 </tr>
               @endforeach

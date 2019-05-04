@@ -1,11 +1,17 @@
 @extends('backend.layouts.app',['title'=> 'Sites'])
 
+@push('styles')
+<style type="text/css">
+  select{
+    width: 200px;
+  }
+</style>
+@endpush
 @section('content')
 
-<!-- Main content -->
 <section class="content">
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
       @if ($errors->any())
           <div class="alert alert-danger">
               @foreach ($errors->all() as $error)
@@ -18,47 +24,58 @@
             {{ \Session::get('message') }}
         </div>
       @endif
-      <div class="box box-primary">
+      <div class="box box-primary collapsed-box box-solid">
         <div class="box-header with-border">
           <h3 class="box-title">Add Building</h3>
+          <div class="pull-right box-tools">
+            <button type="button" class="btn btn-info btn-sm" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
+              <i class="fa fa-plus"></i></button>
+            <button type="button" class="btn btn-info btn-sm" data-widget="remove" data-toggle="tooltip" title="" data-original-title="Remove">
+              <i class="fa fa-times"></i></button>
+          </div>
         </div>
-        <form role="form" action="{{route('site.store')}}" method="POST">
-          @csrf
-          <div class="box-body pad">
-            <div class="form-group">
-              <label for="b_name">Name</label>
-              <input type="text" name="name" class="form-control" id="b_name" placeholder="Enter Name">
+        <div class="box-body pad">
+          <form role="form" action="{{route('site.store')}}" method="POST">
+            @csrf
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="b_name">Name</label>
+                <input type="text" name="name" class="form-control" id="b_name" placeholder="Enter Name">
+              </div>
+              <div class="form-group">
+                <label for="building_no">Building No</label>
+                <input type="text" name="building_no" class="form-control" id="building_no" placeholder="Enter Building Number" required>
+              </div>
+              <div class="form-group">
+                <label for="b_address">Address</label>
+                <input type="text" name="address" class="form-control" id="b_address" placeholder="Enter Address" required>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="building_no">Building No</label>
-              <input type="text" name="building_no" class="form-control" id="building_no" placeholder="Enter Building Number" required>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="b_image">Image</label><br>
+                <input type="file" name="image" class="form-control jfilestyle" id="b_image">
+              </div>
+              <div class="form-group">
+                <label for="b_description">Description</label>
+                <textarea name="description" rows="4" class="form-control" id="b_description" placeholder="Enter Additional Information" required></textarea>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="b_address">Address</label>
-              <input type="text" name="address" class="form-control" id="b_address" placeholder="Enter Address" required>
+            <div class="col-md-12">
+              <div class="box-footer">
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="b_description">Description</label>
-              <textarea name="description" class="form-control" id="b_description" placeholder="Enter Additional Information" required></textarea>
-            </div>
-            <div class="form-group">
-              <label for="b_image">Image</label>
-              <input type="file" name="image" class="form-control" id="b_image">
-            </div>
-          </div>
-          <div class="box-footer">
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-12">
       <div class="box">
         <div class="box-header">
           <h3 class="box-title">Buildings</h3>
         </div>
-        <!-- /.box-header -->
-        <div class="box-body">
+        <div class="box-body table-responsive no-padding">
           <table id="building_list_table" class="table table-bordered table-striped">
             <thead>
             <tr>
@@ -85,41 +102,33 @@
     </div>
   </div>
   <div class="row" id="area_division">
-    <div class="col-md-6">
-      <div class="box box-primary">
+    <div class="col-md-12">
+      <div class="box box-primary collapsed-box box-solid">
         <div class="box-header with-border">
           <h3 class="box-title">Create Division/Area</h3>
+          <div class="pull-right box-tools">
+            <button type="button" class="btn btn-info btn-sm" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
+              <i class="fa fa-plus"></i></button>
+            <button type="button" class="btn btn-info btn-sm" data-widget="remove" data-toggle="tooltip" title="" data-original-title="Remove">
+              <i class="fa fa-times"></i></button>
+          </div>
         </div>
-        <form role="form" action="{{route('room.store')}}" method="POST">
-          @csrf
-
-          <div class="box-body pad">
-            <div class="form-group">
-              <select class="select2" name="building_id">
-                @foreach($buildings as $building)
-                  <option value="{{$building->id}}">{{$building->name}}</option>
-                @endforeach
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="r_name">Name</label>
-              <input type="text" name="name" class="form-control" id="r_name" placeholder="Enter Name">
-            </div>
-
-            <div class="form-group">
-              <label for="room_no">Room No</label>
-              <input type="text" name="room_no" class="form-control" id="room_no" placeholder="Enter Room Number" required>
-            </div>
-            <div class="form-group">
-              <label for="r_description">Description</label>
-              <textarea name="description" class="form-control" id="r_description" placeholder="Enter Additional Information" required></textarea>
-            </div>
-            <div class="form-group">
-              <label for="r_image">Image</label>
-              <input type="file" name="image" class="form-control" id="r_image">
-            </div>
-
-              @if(Auth::user()->hasRole(['superAdmin','contractor']) && Auth::user()->inspection == '1')
+        <div class="box-body pad">
+          <form role="form" action="{{route('room.store')}}" method="POST">
+            @csrf
+            <div class="col-md-6">
+              <div class="col-md-6 no-padding">
+                <div class="form-group">
+                  <label for="">Select Building</label><br>
+                  <select class="select2" name="building_id">
+                    @foreach($buildings as $building)
+                      <option value="{{$building->id}}">{{$building->name}}</option>
+                    @endforeach
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6 no-padding">
+                @if(Auth::user()->hasRole(['superAdmin','contractor']) && Auth::user()->inspection == '1')
                   <div class="form-group">
                     <label for="r_image">Select Questionare</label><br>
                     <select class="select2" name="question_id">
@@ -128,28 +137,49 @@
                       @endforeach
                     </select>
                   </div>
-              @endif
-
-          </div>
-          <div class="box-footer">
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
+                @endif
+              </div>
+              <div class="form-group">
+                <label for="r_name">Name</label>
+                <input type="text" name="name" class="form-control" id="r_name" placeholder="Enter Name">
+              </div>
+              <div class="form-group">
+                <label for="room_no">Room No</label>
+                <input type="text" name="room_no" class="form-control" id="room_no" placeholder="Enter Room Number" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="r_image">Image</label><br>
+                <input type="file" name="image" class="form-control jfilestyle" id="r_image">
+              </div>
+              <div class="form-group">
+                <label for="r_description">Description</label>
+                <textarea name="description" rows="4" class="form-control" id="r_description" placeholder="Enter Additional Information" required></textarea>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="box-footer">
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-12">
       <div class="box">
         <div class="box-header">
-          <h3 class="box-title">Rooms</h3>
+          <h3 class="box-title">Division / Area</h3>
         </div>
-        <!-- /.box-header -->
-        <div class="box-body">
+        <div class="box-body table-responsive no-padding">
           <table id="room_list_table" class="table table-bordered table-striped">
             <thead>
             <tr>
               <th>S.No</th>
               <th>Name</th>
               <th>Room No</th>
+              <th>Description</th>
               <th>Building No</th>
               @if(Auth::user()->hasRole(['superAdmin','contractor']) && Auth::user()->inspection == '1')
                   <th>Question Template</th>
@@ -165,6 +195,7 @@
                 <td>{{$count}}</td>
                 <td>{{$room->name}}</td>
                 <td>{{$room->room_no}}</td>
+                <td>{{$room->description}}</td>
                 <td>{{$room->building_no}}</td>
                 @if(Auth::user()->hasRole(['superAdmin','contractor']) && Auth::user()->inspection == '1')
                     @foreach($questionTemplate as $qt)
@@ -185,7 +216,6 @@
             </tbody>
           </table>
         </div>
-        <!-- /.box-body -->
       </div>
     </div>
   </div>
@@ -195,16 +225,16 @@
 
 @push('scripts')
 <script type="text/javascript">
-  $(function () {
-    $('#building_list_table').DataTable({
-      "pageLength": 8,
-      "scrollX": true,
-    });
-    $('#room_list_table').DataTable({
-      "pageLength": 8,
-      "scrollX": true,
-    });
-  })
+  // $(function () {
+  //   $('#building_list_table').DataTable({
+  //     "pageLength": 8,
+  //     "scrollX": true,
+  //   });
+  //   $('#room_list_table').DataTable({
+  //     "pageLength": 8,
+  //     "scrollX": true,
+  //   });
+  // })
 </script>
   
 @endpush

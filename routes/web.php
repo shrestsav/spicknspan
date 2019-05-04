@@ -38,7 +38,7 @@ Route::middleware(['auth'])->group(function () {
 		})->name('scanner');
 	Route::post('/qr_login', 'AttendanceController@ajax_qr_login')->name('ajax.qrLogin');
 	Route::get('/siteAttendance','AttendanceController@site_attendance')->name('site.attendance');
-	Route::post('/searchsiteAttendance','AttendanceController@search_site_attendance')->name('site.attendance.search');
+	Route::post('/siteAttendance','AttendanceController@site_attendance')->name('site.attendance.search');
 
 	Route::get('/mail', 'MailController@index')->name('mail.index');
 	Route::get('/compose', 'MailController@composeMail')->name('mail.compose');

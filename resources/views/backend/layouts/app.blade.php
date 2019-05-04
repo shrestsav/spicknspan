@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="{{ asset('backend/css/AdminLTE.min.css') }}">
   {{-- Theme Color CSS --}}
   <link rel="stylesheet" href="{{ asset('backend/css/skin-green.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('backend/css/jquery-filestyle.min.css') }}">
 
   {{-- CUSTOM CSS BY SHRESTSAV --}}
   <link rel="stylesheet" href="{{ asset('backend/css/style.css') }}">
@@ -172,6 +173,7 @@
 <script src="{{ asset('backend/js/dataTables.bootstrap.min.js') }}"></script>
 <script src="{{ asset('backend/js/sweetalert.min.js') }}"></script>
 <script src="{{ asset('backend/js/validator.min.js') }}"></script>
+<script src="{{ asset('backend/js/jquery-filestyle.min.js') }}"></script>
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.23/moment-timezone.min.js"></script>
