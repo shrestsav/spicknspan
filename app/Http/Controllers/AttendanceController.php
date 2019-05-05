@@ -165,9 +165,11 @@ class AttendanceController extends Controller
             $employees = $employees->where('added_by','=',$addedBy);
             $clients = $clients->where('added_by','=',$addedBy);
         }
+        
         $employees = $employees->get();
         $clients = $clients->get();
 
+        // return $attendance_lists;
         return view('backend.pages.attendance_list',compact('attendance_lists', 'clients', 'employees'));
     }
 

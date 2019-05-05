@@ -39,3 +39,11 @@ text-align: left;
 .box-roster.row {
     width: auto;
 }
+
+.action_icons{
+  padding: 0px 5px;
+}
+
+.large_modal_dialog{
+  width: 90%
+}

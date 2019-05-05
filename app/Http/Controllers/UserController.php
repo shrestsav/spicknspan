@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -112,51 +113,68 @@ class UserController extends Controller
             'timezone' => $request['timezone'],
         ]);
 
-        $user_id = $user->id;
+        if($user){
 
-        //Save User Photo 
-        if ($request->hasFile('photo')) {
-            $photo = $request->file('photo');
-            $fileName = 'dp_user_'.$user_id.'.'.$photo->getClientOriginalExtension();
-            $uploadDirectory = public_path('files'.DS.'users'.DS.$user_id);
-            $photo->move($uploadDirectory, $fileName);
-        } else {
-          $fileName = 'no_image';
-        }
+          $user_id = $user->id;
 
-        $db_arr = [];
-        if ($request->hasFile('documents')) {
-            $documents = $request->file('documents');
-            $count = 1;
-            foreach($documents as $document){
-              $documentName = $user_id.'_document_'.$count.'_'.$document->getClientOriginalName();
+          //Save User Photo 
+          if ($request->hasFile('photo')) {
+              $photo = $request->file('photo');
+              $fileName = 'dp_user_'.$user_id.'.'.$photo->getClientOriginalExtension();
               $uploadDirectory = public_path('files'.DS.'users'.DS.$user_id);
-              $document->move($uploadDirectory, $documentName);
-              $db_arr['document_'.$count] = $documentName;
-              $count++;
-            }  
-        }
-        //Update User Details Table
-        UserDetail::create([
-            'user_id' => $user_id,
-            'photo' => $fileName,
-            'address' => $request['address'],
-            'gender' => $request['gender'],
-            'contact' => $request['contact'],
-            'hourly_rate' => $request['hourly_rate'],
-            'annual_salary' => $request['annual_salary'],
-            'description' => $request['description'],
-            'date_of_birth' => $request['date_of_birth'],
-            'employment_start_date' => $request['employment_start_date'],
-            'documents' => json_encode($db_arr),
-        ]);
-
-        $roles = Role::pluck('name','id');
-        foreach($roles as $role_id => $role){
-          if($role==$decrypt_user_type){
-            $user->attachRole($role_id);
+              $photo->move($uploadDirectory, $fileName);
+          } else {
+            $fileName = 'no_image';
           }
+
+          $db_arr = [];
+          
+          if ($request->hasFile('documents')) {
+              $documents = $request->file('documents');
+              $count = 1;
+              foreach($documents as $document){
+                $documentName = $user_id.'_document_'.$count.'_'.$document->getClientOriginalName();
+                $uploadDirectory = public_path('files'.DS.'users'.DS.$user_id);
+                $document->move($uploadDirectory, $documentName);
+                $db_arr['document_'.$count] = $documentName;
+                $count++;
+              }  
+          }
+          //Update User Details Table
+          UserDetail::create([
+              'user_id' => $user_id,
+              'photo' => $fileName,
+              'address' => $request['address'],
+              'gender' => $request['gender'],
+              'contact' => $request['contact'],
+              'hourly_rate' => $request['hourly_rate'],
+              'annual_salary' => $request['annual_salary'],
+              'description' => $request['description'],
+              'date_of_birth' => $request['date_of_birth'],
+              'employment_start_date' => $request['employment_start_date'],
+              'documents' => json_encode($db_arr),
+          ]);
+
+          $roles = Role::pluck('name','id');
+          foreach($roles as $role_id => $role){
+            if($role==$decrypt_user_type){
+              $user->attachRole($role_id);
+            }
+          }
+
+
+          //Mail the user
+          $name = $request['name'];
+          $username = $request['email'];
+          $password = $request['password'];
+          $msg='These are your login credentials for Spick and Span. Please Change your password immediately after you receive this email';
+          Mail::send('backend.layouts.email.register_user', array( 'msg' => $msg, 'username' => $username, 'password' => $password), function($message) use ($name,$username)
+          {      
+              $message->from('info@spicknspan.com', 'Spick And Span');
+              $message->to($username)->subject(' Welcome '.$name.' to Spick and Span Family');
+          });
         }
+
 
         return redirect()->back()->with('message', 'Added Successfully');
     }
@@ -169,7 +187,43 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        //
+	      $user_details = User::with('detail')->get();
+	      return $user_details;
+    }
+
+    public function ajax_user_details(Request $request)
+    {
+        $user_details = User::select(
+                              'users.id',
+                              'users.name',
+                              'users.email',
+                              'users.user_type',
+                              'users.timezone',
+                              'user_details.photo',
+                              'user_details.address',
+                              'user_details.gender',
+                              'user_details.contact',
+                              'user_details.hourly_rate',
+                              'user_details.annual_salary',
+                              'user_details.description',
+                              'user_details.date_of_birth',
+                              'user_details.employment_start_date',
+                              'user_details.documents')
+                        ->join('user_details','user_details.user_id','=','users.id')
+                        ->where('users.id','=',$request->user_id)
+                        ->first();
+
+        // return json_encode($user_details);
+        $view = view('backend.modals.render.user_details')->with([
+           'user_details' => $user_details ])->render();
+
+        $response = [
+           'status' => true,
+           'title' => $user_details->name,
+           'html' => $view
+        ];
+       return response()->json($response);
+
     }
 
     /**

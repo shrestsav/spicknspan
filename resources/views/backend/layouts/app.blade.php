@@ -124,6 +124,8 @@
 <script src="{{ asset('backend/js/sweetalert.min.js') }}"></script>
 <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
 <script>
+  var SITE_URL =  '{{ url("/") . "/" }}';
+
   $.widget.bridge('uibutton', $.ui.button);
 
 // SET AJAX CSRF TOKEN

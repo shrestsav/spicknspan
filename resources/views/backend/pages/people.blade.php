@@ -251,7 +251,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
             <input type="hidden" name="user_type" class="form-control" value="{{$user_type}}">
             <div class="col-md-12" style="text-align: center;">
               <div class="form-group">
-                <label for="file">Please Use this feature carefully (Contact Admin for xlsx Format)</label><br><br>
+                <label for="file"><a href="javascript:;"  data-toggle="modal" data-target="#modal-info"> Please Read this before using this feature</a></label><br><br>
                 <input type="file" name="file" class="form-control jfilestyle" required>
                 <div class="help-block with-errors"></div>
                 <button class="btn btn-success" type="submit">Import User Data</button>
@@ -266,7 +266,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
         <a href="{{ route('export_to_excel',Route::current()->getName()) }}" class="export_to_excel">
           <button class="btn btn-success">Export to Excel</button>
         </a>
-        <div class="box-body">
+        <div class="box-body table-responsive">
           <table id="users_table" class="table table-bordered table-striped">
             <thead>
             <tr>
@@ -287,10 +287,14 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <td>{{$user->hourly_rate}}</td>
                 <td>{{$user->employment_start_date}}</td>
                 <td>
-                  <a href="{{route('user.edit',$user->id)}}">
-                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                  <a href="#" class="view_user_details" data-user-id="{{$user->id}}">
+                    <span class="action_icons"><i class="fa fa-eye" aria-hidden="true"></i></span>
                   </a>
-                  <a href="javascript:;" id="delete_user" data-user_id = '{{$user->id}}'><i class="fa fa-trash" aria-hidden="true"></i>
+                  <a href="{{route('user.edit',$user->id)}}">
+                    <span class="action_icons"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></span>
+                  </a>
+                  <a href="javascript:;" id="delete_user" data-user_id = '{{$user->id}}'>
+                    <span class="action_icons"><i class="fa fa-trash" aria-hidden="true"></i></span>
                   </a>
                 </td>
               </tr>
@@ -303,8 +307,76 @@ elseif(Route::current()->getName() == 'user_client.index'){
   </div>
 </section>
 
+@include('backend.modals.modal', [
+            'modalId' => 'userDetailsModal',
+            'modalFile' => '__modal_body',
+            'modalTitle' => __('User Details'),
+            'modalSize' => 'large_modal_dialog',
+        ])
+
+<div class="modal modal-info fade" id="modal-info">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Read Very Carefully</h4>
+      </div>
+      <div class="modal-body">
+        <h3></h3>
+        <div>
+          <ol>
+            <li>First Download the excel file provided here for the correct format to upload</li>
+            <li>Now open the file and replace the dummy data with your actual data</li>
+            <li>Please donot edit or remove any header columns</li>
+            <li>The yellow marked column should not be left empty</li>
+            <li>Donot leave any empty row after heading row or in between any of the rows</li>
+            <li>Donot upload employees lists from clients page or clients from employees page and likewise</li>
+            <li>After you have filled X number of rows, save and upload it.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="modal-footer" style="text-align: center;">
+        <a href="{{ asset('files/import_from_excel_format.xlsx') }}"><button type="button" class="btn btn-outline">Download Excel Format</button></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
 @endsection
 @push('scripts')
+<script type="text/javascript">
+    //Show Product Detail Modal
+    
+    $('.view_user_details').on('click',function (e) {
+        e.preventDefault();
+        var user_id = $(this).data('user-id');
+        // $('#userDetailsModal').modal('show');
+        $.ajax({
+            type: 'POST',
+            url: SITE_URL + 'ajax_user_details',
+            data: {
+                'user_id': user_id
+            },
+            dataType: 'json'
+        }).done(function (response) {
+            console.log(response);
+            detailModel = $('#userDetailsModal');
+            detailModel.find('.modal-content .modal-title').html(response.title);
+            detailModel.find('.modal-body').html(response.html);
+            detailModel.modal('show');
+            // $('#userDetailsModal').modal('show');
+        });
+    });
+</script>
+
 <script type="text/javascript">
   $(function () {
     $('#users_table').DataTable()
@@ -357,5 +429,5 @@ $(document).ready(function() {
     });
 });
 </script>
-  
+
 @endpush

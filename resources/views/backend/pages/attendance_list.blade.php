@@ -138,8 +138,12 @@
                     <td>{{$attendance_list->client_name}}</td>
                     <td>{{$attendance_list->total_time}}</td>
                     <td>{{$check_in->format('g:i A')}} - 
-                        @if($attendance_list->check_out!=null || $attendance_list->check_out!='')
-                          {{$check_out->format('g:i A')}}@else NOT LOGGED OUT @endif</td>
+                      @if($attendance_list->check_out!=null || $attendance_list->check_out!='')
+                        {{$check_out->format('g:i A')}}
+                      @else 
+                        NOT LOGGED OUT 
+                      @endif
+                    </td>
                     <td>
                       <a class="view_att_details btn btn-success" href="{{ url('attendance/details').'/'.$attendance_list->client_id.'/'.$attendance_list->employee_id.'/'.$attendance_list->date}}">Details
                       </a>
