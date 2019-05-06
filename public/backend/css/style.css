@@ -1,3 +1,51 @@
+
+/*Profile Pic CSS */
+
+.profile-pic {
+    max-width: 150px;
+    max-height: 150px;
+    display: block;
+}
+.file-upload {
+    display: none !important;
+}
+.circle {
+    border-radius: 1000px !important;
+    overflow: hidden;
+    width: 128px;
+    height: 128px;
+    background: #ecf0f5;
+    border: 8px solid rgba(162, 162, 162, 0.7);
+    position: relative;
+}
+.circle:img {
+    max-width: 100%;
+    height: auto;
+}
+.p-image {
+  position: absolute;
+  top: 81px;
+  left: 108px;
+  font-size: 30px;
+  color: #666666;
+  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+}
+.p-image:hover {
+  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+}
+.upload-button {
+  font-size: 1.2em;
+}
+.upload-button:hover {
+  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
+  color: #999;
+}
+
+/*Profile Picture CSS ENDS*/
+
+
+
+
 .custom_error_msg, .custom_success_msg, .access_error_msg{
 	text-align: center;
 }
@@ -45,5 +93,10 @@ text-align: left;
 }
 
 .large_modal_dialog{
-  width: 90%
+  width: 90%;
+}
+
+.fa-window-close:hover,.document_container input:hover{
+  cursor: pointer;
+  color: red;
 }

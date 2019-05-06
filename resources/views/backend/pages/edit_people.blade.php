@@ -38,12 +38,24 @@ elseif(Route::current()->getName() == 'user_client.index'){
         <div class="box-header with-border">
           <h3 class="box-title">Employee Information</h3>
         </div>
-        <form role="form" action="{{route('user.update',$user->id)}}" method="POST" data-toggle="validator">
+        <form role="form" action="{{route('user.update',$user->id)}}" method="POST" data-toggle="validator" enctype="multipart/form-data">
           @csrf
           <div class="box-body pad">
             {{-- Hidden Fields --}}
             <input type="hidden" class="form-control" name="user_type" value="{{$user->user_type}}">
             <div class="col-md-6">
+              <div class="form-group col-md-12">
+                <div class="col-md-4 col-md-offset-4">
+                  <div class="circle">
+                    <img class="profile-pic" src="{{ asset('files/users/'.$user->id.'/dp_user_'.$user->id.'.png') }}">
+                  </div>
+                  <div class="p-image">
+                    <i class="fa fa-camera upload-button"></i>
+                    <input class="file-upload" type="file" name="photo" id="photo" accept="image/*"/>
+                  </div>
+                  {{-- <label for="photo">Photo</label> --}}
+                </div>
+              </div>
               <div class="form-group">
                 <label for="name">Name</label>
                 <input type="text" name="name" class="form-control" id="name" placeholder="Enter Name" value="{{$user->name}}" required>
@@ -84,10 +96,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label for="photo">Photo</label>
-                <input type="file" name="photo" class="form-control" id="photo" value="{{$user->photo}}">
-              </div>
-              <div class="form-group">
                 <label for="annual_salary">Annual Salary</label>
                 <input type="number" name="annual_salary" class="form-control" id="annual_salary" placeholder="Enter Annual Salary" value="{{$user->annual_salary}}">
               </div>
@@ -106,6 +114,32 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 </select>
                 <div class="help-block with-errors"></div>
               </div>
+
+              
+              <div class="form-group">
+                <input type="hidden" name="left_user_doc_array" id="left_user_doc_array" value="">
+                <input type="hidden" name="del_user_doc_array" id="del_user_doc_array" value="">
+                <label for="documents">Documents</label><br>
+                @php 
+                  $documents = json_decode($user->documents, true);
+                @endphp
+                
+                @if($documents)
+                  @foreach($documents as $key => $document)
+                    <div class="input-group document_container" style="width: 350px;">
+                      <a href="{{ asset('files/users/'.$user->id.'/'.$document)}}" target="__blank">
+                        <input type="text" class="form-control pull-right" value="{{$document}}" readonly>
+                      </a>
+                      <div class="input-group-addon">
+                        <i class="fa fa-window-close delete_document" aria-hidden="true" data-document-pointer="{{$key}}" data-user-id="{{$user->id}}"></i>
+                      </div>
+                    </div>
+                  @endforeach 
+                @endif 
+                <br><label for="adding">Add Documents</label><br>
+                <input type="file" name="documents[]" class="jfilestyle" multiple> 
+                <div class="help-block with-errors"></div>
+              </div> 
             </div>
           </div>
           <div class="box-footer">
@@ -129,5 +163,42 @@ elseif(Route::current()->getName() == 'user_client.index'){
     //Guesses the current timezone automatically 
     var timezone = '{{$user->timezone}}';
     $("#timezone").val(timezone).change();
+
+
+    var user_doc_json = '@php echo $user->documents @endphp';
+    var left_user_doc_array = JSON.parse(user_doc_json);
+    var del_user_doc_array = [];
+    $('#left_user_doc_array').val(JSON.stringify(left_user_doc_array));
+    $('#del_user_doc_array').val(JSON.stringify(del_user_doc_array));
+
+
+  
+    $('.delete_document').on('click',function(e){
+      e.preventDefault();
+      var my = $(this);
+      var document_id = my.data('document-pointer');
+      var user_id = my.data('user-id');
+      del_user_doc_array.push(left_user_doc_array[document_id]);
+      left_user_doc_array.splice(document_id,1);
+      $('#left_user_doc_array').val(JSON.stringify(left_user_doc_array));
+      $('#del_user_doc_array').val(JSON.stringify(del_user_doc_array));
+
+      my.parent().parent().fadeOut('slow');
+
+      // alert(my.parents().parents().attr('class'));
+      // $.ajax({
+      //       type: 'POST',
+      //       url: SITE_URL + 'ajax_delete_documents',
+      //       data: {
+      //           'user_id': user_id,
+      //           'document_id': document_id,
+      //       },
+      //       dataType: 'json'
+      //   }).done(function (response) {
+      //       console.log(response);
+           
+      //   });
+      // alert(document_id);
+    })
   </script>
 @endpush

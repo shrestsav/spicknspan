@@ -86,9 +86,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-      // return $request->all();
-     
+    {     
         $userId   = Auth::id();
 
         $validatedData = $request->validate([
@@ -116,16 +114,14 @@ class UserController extends Controller
         if($user){
 
           $user_id = $user->id;
-
+          $fileName = '';
           //Save User Photo 
           if ($request->hasFile('photo')) {
               $photo = $request->file('photo');
               $fileName = 'dp_user_'.$user_id.'.'.$photo->getClientOriginalExtension();
               $uploadDirectory = public_path('files'.DS.'users'.DS.$user_id);
               $photo->move($uploadDirectory, $fileName);
-          } else {
-            $fileName = 'no_image';
-          }
+          } 
 
           $db_arr = [];
           
@@ -136,7 +132,8 @@ class UserController extends Controller
                 $documentName = $user_id.'_document_'.$count.'_'.$document->getClientOriginalName();
                 $uploadDirectory = public_path('files'.DS.'users'.DS.$user_id);
                 $document->move($uploadDirectory, $documentName);
-                $db_arr['document_'.$count] = $documentName;
+                // $db_arr['document_'.$count] = $documentName;
+                $db_arr[] = $documentName;
                 $count++;
               }  
           }
@@ -162,19 +159,17 @@ class UserController extends Controller
             }
           }
 
-
           //Mail the user
           $name = $request['name'];
           $username = $request['email'];
           $password = $request['password'];
-          $msg='These are your login credentials for Spick and Span. Please Change your password immediately after you receive this email';
-          Mail::send('backend.layouts.email.register_user', array( 'msg' => $msg, 'username' => $username, 'password' => $password), function($message) use ($name,$username)
+          Mail::send('backend.layouts.email.register_user', array('username' => $username, 'password' => $password), function($message) use ($name,$username)
           {      
-              $message->from('info@spicknspan.com', 'Spick And Span');
-              $message->to($username)->subject(' Welcome '.$name.' to Spick and Span Family');
+              $message->from('support@trackncheck.com', 'Spick And Span');
+              $message->to($username)->subject('Greetings '.$name.': Welcome to Spick and Span Team');
           });
-        }
 
+        }
 
         return redirect()->back()->with('message', 'Added Successfully');
     }
@@ -257,6 +252,106 @@ class UserController extends Controller
         return view('backend.pages.edit_people',compact('user'));
     }
 
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255',
+            'gender' => 'required',
+            'contact' => 'required',
+            'employment_start_date' => 'required',
+            'timezone' => 'required',
+        ]);
+
+        $update_user = User::where('id','=',$id)->update(['name' => $request->name,
+                                                          'email' => $request->email,
+                                                          'timezone' => $request->timezone,
+                                                            ]);
+
+        if($update_user){
+          $fileName = '';
+          //Save User Photo 
+          if ($request->hasFile('photo')) {
+              $photo = $request->file('photo');
+              $fileName = 'dp_user_'.$id.'.'.$photo->getClientOriginalExtension();
+              $uploadDirectory = public_path('files'.DS.'users'.DS.$id);
+              $photo->move($uploadDirectory, $fileName);
+          } 
+
+          $db_arr =  json_decode($request->left_user_doc_array, true);
+          $doc_del =  json_decode($request->del_user_doc_array, true);
+
+          if($doc_del){
+            $documentDirectory = public_path('files'.DS.'users'.DS.$id);
+            foreach($doc_del as $del){
+              \File::delete(public_path('files'.DS.'users'.DS.$id.DS).$del);
+            }
+          }
+
+          if ($request->hasFile('documents')) {
+              $documents = $request->file('documents');
+              $count = 1;
+              foreach($documents as $document){
+                $documentName = $id.'_document_'.$count.'_'.$document->getClientOriginalName();
+                $uploadDirectory = public_path('files'.DS.'users'.DS.$id);
+                $document->move($uploadDirectory, $documentName);
+                $db_arr[] = $documentName;
+                $count++;
+              }  
+          }
+
+          $update_user_details = UserDetail::where('user_id','=',$id)
+                 ->update([
+                            'gender' => $request->gender,
+                            'hourly_rate' => $request->hourly_rate,
+                            'address' => $request->address,
+                            'contact' => $request->contact,
+                            'date_of_birth' => $request->date_of_birth,
+                            'photo' => $fileName,
+                            'annual_salary' => $request->annual_salary,
+                            'description' => $request->description,
+                            'employment_start_date' => $request->employment_start_date,
+                            'documents' => json_encode($db_arr),
+                         ]);
+        }
+
+        // if($request->user_type=='employee')
+        //     $route = 'user_employee.index';
+        // if($request->user_type=='client')
+        //     $route =  'user_client.index';
+        // if($request->user_type=='contractor')
+        //     $route =  'user_contractor.index';
+        // if($request->user_type=='company')
+        //     $route =  'user_company.index';
+        // return redirect()->route($route)->with('message', 'Updated Successfully');
+        return redirect()->back()->with('message', 'Updated Successfully');
+    }
+    
+    //Not in use
+    public function ajax_delete_documents(Request $request)
+    {
+      $user_id = $request->user_id;
+      $user_documents_json = UserDetail::where('user_id',$user_id)->first()->documents;
+      $user_documents = json_decode($user_documents_json, true);
+      $fileName = $user_documents[$request->document_id];
+      unset($user_documents[$request->document_id]);
+      $updated_user_documents_json = json_encode($user_documents);
+      $update_user_documents = UserDetail::where('user_id',$request->user_id)
+                                          ->update(['documents' => $updated_user_documents_json]);
+      if($update_user_documents){
+        $documentDirectory = public_path('files'.DS.'users'.DS.$user_id);
+        \File::delete(public_path('files'.DS.'users'.DS.$user_id.DS).$fileName);
+      }
+      return json_encode($documentDirectory);
+
+    }
     public function profile_edit($id)
     {
         $user = User::select(
@@ -301,43 +396,6 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $update_user = User::where('id','=',$id)
-                      ->update(['name' => $request->name,
-                                'email' => $request->email,
-                                'timezone' => $request->timezone,
-                                  ]);
-        $update_user_details = UserDetail::where('user_id','=',$id)
-               ->update([
-                          'gender' => $request->gender,
-                          'hourly_rate' => $request->hourly_rate,
-                          'address' => $request->address,
-                          'contact' => $request->contact,
-                          'date_of_birth' => $request->date_of_birth,
-                          'photo' => $request->photo,
-                          'annual_salary' => $request->annual_salary,
-                          'description' => $request->description,
-                          'employment_start_date' => $request->employment_start_date
-                       ]);
-        if($request->user_type=='employee')
-            $route = 'user_employee.index';
-        if($request->user_type=='client')
-            $route =  'user_client.index';
-        if($request->user_type=='contractor')
-            $route =  'user_contractor.index';
-        if($request->user_type=='company')
-            $route =  'user_company.index';
-        return redirect()->route($route)->with('message', 'Updated Successfully');
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
@@ -345,8 +403,7 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        User::where('id','=',$id)->delete();
-        UserDetail::where('user_id','=',$id)->delete();
+        User::where('id',$id)->delete();
         return redirect()->back()->with('message','Deleted Successfully');
     }
 }

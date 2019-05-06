@@ -6,11 +6,21 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Zizaco\Entrust\Traits\EntrustUserTrait;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
     use Notifiable;
-    use EntrustUserTrait; 
+
+    //Traits method haru collide bhayera rakheko,,, User::find($id)->delete() garyo bhaney role delete hunxa,, so use User::where('id',$id)->delete() instead,, that way softdelete matra hunxa
+    use SoftDeletes, EntrustUserTrait {
+
+        SoftDeletes::restore insteadof EntrustUserTrait;
+        EntrustUserTrait::restore insteadof SoftDeletes;
+
+    }
+    // use EntrustUserTrait;
+    // use SoftDeletes; 
 
     /**
      * The attributes that are mass assignable.

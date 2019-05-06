@@ -30,7 +30,7 @@ class AttendanceController extends Controller
         $clients = User::whereHas('roles', function ($query) {
                                 $query->where('name', '=', 'client');
                              })
-                        ->where('added_by','=',$addedBy)
+                        ->where('id','=',$addedBy)
                         ->get();
 
         // Check Users last login status

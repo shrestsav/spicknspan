@@ -60,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/clients', 'UserController@index')->name('user_client.index');
 		Route::post('/add_user', 'UserController@store')->name('user.store');
 		Route::get('/edit_user/{id}', 'UserController@edit')->name('user.edit');
+		Route::post('/ajax_delete_documents', 'UserController@ajax_delete_documents');
 		Route::post('/ajax_user_details', 'UserController@ajax_user_details')->name('user.view');
 
 		Route::post('/update_user/{id}', 'UserController@update')->name('user.update');

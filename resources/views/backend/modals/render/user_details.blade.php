@@ -55,20 +55,6 @@
                 </div>
             </div>
         @endif
-
-        {{-- <div class="col-md-12">
-            <div class="form-group">
-                <label for="user_name">{{__('Documents')}}</label>
-                <div>
-                    @foreach($documents as $document)
-                    <label>
-                        
-                        {{$document}}
-                    </label>
-                    
-                </div>
-            </div>
-        </div> --}}
     </div>
       
 

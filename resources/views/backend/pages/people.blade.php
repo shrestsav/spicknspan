@@ -34,51 +34,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
   }
 </style>
 
-
-
-
-{{-- Profile Pic CSS --}}
-<style type="text/css">
-.profile-pic {
-    max-width: 150px;
-    max-height: 150px;
-    display: block;
-}
-.file-upload {
-    display: none !important;
-}
-.circle {
-    border-radius: 1000px !important;
-    overflow: hidden;
-    width: 128px;
-    height: 128px;
-    background: #ecf0f5;
-    border: 8px solid rgba(162, 162, 162, 0.7);
-    position: relative;
-}
-.circle:img {
-    max-width: 100%;
-    height: auto;
-}
-.p-image {
-  position: absolute;
-  top: 81px;
-  left: 108px;
-  font-size: 30px;
-  color: #666666;
-  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
-}
-.p-image:hover {
-  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
-}
-.upload-button {
-  font-size: 1.2em;
-}
-.upload-button:hover {
-  transition: all .3s cubic-bezier(.175, .885, .32, 1.275);
-  color: #999;
-}
-</style>
 @endpush
 
 @section('content')
@@ -275,6 +230,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
               <th>Contact No</th>
               <th>Hourly Rate</th>
               <th>Start Date</th>
+              <th>Documents</th>
               <th>Action</th>
             </tr>
             </thead>
@@ -286,6 +242,13 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <td>{{$user->contact}}</td>
                 <td>{{$user->hourly_rate}}</td>
                 <td>{{$user->employment_start_date}}</td>
+                @php
+                  $docs = json_decode($user->documents, true);
+                  $count = 'No Docs';
+                  if($docs)
+                    $count = count($docs);
+                @endphp
+                <td>{{$count}}</td>
                 <td>
                   <a href="#" class="view_user_details" data-user-id="{{$user->id}}">
                     <span class="action_icons"><i class="fa fa-eye" aria-hidden="true"></i></span>
@@ -293,9 +256,11 @@ elseif(Route::current()->getName() == 'user_client.index'){
                   <a href="{{route('user.edit',$user->id)}}">
                     <span class="action_icons"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></span>
                   </a>
-                  <a href="javascript:;" id="delete_user" data-user_id = '{{$user->id}}'>
+                  @if(Route::current()->getName() == 'user_employee.index')
+                  <a href="javascript:;" class="delete_user" data-user_id='{{$user->id}}'>
                     <span class="action_icons"><i class="fa fa-trash" aria-hidden="true"></i></span>
                   </a>
+                  @endif
                 </td>
               </tr>
             @endforeach
@@ -358,7 +323,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
     $('.view_user_details').on('click',function (e) {
         e.preventDefault();
         var user_id = $(this).data('user-id');
-        // $('#userDetailsModal').modal('show');
         $.ajax({
             type: 'POST',
             url: SITE_URL + 'ajax_user_details',
@@ -372,7 +336,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
             detailModel.find('.modal-content .modal-title').html(response.title);
             detailModel.find('.modal-body').html(response.html);
             detailModel.modal('show');
-            // $('#userDetailsModal').modal('show');
         });
     });
 </script>
@@ -381,7 +344,8 @@ elseif(Route::current()->getName() == 'user_client.index'){
   $(function () {
     $('#users_table').DataTable()
   });
-  $('#delete_user').on('click',function(){
+  $('.delete_user').on('click',function(){
+    var user_id = $(this).data('user_id');
     swal({
     title: "Are you sure?",
     text: "Once deleted, you will not be able to recover this data!",
@@ -391,8 +355,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
   })
     .then((willDelete) => {
       if (willDelete) {
-        var user_id = $(this).data('user_id');
-        alert(user_id);
         window.location.href = "{{url('delete_user/')}}/"+user_id;
       } 
     });
@@ -407,27 +369,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
   var guess_current_timezone = moment.tz.guess();
   $("#timezone").val(guess_current_timezone).change();
 
-
-{{-- Profile Pic JS --}}
-
-$(document).ready(function() {
-    var readURL = function(input) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                $('.profile-pic').attr('src', e.target.result);
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-    $(".file-upload").on('change', function(){
-        readURL(this);
-    });
-    
-    $(".upload-button").on('click', function() {
-       $(".file-upload").click();
-    });
-});
 </script>
 
 @endpush
