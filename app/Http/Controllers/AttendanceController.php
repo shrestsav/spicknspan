@@ -26,12 +26,24 @@ class AttendanceController extends Controller
      */
     public function index(Request $request)
     {
-        $addedBy  = Auth::user()->added_by;
+
+        //Here, Condition is ,, if contractors or admin goes to check in out page then they will be displayed with their added clients whereas if employees goes in checkin out page then they will be displayed with their assigned clients only
+
         $clients = User::whereHas('roles', function ($query) {
-                                $query->where('name', '=', 'client');
-                             })
-                        ->where('id','=',$addedBy)
-                        ->get();
+                                  $query->where('name', '=', 'client');
+                               });
+
+        if(Entrust::hasRole(['contractor'])){
+          //Retrieve all clients added by Contractors
+          $clients->where('added_by','=',Auth::id());
+        }
+        elseif(Entrust::hasRole(['employee'])){
+          $client_ids  = json_decode(Auth::user()->client_ids);
+          if($client_ids)
+            $clients->whereIn('id',$client_ids);
+        }
+        
+        $clients = $clients->get();
 
         // Check Users last login status
         $last_check_in_out_client = Attendance::select('check_in', 'check_out', 'client_id')
@@ -41,7 +53,7 @@ class AttendanceController extends Controller
                                         ->first();
         if($last_check_in_out_client){
             $last_check_in_out_client = $last_check_in_out_client->client_id;
-        }                                        
+        }
 
         return view('backend.pages.check_in_out',compact('clients','last_check_in_out_client'));
     }
@@ -111,48 +123,30 @@ class AttendanceController extends Controller
     {
         //
     }
-    public function list()
+    public function list(Request $request)
     {
         $addedBy  = Auth::user()->added_by;
-
-        if(isset($_GET['employee_id'])){
-            $filtEmpId = $_GET['employee_id'];
-        } else {
-            $filtEmpId = '';
-        }
-
-        if(isset($_GET['client_id'])){
-            $filtCliId = $_GET['client_id'];
-        } else {
-            $filtCliId = '';
-        }
-
-        if(isset($_GET['filt_date'])){
-            $filtDate = $_GET['filt_date'];
-        } else {
-            $filtDate = '';
-        }
 
         $employee_id = Auth::id();
 
         $attendance_lists = Attendance::select(
-                                DB::raw("SEC_TO_TIME(SUM(TIME_TO_SEC(CAST(TIMEDIFF(`check_out`,`check_in`) AS TIME)))) AS total_time"),
-                                DB::raw("min(check_in) as check_in"),
-                                DB::raw("max(check_out) as check_out"),
-                                DB::raw("CAST(check_in AS date) AS date"),
-                                'attendances.client_id',
-                                'attendances.employee_id',
-                                'client.name as client_name',
-                                'employee.name as employee_name'
-                                    )
+                              DB::raw("SEC_TO_TIME(SUM(TIME_TO_SEC(CAST(TIMEDIFF(`check_out`,`check_in`) AS TIME)))) AS total_time"),
+                              DB::raw("min(check_in) as check_in"),
+                              DB::raw("max(check_out) as check_out"),
+                              DB::raw("CAST(check_in AS date) AS date"),
+                              'attendances.client_id',
+                              'attendances.employee_id',
+                              'client.name as client_name',
+                              'employee.name as employee_name'
+                                  )
                             ->join('users as employee','attendances.employee_id','=','employee.id')
                             ->join('users as client','attendances.client_id','=','client.id')
                             ->groupBy('client_name','employee_name','date','client_id','employee_id')
                             ->orderBy('check_out','desc');
                             
-                        if(!Entrust::can('view_all_data'))
-                            $attendance_lists = $attendance_lists->where('attendances.employee_id','=',$employee_id);
-                        $attendance_lists = $attendance_lists->get();
+        if(!Entrust::can('view_all_data'))
+          $attendance_lists->where('attendances.employee_id','=',$employee_id);
+        
             
         $employees = User::whereHas('roles', function ($query) {
                                 $query->where('name', '=', 'employee');
@@ -162,13 +156,30 @@ class AttendanceController extends Controller
                              });
 
         if(!Entrust::can('view_all_data')){
-            $employees = $employees->where('added_by','=',$addedBy);
-            $clients = $clients->where('added_by','=',$addedBy);
+            $employees->where('added_by','=',$addedBy);
+            $clients->where('added_by','=',$addedBy);
         }
         
+        if($request->all()){
+          if($request->search_by_employee_id)
+            $attendance_lists->where('attendances.employee_id','=',$request->search_by_employee_id);
+          if($request->search_by_client_id)
+            $attendance_lists->where('attendances.client_id','=',$request->search_by_client_id);
+        }
+
+        $attendance_lists = $attendance_lists->get();
         $employees = $employees->get();
         $clients = $clients->get();
 
+        if($request->search_date_from_to){
+          $search_date_from_to = explode("-", $request->search_date_from_to);
+      
+          $search_date_from = date('Y-m-d',strtotime($search_date_from_to[0]));
+          $search_date_to = date('Y-m-d',strtotime($search_date_from_to[1]));
+          
+          // return $search_date_from.','.$search_date_to;
+          $attendance_lists = $attendance_lists->where('date','>=',$search_date_from)->where('date','<=',$search_date_to);
+        }
         // return $attendance_lists;
         return view('backend.pages.attendance_list',compact('attendance_lists', 'clients', 'employees'));
     }

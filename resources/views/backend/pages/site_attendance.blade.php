@@ -6,7 +6,7 @@
         display: inline-block;
       }
       .filter_label{
-        padding: 20px 20px 10px 20px;
+        padding: 20px;
       }
       .search_by_date{
         display: inline-table;
@@ -43,37 +43,58 @@
           <div class="search_form">
             <form autocomplete="off" role="form" action="{{route('site.attendance.search')}}" method="POST" enctype="multipart/form-data">
               @csrf
+
               <label class="filter_label">Filter</label>
-              <select class="select2 search_by_user_id" name="search_by_user_id">
-                <option disabled selected value>User Name</option>
-                @foreach($site_attendances_search->unique('user_id') as $site_attendance)
-                 <option value="{{$site_attendance->user_id}}" @if(Request::input('search_by_user_id')==$site_attendance->user_id) selected @endif>{{$site_attendance->name}}</option>
-                @endforeach
-              </select>
-              <select class="select2 search_by_building_name" name="search_by_building_id">
-                <option disabled selected value>Building Name</option>
-                @foreach($site_attendances_search->unique('building_id') as $site_attendance)
-                 <option value="{{$site_attendance->building_id}}" @if(Request::input('search_by_building_id')==$site_attendance->building_id) selected @endif>{{$site_attendance->building_name}}</option>
-                @endforeach
-              </select>
-              <select class="select2 search_by_building_no">
-                <option disabled selected value> Building No</option>
-                @foreach($site_attendances_search->unique('building_id') as $site_attendance)
-                  <option value="{{$site_attendance->building_id}}" @if(Request::input('search_by_building_id')==$site_attendance->building_id) selected @endif>{{$site_attendance->building_no}}</option>
-                @endforeach
-              </select>
-              <select class="select2 search_by_room_name" name="search_by_room_id">
-                <option disabled selected value>Division / Area</option>
-                @foreach($site_attendances_search->unique('room_id') as $site_attendance)
-                  <option value="{{$site_attendance->room_id}}" @if(Request::input('search_by_room_id')==$site_attendance->room_id) selected @endif>{{$site_attendance->room_name}}</option>
-                @endforeach
-              </select>
-              <select class="select2 search_by_room_no">
-                <option disabled selected value>Room No</option>
-                @foreach($site_attendances_search->unique('room_id') as $site_attendance)
-                  <option value="{{$site_attendance->room_id}}"  @if(Request::input('search_by_room_id')==$site_attendance->room_id) selected @endif>{{$site_attendance->room_no}}</option>
-                @endforeach
-              </select>
+
+              @php 
+                $search_arr = [
+                  'User Name' => [
+                    'class'   => 'search_by_user_id',
+                    'name'    => 'search_by_user_id',
+                    'value'   => 'user_id',
+                    'view'    => 'name'
+                  ],
+                  'Building Name' => [
+                    'class'   => 'search_by_building_name',
+                    'name'    => 'search_by_building_id',
+                    'value'   => 'building_id',
+                    'view'    => 'building_name'
+                  ],
+                  'Building No' => [
+                    'class'   => 'search_by_building_no',
+                    'name'    => '',
+                    'value'   => 'building_id',
+                    'view'    => 'building_no'
+                  ],
+                  'Division / Area' => [
+                    'class'   => 'search_by_room_name',
+                    'name'    => 'search_by_room_id',
+                    'value'   => 'room_id',
+                    'view'    => 'room_name'
+                  ],
+                  'Room No' => [
+                    'class'   => 'search_by_room_no',
+                    'name'    => '',
+                    'value'   => 'room_id',
+                    'view'    => 'room_no'
+                  ],
+                ]
+              @endphp
+
+              @foreach($search_arr as $part => $arr)
+                <select class="select2 {{$arr['class']}}" name="{{$arr['name']}}">
+                  <option disabled selected value> {{$part}}</option>
+                  @foreach($site_attendances_search->unique($arr['value']) as $site_attendance)
+                    @php 
+                      $val = $site_attendance->{$arr['value']};
+                    @endphp
+                    <option value="{{$val}}" @if(Request::input('search_by_'.$arr['value'])==$val) selected @endif>
+                      {{$site_attendance->{$arr['view']} }}
+                    </option>
+                  @endforeach
+                </select>
+              @endforeach
+
               <div class="input-group date search_by_date">
                 <div class="input-group-addon">
                   <i class="fa fa-calendar"></i>
@@ -85,7 +106,7 @@
             </form>
           </div>
         </div>
-        <div class="box-body table-responsive">
+        <div class="box-body table-responsive no-padding">
           @if(count($site_attendances))
             <table id="site_attendance_table" class="table table-bordered table-striped">
               <thead>

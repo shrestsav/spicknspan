@@ -27,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
 	Route::get('/', 'HomeController@index')->name('dashboard');
 	Route::get('/check_in_out', 'AttendanceController@index')->name('attendance.index');
 	Route::get('/attendance', 'AttendanceController@list')->name('attendance.list');
-	Route::post('/attendance', 'AttendanceController@store')->name('attendance.store');
+	Route::post('/attendance', 'AttendanceController@list')->name('attendance.search');
 	Route::get('/attendance/details/{client_id}/{employee_id}/{date}', 'AttendanceController@details')->name('attendance.details');
 	Route::post('/checkin', 'AttendanceController@checkin')->name('attendance.checkin');
 	Route::post('/checkout', 'AttendanceController@checkout')->name('attendance.checkout');

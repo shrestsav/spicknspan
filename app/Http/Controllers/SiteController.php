@@ -36,10 +36,12 @@ class SiteController extends Controller
                             'rooms.building_id',
                             'rooms.question_id',
                             'buildings.building_no',
+                            'question_template.template_title',
                             'rooms.room_no')
                         ->join('buildings','rooms.building_id','=','buildings.id')
-                        ->join('question_template','rooms.question_id','=','question_template.id')
+                        ->leftJoin('question_template','rooms.question_id','=','question_template.id')
                         ->get();
+        // return $rooms;
         return view('backend.pages.sites',compact('buildings','rooms', 'questionTemplate'));
     }
 

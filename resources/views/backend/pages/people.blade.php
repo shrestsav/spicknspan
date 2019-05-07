@@ -56,7 +56,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
       @endif
     </div>
     <div class="col-md-12">
-      <div class="box box-primary collapsed-box box-solid">
+      <div class="box box-primary{{--  collapsed-box --}} box-solid">
         <div class="box-header with-border">
           <h3 class="box-title">Add {{$title}}</h3>
           <div class="pull-right box-tools">
@@ -176,6 +176,16 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" placeholder="Confirm Password" data-match="#password" data-match-error="Passwords don't match"  required>
                 <div class="help-block with-errors"></div>
               </div>
+              @if(Route::current()->getName() == 'user_employee.index')
+                <div class="form-group">
+                  <label>Choose Clients</label>
+                  <select class="form-control select2" name="client_ids[]" multiple="multiple" data-placeholder="Select Clients" style="width: 100%;" required>
+                    @foreach($clients as $client)
+                      <option value="{{$client->id}}">{{$client->name}}</option>
+                    @endforeach
+                  </select>
+                </div>
+              @endif
             </div>
             <div class="col-md-12">
               <div class="box-footer">

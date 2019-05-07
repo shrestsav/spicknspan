@@ -197,13 +197,13 @@
                 <td>{{$room->room_no}}</td>
                 <td>{{$room->description}}</td>
                 <td>{{$room->building_no}}</td>
-                @if(Auth::user()->hasRole(['superAdmin','contractor']) && Auth::user()->inspection == '1')
-                    @foreach($questionTemplate as $qt)
-                      @if($qt->id == $room->question_id)
-                        <td>{{$qt->template_title}}</td>
-                      @endif
-                    @endforeach
-                @endif
+                <td>
+                  @if($room->template_title)
+                    {{$room->template_title}}
+                  @else
+                    --
+                  @endif
+                </td>
                 <td><a href="{{route('generate.qr',$room->id)}}" target="_blank">Show QR</a></td>
                 <form action="{{ url('/site/delete_room/').'/'.$room->id}}" method="POST">
                   {{ csrf_field() }}

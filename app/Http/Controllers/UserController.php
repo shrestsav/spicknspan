@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\sendMail;
 
 class UserController extends Controller
 {
@@ -25,7 +26,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {   
+    {
         $userId   = Auth::id();
 
         if(\Route::current()->getName() == 'user_company.index'){
@@ -60,13 +61,16 @@ class UserController extends Controller
                         ->whereHas('roles', function ($query) use ($user_type) {
                                 $query->where('name', '=', $user_type);
                              });
-
+        $clients = User::select('id','name')->whereHas('roles', function ($query) {
+                                $query->where('name', '=', 'client');
+                             });
         if(Entrust::hasRole('contractor')){
-            $users = $users->where('added_by','=',$userId);
+            $users->where('added_by','=',$userId);
+            $clients->where('added_by','=',$userId);
         }
         $users = $users->get();
-        // return $users;
-        return view('backend.pages.people',compact('users'));
+        $clients = $clients->get();
+        return view('backend.pages.people',compact('users','clients'));
     }
 
     /**
@@ -86,9 +90,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {     
-        $userId   = Auth::id();
-
+    {   
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users|max:255',
@@ -98,7 +100,10 @@ class UserController extends Controller
             'employment_start_date' => 'required',
             'timezone' => 'required',
         ]);
-        
+
+        $userId   = Auth::id();
+        $client_ids =  json_encode($request->client_ids);
+
         //Decrypt User_type
         $decrypt_user_type = decrypt($request['utilisateur']);
         $user = User::create([
@@ -108,6 +113,7 @@ class UserController extends Controller
             'user_type' => $decrypt_user_type,
             'mark_default' => $request['mark_default'],
             'added_by' => $userId,
+            'client_ids' => $client_ids,
             'timezone' => $request['timezone'],
         ]);
 
@@ -159,15 +165,25 @@ class UserController extends Controller
             }
           }
 
+          $mailData = [
+            'email_type' => 'registration',
+            'name'       => $request['name'],
+            'username'   => $request['email'],
+            'password'   => $request['password'],
+            'subject'    => 'Greetings '.$request['name'].': Welcome to Spick and Span Team',
+            'message'    => 'These are your login credentials for Spick and Span Portal. Please change your password immediately after you receive this email for User privacy',
+          ];
+
+          Mail::send(new sendMail($mailData));
           //Mail the user
-          $name = $request['name'];
-          $username = $request['email'];
-          $password = $request['password'];
-          Mail::send('backend.layouts.email.register_user', array('username' => $username, 'password' => $password), function($message) use ($name,$username)
-          {      
-              $message->from('support@trackncheck.com', 'Spick And Span');
-              $message->to($username)->subject('Greetings '.$name.': Welcome to Spick and Span Team');
-          });
+          // $name = $request['name'];
+          // $username = $request['email'];
+          // $password = $request['password'];
+          // Mail::send('backend.layouts.email.register_user', array('username' => $username, 'password' => $password), function($message) use ($name,$username)
+          // {      
+          //     $message->from('support@trackncheck.com', 'Spick And Span');
+          //     $message->to($username)->subject('Greetings '.$name.': Welcome to Spick and Span Team');
+          // });
 
         }
 
@@ -235,6 +251,7 @@ class UserController extends Controller
                               'users.email',
                               'users.user_type',
                               'users.timezone',
+                              'users.client_ids',
                               'user_details.photo',
                               'user_details.address',
                               'user_details.gender',
@@ -246,10 +263,20 @@ class UserController extends Controller
                               'user_details.employment_start_date',
                               'user_details.documents')
                         ->join('user_details','user_details.user_id','=','users.id')
-                        ->where('users.id','=',$id)
-                        ->first();
+                        ->where('users.id','=',$id);
 
-        return view('backend.pages.edit_people',compact('user'));
+        $clients = User::select('id','name')->whereHas('roles', function ($query) {
+                                $query->where('name', '=', 'client');
+                             });
+
+        if(Entrust::hasRole('contractor')){
+            $user->where('added_by','=',Auth::id());
+            $clients->where('added_by','=',Auth::id());
+        }
+
+        $user = $user->first();
+        $clients = $clients->get();
+        return view('backend.pages.edit_people',compact('user','clients'));
     }
 
     /**
@@ -260,7 +287,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
+    { 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
@@ -270,10 +297,26 @@ class UserController extends Controller
             'timezone' => 'required',
         ]);
 
-        $update_user = User::where('id','=',$id)->update(['name' => $request->name,
-                                                          'email' => $request->email,
-                                                          'timezone' => $request->timezone,
-                                                            ]);
+        //Update Client_ids of user
+        $previous_client_ids = json_decode(User::find($id)->client_ids);
+        $deleted_client_ids = json_decode($request->deleted_client_ids);
+        $added_client_ids = json_decode($request->added_client_ids);
+      
+        if(!$deleted_client_ids)
+          $deleted_client_ids = [];
+        if(!$added_client_ids)
+          $added_client_ids = [];
+          
+        $after_delete = array_values(array_diff($previous_client_ids, $deleted_client_ids));
+        $updated_client_ids = json_encode(array_merge($after_delete,$added_client_ids));
+
+        $update_user = User::where('id','=',$id)
+                            ->update([
+                              'name' => $request->name,
+                              'email' => $request->email,
+                              'timezone' => $request->timezone,
+                              'client_ids' => $updated_client_ids,
+                              ]);
 
         if($update_user){
           $fileName = '';

@@ -39,9 +39,9 @@
                     <!-- <td></td> -->
                     <td>{{$qT->template_title}}</td>
                     <td>
-                      <a href="{{url('/questionTemplate',$qT->id)}}">
+                     {{--  <a href="{{url('/questionTemplate',$qT->id)}}">
                         <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                      </a>
+                      </a> --}}
                       <a href="javascript:;" id="delete_qT" data-user_id = '{{$qT->id}}'><i class="fa fa-trash" aria-hidden="true"></i>
                       </a>
                     </td>

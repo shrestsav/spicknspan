@@ -140,6 +140,21 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <input type="file" name="documents[]" class="jfilestyle" multiple> 
                 <div class="help-block with-errors"></div>
               </div> 
+
+                <input type="hidden" name="deleted_client_ids" id="deleted_client_ids">
+                <input type="hidden" name="added_client_ids" id="added_client_ids">
+                <div class="form-group">
+                  @php 
+                    $client_ids = json_decode($user->client_ids);
+                  @endphp
+                  <label>Choose Clients</label>
+                  <select class="form-control select2 client_ids" multiple="multiple" data-placeholder="Select Clients" style="width: 100%;" required>
+                    @foreach($clients as $client)
+                      <option value="{{$client->id}}" @if(in_array($client->id, $client_ids)) selected @endif>{{$client->name}}</option>
+                    @endforeach
+                  </select>
+                </div>
+              
             </div>
           </div>
           <div class="box-footer">
@@ -184,21 +199,47 @@ elseif(Route::current()->getName() == 'user_client.index'){
       $('#del_user_doc_array').val(JSON.stringify(del_user_doc_array));
 
       my.parent().parent().fadeOut('slow');
+    });
 
-      // alert(my.parents().parents().attr('class'));
-      // $.ajax({
-      //       type: 'POST',
-      //       url: SITE_URL + 'ajax_delete_documents',
-      //       data: {
-      //           'user_id': user_id,
-      //           'document_id': document_id,
-      //       },
-      //       dataType: 'json'
-      //   }).done(function (response) {
-      //       console.log(response);
-           
-      //   });
-      // alert(document_id);
-    })
+    var client_ids = $('.client_ids').val();
+    $('.client_ids').on('change',function(e){
+      e.preventDefault();
+      var sel_client_ids = $(this).val();
+      var diff = arr_diff(client_ids,sel_client_ids);
+      var added = [];
+      var deleted = [];
+      diff.forEach(function(entry) {
+        if(sel_client_ids.includes(entry))
+          added.push(entry);
+        else
+          deleted.push(entry);
+      });
+      $('#added_client_ids').val(JSON.stringify(added));
+      $('#deleted_client_ids').val(JSON.stringify(deleted));
+    });
+
+
+  function arr_diff (a1, a2) {
+    var a = [], diff = [];
+    for (var i = 0; i < a1.length; i++) {
+        a[a1[i]] = true;
+    }
+    for (var i = 0; i < a2.length; i++) {
+        if (a[a2[i]]) {
+            delete a[a2[i]];
+        } else {
+            a[a2[i]] = true;
+        }
+    }
+    for (var k in a) {
+        diff.push(k);
+    }
+    return diff;
+  }
+
+
+
+
+
   </script>
 @endpush

@@ -25,6 +25,7 @@
   {{-- Theme Color CSS --}}
   <link rel="stylesheet" href="{{ asset('backend/css/skin-green.min.css') }}">
   <link rel="stylesheet" href="{{ asset('backend/css/jquery-filestyle.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('backend/css/daterangepicker.css') }}">
 
   {{-- CUSTOM CSS BY SHRESTSAV --}}
   <link rel="stylesheet" href="{{ asset('backend/css/style.css') }}">
@@ -176,6 +177,7 @@
 <script src="{{ asset('backend/js/sweetalert.min.js') }}"></script>
 <script src="{{ asset('backend/js/validator.min.js') }}"></script>
 <script src="{{ asset('backend/js/jquery-filestyle.min.js') }}"></script>
+
 <script src="{{ asset('backend/js/custom.js') }}"></script>
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
@@ -185,6 +187,7 @@
   var timeZones = moment.tz.names();
   console.log(timeZones);
 </script>
+<script src="{{ asset('backend/js/daterangepicker.js') }}"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js"></script>
 
