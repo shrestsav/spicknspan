@@ -62,8 +62,8 @@
 
 
 @php  
-  $check_in_date = \Carbon\Carbon::parse($attendance_details[0]->check_in)->timezone(Session::get('timezone')); 
-  $employee_id = $attendance_details[0]->employee_id; 
+  $check_in_date = \Carbon\Carbon::parse($attendance_details[0]['local_check_in']['date']); 
+  $employee_id = $attendance_details[0]['employee_id']; 
 @endphp
 
   <section class="content location_history" style="padding-top: 50px;">
@@ -71,9 +71,9 @@
       <div class="col-md-10 col-md-offset-1">
         <div class="box box-widget widget-user">
           <div class="widget-user-header bg-green">
-            <h3 class="widget-user-username">{{strtoupper($attendance_details[0]->employee_name)}}</h3>
-            <h5 class="widget-user-desc">CLIENT : {{$attendance_details[0]->client_name}}</h5>
-            <h5 class="widget-user-desc">DATE : {{\Carbon\Carbon::parse($attendance_details[0]->check_in)->format('d M Y')}}</h5>
+            <h3 class="widget-user-username">{{strtoupper($attendance_details[0]['employee_name'])}}</h3>
+            <h5 class="widget-user-desc">CLIENT : {{$attendance_details[0]['client_name']}}</h5>
+            <h5 class="widget-user-desc">DATE : {{$check_in_date->format('d M Y')}}</h5>
           </div>
           <div class="widget-user-image">
             @if(file_exists(public_path('files/users/'.$employee_id.'/dp_user_'.$employee_id.'.png')))
@@ -90,33 +90,31 @@
                   <th><strong>CHECKED OUT</strong></th>
                 </tr>
                 @foreach($attendance_details as $attendance_detail)
-                  @php 
-                    $check_in_time = \Carbon\Carbon::parse($attendance_detail->check_in)->timezone(Session::get('timezone')); 
-                    $check_out_time = \Carbon\Carbon::parse($attendance_detail->check_out)->timezone(Session::get('timezone')); 
-                    list($check_in_latitude, $check_in_longitude) = explode(",", $attendance_detail->check_in_location);
+                  @php  
+                    list($check_in_latitude, $check_in_longitude) = explode(",", $attendance_detail['check_in_location']);
                   @endphp
                 <tr>
                   <td>
                     <span>
-                      <img class="img-circle check_in_out_image" src="{{asset('files/employee_login/'.$attendance_detail->employee_id.'/'.$attendance_detail->check_in_image)}}" alt="User Avatar">
+                      <img class="img-circle check_in_out_image" src="{{asset('files/employee_login/'.$attendance_detail['employee_id'].'/'.$attendance_detail['check_in_image'])}}" alt="User Avatar">
                     </span>
                     
-                    <span><strong>{{$check_in_time->format('g:i A')}}</strong></span>
+                    <span><strong>{{$attendance_detail['local_check_in']['time']}}</strong></span>
                     <span class="expand_map">
                       <i class="fa fa-map-marker fa-2x show_map" data-latitude="{{$check_in_latitude}}" data-longitude="{{$check_in_longitude}}"></i>
                     </span>
                   </td>
                   <td>
-                    @if($attendance_detail->check_out!=null)
+                    @if($attendance_detail['check_out']!=null)
                       @php 
-                        list($check_out_latitude, $check_out_longitude) = explode(",", $attendance_detail->check_out_location);
+                        list($check_out_latitude, $check_out_longitude) = explode(",", $attendance_detail['check_out_location']);
                       @endphp
                     <span>
-                      <img class="img-circle check_in_out_image" src="{{asset('files/employee_login/'.$attendance_detail->employee_id.
-                      '/'.$attendance_detail->check_out_image)}}" alt="User Avatar">
+                      <img class="img-circle check_in_out_image" src="{{asset('files/employee_login/'.$attendance_detail['employee_id'].
+                      '/'.$attendance_detail['check_out_image'])}}" alt="User Avatar">
                     </span>
                     
-                    <span><strong>{{$check_out_time->format('g:i A')}}</strong></span>
+                    <span><strong>{{$attendance_detail['local_check_out']['time']}}</strong></span>
                     <span class="expand_map">
                       <i class="fa fa-map-marker fa-2x show_map" data-latitude="{{$check_out_latitude}}" data-longitude="{{$check_out_longitude}}"></i>
                     </span>
@@ -193,7 +191,7 @@
         zoom: 16
         });
         var marker = L.marker(JSON.parse(geoCoords)).addTo(map);
-        marker.bindPopup("<b>{{ucfirst($attendance_detail->name)}}</b>").openPopup();
+        marker.bindPopup("<b>Last Seen</b>").openPopup();
         map.scrollWheelZoom.disable();
 
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYW1pdC1tYWhhcnhhbiIsImEiOiJjanJ1cGZxZ3UwNnhsNGFsNTAzcWtsanpsIn0.tnq36qhYA87WJb2nR7_KIw', {

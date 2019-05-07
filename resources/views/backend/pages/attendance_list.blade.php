@@ -79,7 +79,7 @@
               </div>
             </div>
 
-            <div class="box-body table-responsive no-padding">
+{{--             <div class="box-body table-responsive no-padding">
               <table class="table table-hover table-striped" id="employee_attendance">
                 <tr>
                   <th>Date</th>
@@ -120,6 +120,53 @@
                   </tr>
                 @endif
               </table>
+            </div> --}}
+            <div class="box-body table-responsive no-padding">
+              <table class="table table-hover table-striped" id="employee_attendance">
+                <tr>
+                  <th>Date</th>
+                  <th>Employee Name</th>
+                  <th>Client Name</th>
+                  <th>Total Time</th>
+                  <th>Timing</th>
+                  <th>View Details</th>
+                </tr>
+                @foreach($grouped_attendances as $date => $grouped_attendance)
+                  @foreach($grouped_attendance as $id => $details)  
+                    <tr>
+                      <td>{{$date}}</td>                   
+                      <td>{{$details[0]['employee_name']}}</td>
+                      <td>{{$details[0]['client_name']}}</td>
+                      <td>
+                        @php 
+                          $count = count($details);
+                          $totalSec = 0;
+                          foreach($details as $detail){
+                            if($detail['check_in'] && $detail['check_out']){
+                              $startTime = \Carbon\Carbon::parse($detail['check_in']);
+                              $endTime = \Carbon\Carbon::parse($detail['check_out']);
+                              $totalDuration = $endTime->diffInSeconds($startTime);
+                              $totalSec += $totalDuration;
+                            }
+                          }
+                          $startTime = $details[0]['local_check_in']['time'];
+                          if($details[($count-1)]['check_out'])
+                            $endTime = $details[($count-1)]['local_check_in']['time'];
+                          else
+                            $endTime = 'Not Logged Out';
+                        @endphp
+                        {{gmdate('H:i:s', $totalSec)}}
+                      </td>
+                      <td>{{$startTime}} - {{$endTime}}</td>
+                      <td>
+                        <a class="view_att_details btn btn-success" href="{{ url('attendance/details').'/'.$details[0]['client_id'].'/'.$details[0]['employee_id'].'/'.$date}}">
+                          Details
+                        </a>
+                      </td>
+                    </tr>
+                  @endforeach
+                @endforeach
+              </table>
             </div>
           </div>
         </div>
@@ -136,7 +183,7 @@
     $('#datepicker').datepicker({
       autoclose: true
     });
-    $('#search_date_from_to').daterangepicker()
+    $('#search_date_from_to').daterangepicker();
   });
   </script>
 @endpush

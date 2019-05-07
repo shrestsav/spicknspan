@@ -16,6 +16,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
@@ -129,59 +130,70 @@ class AttendanceController extends Controller
 
         $employee_id = Auth::id();
 
-        $attendance_lists = Attendance::select(
-                              DB::raw("SEC_TO_TIME(SUM(TIME_TO_SEC(CAST(TIMEDIFF(`check_out`,`check_in`) AS TIME)))) AS total_time"),
-                              DB::raw("min(check_in) as check_in"),
-                              DB::raw("max(check_out) as check_out"),
-                              DB::raw("CAST(check_in AS date) AS date"),
-                              'attendances.client_id',
-                              'attendances.employee_id',
-                              'client.name as client_name',
-                              'employee.name as employee_name'
-                                  )
-                            ->join('users as employee','attendances.employee_id','=','employee.id')
-                            ->join('users as client','attendances.client_id','=','client.id')
-                            ->groupBy('client_name','employee_name','date','client_id','employee_id')
-                            ->orderBy('check_out','desc');
-                            
-        if(!Entrust::can('view_all_data'))
-          $attendance_lists->where('attendances.employee_id','=',$employee_id);
-        
-            
         $employees = User::whereHas('roles', function ($query) {
                                 $query->where('name', '=', 'employee');
                              });
         $clients = User::whereHas('roles', function ($query) {
                                 $query->where('name', '=', 'client');
                              });
+        $attendances = Attendance::select('attendances.client_id',
+                                         'attendances.employee_id',
+                                         'attendances.check_in',
+                                         'attendances.check_out',
+                                         'client.name as client_name',
+                                         'employee.name as employee_name')
+                                  ->join('users as employee','attendances.employee_id','=','employee.id')
+                                  ->join('users as client','attendances.client_id','=','client.id');
 
         if(!Entrust::can('view_all_data')){
-            $employees->where('added_by','=',$addedBy);
-            $clients->where('added_by','=',$addedBy);
-        }
-        
-        if($request->all()){
-          if($request->search_by_employee_id)
-            $attendance_lists->where('attendances.employee_id','=',$request->search_by_employee_id);
-          if($request->search_by_client_id)
-            $attendance_lists->where('attendances.client_id','=',$request->search_by_client_id);
+          $attendances->where('attendances.employee_id','=',$employee_id);
+          $employees->where('added_by','=',$addedBy);
+          $clients->where('added_by','=',$addedBy);
         }
 
-        $attendance_lists = $attendance_lists->get();
+        if($request->all()){
+          if($request->search_by_employee_id)
+            $attendances->where('attendances.employee_id','=',$request->search_by_employee_id);
+          if($request->search_by_client_id)
+            $attendances->where('attendances.client_id','=',$request->search_by_client_id);
+        }
+
         $employees = $employees->get();
         $clients = $clients->get();
+        $attendances = $attendances->get()->toArray();
+
+        $collection = collect($attendances);
 
         if($request->search_date_from_to){
           $search_date_from_to = explode("-", $request->search_date_from_to);
-      
           $search_date_from = date('Y-m-d',strtotime($search_date_from_to[0]));
           $search_date_to = date('Y-m-d',strtotime($search_date_from_to[1]));
-          
-          // return $search_date_from.','.$search_date_to;
-          $attendance_lists = $attendance_lists->where('date','>=',$search_date_from)->where('date','<=',$search_date_to);
+
+          $collection = $collection->where('local_check_in.date','>=',$search_date_from)->where('local_check_in.date','<=',$search_date_to);
         }
-        // return $attendance_lists;
-        return view('backend.pages.attendance_list',compact('attendance_lists', 'clients', 'employees'));
+
+        // return $request->search_date_from_to;
+        // return $collection;
+
+        $grouped_attendances = $collection->groupBy(['local_check_in.date','employee_id'])->toArray();
+        
+        // $attendance_lists = Attendance::select(
+        //                       DB::raw("SEC_TO_TIME(SUM(TIME_TO_SEC(CAST(TIMEDIFF(`check_out`,`check_in`) AS TIME)))) AS total_time"),
+        //                       DB::raw("min(check_in) as check_in"),
+        //                       DB::raw("max(check_out) as check_out"),
+        //                       DB::raw("CAST(check_in AS date) AS date"),
+        //                       'attendances.client_id',
+        //                       'attendances.employee_id',
+        //                       'client.name as client_name',
+        //                       'employee.name as employee_name'
+        //                           )
+        //                     ->join('users as employee','attendances.employee_id','=','employee.id')
+        //                     ->join('users as client','attendances.client_id','=','client.id')
+        //                     ->groupBy('client_name','employee_name','date','client_id','employee_id')
+        //                     ->orderBy('check_out','desc');
+                            
+
+        return view('backend.pages.attendance_list',compact('clients', 'employees','grouped_attendances'));
     }
 
     public function checkin(Request $request)
@@ -304,6 +316,7 @@ class AttendanceController extends Controller
 
     public function details($client_id, $employee_id, $date)
     {
+      // return $date;
         $attendance_details = Attendance::select(
                                             'attendances.id',
                                             'attendances.client_id',
@@ -319,10 +332,15 @@ class AttendanceController extends Controller
                                             'client.name as client_name')
                                 ->where('attendances.client_id',$client_id)
                                 ->where('attendances.employee_id',$employee_id)
-                                ->whereDate('attendances.check_in',$date)
+                                // ->whereDate('attendances.check_in',$date)
                                 ->join('users as employee','attendances.employee_id','=','employee.id')
                                 ->join('users as client','attendances.client_id','=','client.id')
-                                ->get();
+                                ->get()
+                                ->toArray();
+        $collection = collect($attendance_details);
+
+        // array_values reindexes all keys in array
+        $attendance_details = array_values($collection->where('local_check_in.date',$date)->toArray());
 
         return view('backend.pages.attendance_details', compact('attendance_details'));
     }
