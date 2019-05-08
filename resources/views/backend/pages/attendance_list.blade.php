@@ -1,6 +1,7 @@
 @extends('backend.layouts.app',['title'=>'Attendance'])
 
 @push('styles')
+<link rel="stylesheet" href="{{ asset('backend/excel-plugins/tableexport.css') }}">
 <style type="text/css">
     .form-group.date_filter {
         display: inline-flex;
@@ -64,19 +65,25 @@
                       <div class="input-group-addon">
                         <i class="fa fa-calendar"></i>
                       </div>
-                      <input type="text" class="form-control pull-right" id="search_date_from_to" name="search_date_from_to" @if(Request::input('search_date_from_to')) value="{{Request::input('search_by_date')}}" @endif>
+                      @php
+                        $today = date('m/d/Y');
+                        $pastOneMonth = date("m/d/Y", strtotime( date( "m/d/Y", strtotime( date("m/d/Y") ) ) . "-1 month" ) );
+                      @endphp
+                      <input type="text" class="form-control pull-right" id="search_date_from_to" name="search_date_from_to" @if(Request::input('search_date_from_to')) value="{{Request::input('search_date_from_to')}}" @else value="{{$pastOneMonth.' - '.$today}}" @endif>
                     </div>
+                    
+                    {{-- {{Request::input('search_date_from_to')}} --}}
                     &nbsp; &nbsp; &nbsp;
                     <button type="submit" class="btn btn-primary">Search</button>
                 </form>
               </div>
-              <div class="box-tools">
+              {{-- <div class="box-tools">
                 <div class="input-group input-group-sm" style="width: 150px;">
                   <div class="input-group-btn">
-                    <button type="submit" class="btn btn-default" onclick="exportTableToExcel('employee_attendance', 'members-data')"><i class="fa fa-file-excel-o"></i></button>
+                    <button type="submit" class="btn btn-default export_to_excel" onclick="exportTableToExcel('employee_attendance', 'members-data')"><i class="fa fa-file-excel-o"></i></button>
                   </div>
                 </div>
-              </div>
+              </div> --}}
             </div>
 
 {{--             <div class="box-body table-responsive no-padding">
@@ -123,14 +130,17 @@
             </div> --}}
             <div class="box-body table-responsive no-padding">
               <table class="table table-hover table-striped" id="employee_attendance">
-                <tr>
-                  <th>Date</th>
-                  <th>Employee Name</th>
-                  <th>Client Name</th>
-                  <th>Total Time</th>
-                  <th>Timing</th>
-                  <th>View Details</th>
-                </tr>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Employee Name</th>
+                    <th>Client Name</th>
+                    <th>Total Time</th>
+                    <th>Timing</th>
+                    <th>View Details</th>
+                  </tr>
+                </thead>
+                <tbody>
                 @foreach($grouped_attendances as $date => $grouped_attendance)
                   @foreach($grouped_attendance as $id => $details)  
                     <tr>
@@ -166,6 +176,7 @@
                     </tr>
                   @endforeach
                 @endforeach
+                </tbody>
               </table>
             </div>
           </div>
@@ -176,7 +187,14 @@
 @endsection
 
 @push('scripts')
-  <script src="{{ asset('backend/js/export-table-excel.js') }}"></script>
+  {{-- <script src="{{ asset('backend/js/export-table-excel.js') }}"></script> --}}
+  <script src="{{ asset('backend/excel-plugins/xlsx.core.min.js') }}"></script>
+  <script src="{{ asset('backend/excel-plugins/Blob.js') }}"></script>
+  <script src="{{ asset('backend/excel-plugins/FileSaver.js') }}"></script>
+  <script src="{{ asset('backend/excel-plugins/Export2Excel.js') }}"></script>
+
+
+  <script src="{{ asset('backend/excel-plugins/jquery.tableexport.v2.js') }}"></script>
   <script type="text/javascript">
   $(function () {
     //Date picker
@@ -185,5 +203,12 @@
     });
     $('#search_date_from_to').daterangepicker();
   });
+
+$("table").tableExport({
+        formats: ["xlsx"],
+        ignoreCols: Number[3],  
+    });
+
+
   </script>
 @endpush

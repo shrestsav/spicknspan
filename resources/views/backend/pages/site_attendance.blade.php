@@ -2,6 +2,9 @@
 
 @push('styles')
   <style type="text/css">
+      .select2{
+        width: 130px;
+      }
       .search_form{
         display: inline-block;
       }
@@ -10,7 +13,7 @@
       }
       .search_by_date{
         display: inline-table;
-        width: 170px; 
+        width: 150px; 
         top: 14px;
       }
   </style>
