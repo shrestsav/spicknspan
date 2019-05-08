@@ -97,7 +97,6 @@
             </tbody>
           </table>
         </div>
-        <!-- /.box-body -->
       </div>
     </div>
   </div>
@@ -176,6 +175,11 @@
           <table id="room_list_table" class="table table-bordered table-striped">
             <thead>
             <tr>
+              <th>
+                <div class="print_qr" style="display: none;">
+                  <i class="fa fa-print" aria-hidden="true"></i>
+                </div>
+              </th>
               <th>S.No</th>
               <th>Name</th>
               <th>Room No</th>
@@ -192,6 +196,7 @@
               @php $count = 1; @endphp
             @foreach($rooms as $room)
               <tr>
+                <td><input type="checkbox" class="room_check" data-room-id="{{$room->id}}"></td>
                 <td>{{$count}}</td>
                 <td>{{$room->name}}</td>
                 <td>{{$room->room_no}}</td>
@@ -204,11 +209,12 @@
                     --
                   @endif
                 </td>
-                <td><a href="{{route('generate.qr',$room->id)}}" target="_blank">Show QR</a></td>
+
+                <td><a href="{{route('generate.qr',json_encode([$room->id]))}}" target="_blank">Show QR</a></td>
                 <form action="{{ url('/site/delete_room/').'/'.$room->id}}" method="POST">
                   {{ csrf_field() }}
                   <input type="hidden" name="_method" value="POST">
-                  <td><button>Delete</button></td>
+                  <td><button><i class="fa fa-trash-o"></i></button></td>
                 </form>
               </tr>
               @php $count++; @endphp
@@ -236,5 +242,62 @@
   //   });
   // })
 </script>
+<script type="text/javascript">
   
+    //DELETE CHECKBOX COUNT STARTS
+    (function($) {
+      
+      "use_strict";
+
+      // This array will store the values of the "checked" room-id checkboxes
+      var cboxArray = [];
+            
+      // Check if the room-id has already been added to the array and if not - add it
+      function itemExistsChecker(cboxValue) {          
+        var len = cboxArray.length;
+        if (len > 0) {
+          for (var i = 0; i < len; i++) {
+            if (cboxArray[i] == cboxValue) {
+              return true;
+            }
+          }
+        }       
+        cboxArray.push(cboxValue);
+      } 
+            
+      $('input[type="checkbox"]').each(function() {  
+        var cboxValue = $(this).data('room-id');
+            
+        // On checkbox change add/remove the room-id from the array based on the choice
+        $(this).change(function() {
+
+          //Display Print button only if any one of checkbox is checked
+           if ($('.room_check').is(':checked'))
+                $('.print_qr').show();
+            else
+                $('.print_qr').hide();
+
+          if ($(this).is(':checked')) {
+            itemExistsChecker(cboxValue);
+          } else {
+
+            // Delete room-id from the array if its checkbox is unchecked
+            var cboxValueIndex = cboxArray.indexOf(cboxValue);
+            if (cboxValueIndex >= 0) {
+              cboxArray.splice( cboxValueIndex, 1 );
+            }
+          }
+          // console.log(cboxArray);
+        });
+      });
+
+      $('.print_qr').on('click', function () {
+        var serialize = JSON.stringify(cboxArray);
+        window.location = SITE_URL+"generate_qr/"+serialize;
+      });
+})(jQuery);
+
+
+  //DELETE CHECKBOX COUNT ENDS
+</script>
 @endpush

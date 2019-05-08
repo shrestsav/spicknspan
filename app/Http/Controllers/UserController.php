@@ -70,7 +70,7 @@ class UserController extends Controller
         }
         $users = $users->get();
         $clients = $clients->get();
-        return view('backend.pages.people',compact('users','clients'));
+        return view('backend.pages.user.index',compact('users','clients'));
     }
 
     /**
@@ -276,7 +276,7 @@ class UserController extends Controller
 
         $user = $user->first();
         $clients = $clients->get();
-        return view('backend.pages.edit_people',compact('user','clients'));
+        return view('backend.pages.user.edit',compact('user','clients'));
     }
 
     /**
@@ -415,12 +415,12 @@ class UserController extends Controller
                         ->join('user_details','user_details.user_id','=','users.id')
                         ->where('users.id','=',$id)->first();
 
-        return view('backend.pages.edit_people',compact('user'));
+        return view('backend.pages.user.edit',compact('user'));
     }
 
     public function password_edit()
     {
-        return view('backend.pages.change_password');
+        return view('backend.pages.user.profile');
     }
 
     public function password_update(Request $request, $id)

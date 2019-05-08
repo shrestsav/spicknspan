@@ -114,8 +114,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 </select>
                 <div class="help-block with-errors"></div>
               </div>
-
-              
               <div class="form-group">
                 <input type="hidden" name="left_user_doc_array" id="left_user_doc_array" value="">
                 <input type="hidden" name="del_user_doc_array" id="del_user_doc_array" value="">
@@ -140,10 +138,10 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <input type="file" name="documents[]" class="jfilestyle" multiple> 
                 <div class="help-block with-errors"></div>
               </div> 
-
-                <input type="hidden" name="deleted_client_ids" id="deleted_client_ids">
-                <input type="hidden" name="added_client_ids" id="added_client_ids">
-                <div class="form-group">
+              @if($user->hasRole('employee'))
+              <input type="hidden" name="deleted_client_ids" id="deleted_client_ids">
+              <input type="hidden" name="added_client_ids" id="added_client_ids">
+                <div class="form-group"> 
                   @php 
                     $client_ids = json_decode($user->client_ids);
                   @endphp
@@ -154,6 +152,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
                     @endforeach
                   </select>
                 </div>
+              @endif
               
             </div>
           </div>

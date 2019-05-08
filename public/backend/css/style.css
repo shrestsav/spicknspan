@@ -96,7 +96,7 @@ text-align: left;
   width: 90%;
 }
 
-.fa-window-close:hover,.document_container input:hover{
+.fa-window-close:hover,.document_container input:hover, .room_check:hover, .print_qr:hover{
   cursor: pointer;
   color: red;
 }

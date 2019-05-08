@@ -1,21 +1,9 @@
 @if($mailData['email_type']==='registration')
-@component('mail::message')
-# Hello {{$mailData['name']}},
+	
+	@include('backend.layouts.includes.mail.email.__registration')
 
-{{$mailData['message']}}<br>
+@elseif($mailData['email_type']==='support')
 
-@component('mail::table')
-| User Credentials 					   |
-| -------------    					   |
-| Username:  {{$mailData['username']}} |
-| Password:  {{$mailData['password']}} |
-@endcomponent
- 
-@component('mail::button', ['url' => config('app.url')])
-Dashboard
-@endcomponent
+	@include('backend.layouts.includes.mail.email.__support')
 
-Regards,<br>
-Spick And Span Team
-@endcomponent
 @endif

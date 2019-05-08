@@ -145,12 +145,19 @@ class SiteController extends Controller
         return redirect(route('site.index') . '#area_division')->with('message', 'Room Deleted Successfully');
     }
 
-    public function generate_qr($id)
+    public function generate_qr($json)
     {   
-        $pngImage = \QrCode::format('png')
-                            ->size(200)
-                            ->generate($id);
-        return view('backend.pages.printqr',compact('pngImage'));
+        $array = json_decode($json);
+        $pngImage = [];
+        $room_no = Room::select('room_no')->whereIn('id',$array)->pluck('room_no')->toArray();
+        // return var_dump($room_no);
+        foreach ($array as $room_id) {
+            $pngImage[] = \QrCode::format('png')
+                            ->size(150)
+                            ->generate($room_id);
+        }
+        return view('backend.pages.printqr',compact('pngImage','room_no'));
         // return response($pngImage)->header('Content-type','image/png');
     }
+
 }

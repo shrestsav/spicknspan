@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\sendMail;
+use Illuminate\Support\Facades\Validator;
+use App\SupportMail;
 
 class MailController extends Controller
 {
@@ -13,7 +17,7 @@ class MailController extends Controller
      */
     public function index()
     {
-        return view('backend.pages.mail');
+        return view('backend.pages.mail.mail');
     }
 
     /**
@@ -83,10 +87,38 @@ class MailController extends Controller
     }
     public function composeMail()
     {
-        return view('backend.pages.mail');
+        return view('backend.pages.mail.mail');
     }
-     public function viewMail()
+    public function viewMail()
     {
-        return view('backend.pages.mail');
+        return view('backend.pages.mail.mail');
+    }
+    public function support(Request $request)
+    { 
+        if($request->all()){
+          // return $request->all();
+          $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255',
+            'subject' => 'required|string|max:255',
+            'message' => 'required',
+          ]);
+          $supportMail = SupportMail::create($request->all());
+
+          $mailData = [
+            'email_type' => 'support',
+            'name'       => $request['name'],
+            'username'   => 'shrestsav@gmail.com',
+            'contact'    => $request['contact'],
+            'subject'    => 'SUPPORT: '.$request['subject'],
+            'message'    => $request['message'],
+          ];
+
+          Mail::send(new sendMail($mailData));  
+          return redirect()->back()->with('message','Support Message Sent Successfully');
+
+        }
+        return view('backend.pages.mail.support');
+
     }
 }

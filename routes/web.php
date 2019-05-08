@@ -19,10 +19,14 @@ Route::get('testing',function(){
 
 Auth::routes();
 
+Route::get('support', 'MailController@support');
+Route::post('support', 'MailController@support')->name('support');
+
 Route::middleware(['auth'])->group(function () {
 	Route::group(['prefix' => 'admin', 'middleware' => ['role:superAdmin']], function() {
 		Route::resource('roles','RoleController');
 		Route::resource('users','UserRoleController');
+		Route::post('assignSupportTask','HomeController@assignSupportTask')->name('assignSupportTask');
 	});
 	Route::get('/', 'HomeController@index')->name('dashboard');
 	Route::get('/check_in_out', 'AttendanceController@index')->name('attendance.index');
@@ -82,7 +86,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/site','SiteController@index')->name('site.index');
 		Route::post('/site','SiteController@store')->name('site.store');
 		Route::post('/store_room','SiteController@store_room')->name('room.store');
-		Route::get('/generate_qr/{id}', 'SiteController@generate_qr')->name('generate.qr');
+		Route::get('/generate_qr/{arr}', 'SiteController@generate_qr')->name('generate.qr');
 		Route::post('/site/delete_room/{id}','SiteController@delete_room')->name('room.destroy');
 		
 		Route::get('/questionTemplate','QuestionTemplateController@index')->name('question.index');

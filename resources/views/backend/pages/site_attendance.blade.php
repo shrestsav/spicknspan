@@ -167,11 +167,11 @@
 
     // Search Switch Algorithms
     search_by_classes = {
-                          search_by_building_name:'search_by_building_no', 
-                          search_by_building_no:'search_by_building_name', 
-                          search_by_room_name:'search_by_room_no',
-                          search_by_room_no:'search_by_room_name',
-                        };
+      search_by_building_name:'search_by_building_no', 
+      search_by_building_no:'search_by_building_name', 
+      search_by_room_name:'search_by_room_no',
+      search_by_room_no:'search_by_room_name',
+    };
     
     Object.keys(search_by_classes).forEach(function(key){
         $('.'+key).on('change', function(e) {
