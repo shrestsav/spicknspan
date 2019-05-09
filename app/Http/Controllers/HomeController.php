@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use App\SupportMail;
 use App\User;
 use Entrust;
+use Auth;
 
 class HomeController extends Controller
 {
@@ -27,27 +28,35 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {    
-        if(Entrust::hasRole('superAdmin')){
-            $supportMails = SupportMail::select('support_mails.id',
-                                                'support_mails.email',
-                                                'support_mails.assigned_to',
-                                                'support_mails.name',
-                                                'support_mails.contact',
-                                                'support_mails.subject',
-                                                'support_mails.message',
-                                                'support_mails.created_at',
-                                                'users.name as assigned_to_name')
-                                        ->leftJoin('users','users.id','=','support_mails.assigned_to')
-                                        ->where('status',0)
-                                        ->orWhere('status',1)
-                                        ->get();
-            $superUsers = User::whereHas('roles', function ($query) {
-                                  $query->where('name', '=', 'contractor')
-                                        ->orWhere('name', '=', 'superAdmin');
-                               })->get();
-        }
+      $supportMails = [];
+      $superUsers = [];
+      $assignedTasks = [];
+      
+      if(Entrust::hasRole('superAdmin')){
+          $supportMails = SupportMail::select('support_mails.id',
+                                              'support_mails.email',
+                                              'support_mails.assigned_to',
+                                              'support_mails.name',
+                                              'support_mails.contact',
+                                              'support_mails.subject',
+                                              'support_mails.message',
+                                              'support_mails.created_at',
+                                              'users.name as assigned_to_name')
+                                      ->leftJoin('users','users.id','=','support_mails.assigned_to')
+                                      ->where('status',0)
+                                      ->orWhere('status',1)
+                                      ->get();
+          $superUsers = User::whereHas('roles', function ($query) {
+                                $query->where('name', '=', 'contractor')
+                                      ->orWhere('name', '=', 'superAdmin');
+                             })->get();
+      }
 
-        return view('backend.pages.dashboard',compact('supportMails','superUsers'));
+      if(Entrust::hasRole(['contractor','superAdmin'])){
+        $assignedTasks = SupportMail::where('assigned_to',Auth::id())->where('status',0)->get();
+      }
+
+      return view('backend.pages.dashboard',compact('supportMails','superUsers','assignedTasks'));
     }
 
     public function assignSupportTask(Request $request)

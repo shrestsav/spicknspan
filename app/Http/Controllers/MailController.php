@@ -108,7 +108,7 @@ class MailController extends Controller
           $mailData = [
             'email_type' => 'support',
             'name'       => $request['name'],
-            'username'   => 'shrestsav@gmail.com',
+            'username'   => $request['email'],
             'contact'    => $request['contact'],
             'subject'    => 'SUPPORT: '.$request['subject'],
             'message'    => $request['message'],

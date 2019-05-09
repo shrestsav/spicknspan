@@ -15,7 +15,7 @@
       </div>
       @role('superAdmin')
       @if(count($supportMails))
-      <div class="col-md-12">
+      <div class="col-md-6">
         @if ($errors->any())
           <div class="alert alert-danger">
               @foreach ($errors->all() as $error)
@@ -123,11 +123,99 @@
             </div>
           </div>
         </div>
+
+
+
+
+
       </div>
       @endif
+      <div class="col-md-6">
+        @if(count($assignedTasks))
+        <div class="box box-primary">
+          <div class="box-header">
+            <i class="ion ion-clipboard"></i>
+            <h3 class="box-title">Assigned Tasks</h3>
+          </div>
+
+          <div class="box-body">
+            <ul class="todo-list">
+              @foreach($assignedTasks as $assignedTask)
+              <li>
+                <span class="handle">
+                  <i class="fa fa-ellipsis-v"></i>
+                  <i class="fa fa-ellipsis-v"></i>
+                </span>
+                <input type="checkbox" value="">
+                <span class="text">{{$assignedTask->subject}}</span>
+                <small class="label label-warning"><i class="fa fa-clock-o"></i> {{\Carbon\Carbon::parse($assignedTask->updated_at)->diffForHumans()}}</small>
+                <div class="tools">
+                  <i class="fa fa-edit"></i>
+                  <i class="fa fa-trash-o"></i>
+                </div>
+              </li>
+              @endforeach
+            </ul>
+          </div>
+        </div>
+        @endif
+        <!-- quick email widget -->
+        <div class="box box-info">
+          <div class="box-header">
+            <i class="fa fa-envelope"></i>
+
+            <h3 class="box-title">Quick Email</h3>
+            <div class="pull-right box-tools">
+              <button type="button" class="btn btn-info btn-sm" data-widget="remove" data-toggle="tooltip" title="Remove">
+                <i class="fa fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div class="box-body">
+            <form action="#" method="post">
+              <div class="form-group">
+                <input type="email" class="form-control" name="emailto" placeholder="Email to:">
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-control" name="subject" placeholder="Subject">
+              </div>
+              <div>
+                <textarea class="textarea" placeholder="Message" style="width: 100%; height: 125px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="box-footer clearfix">
+            <button type="button" class="pull-right btn btn-default" id="sendEmail">Send
+              <i class="fa fa-arrow-circle-right"></i></button>
+          </div>
+        </div>
+      </div>
       @endrole
     </div>
   </section>
 
 @endsection
+
+@push('scripts')
+<script type="text/javascript">
+
+    // jQuery UI sortable for the todo list
+  $('.todo-list').sortable({
+    placeholder         : 'sort-highlight',
+    handle              : '.handle',
+    forcePlaceholderSize: true,
+    zIndex              : 999999
+  });
+
+  /* The todo list plugin */
+  $('.todo-list').todoList({
+    onCheck  : function () {
+      window.console.log($(this), 'The element has been checked');
+    },
+    onUnCheck: function () {
+      window.console.log($(this), 'The element has been unchecked');
+    }
+  });
+</script>
+@endpush
 
