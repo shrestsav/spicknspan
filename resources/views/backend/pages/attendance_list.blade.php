@@ -161,7 +161,7 @@
                           }
                           $startTime = $details[0]['local_check_in']['time'];
                           if($details[($count-1)]['check_out'])
-                            $endTime = $details[($count-1)]['local_check_in']['time'];
+                            $endTime = $details[($count-1)]['local_check_out']['time'];
                           else
                             $endTime = 'Not Logged Out';
                         @endphp
