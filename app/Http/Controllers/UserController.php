@@ -174,7 +174,7 @@ class UserController extends Controller
             'message'    => 'These are your login credentials for Spick and Span Portal. Please change your password immediately after you receive this email for User privacy',
           ];
 
-          Mail::send(new sendMail($mailData));
+          // Mail::send(new sendMail($mailData));
           //Mail the user
           // $name = $request['name'];
           // $username = $request['email'];

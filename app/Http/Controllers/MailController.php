@@ -96,7 +96,6 @@ class MailController extends Controller
     public function support(Request $request)
     { 
         if($request->all()){
-          // return $request->all();
           $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',

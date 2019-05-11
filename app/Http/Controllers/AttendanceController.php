@@ -127,30 +127,29 @@ class AttendanceController extends Controller
     public function list(Request $request)
     {
         $addedBy  = Auth::user()->added_by;
-
-        $employee_id = Auth::id();
-
-        $employees = User::whereHas('roles', function ($query) {
-                                $query->where('name', '=', 'employee');
-                             });
-        $clients = User::whereHas('roles', function ($query) {
-                                $query->where('name', '=', 'client');
-                             });
         $attendances = Attendance::select('attendances.client_id',
                                          'attendances.employee_id',
                                          'attendances.check_in',
                                          'attendances.check_out',
                                          'client.name as client_name',
+                                         'employee.added_by as added_by',
                                          'employee.name as employee_name')
                                   ->join('users as employee','attendances.employee_id','=','employee.id')
-                                  ->join('users as client','attendances.client_id','=','client.id');
+                                  ->join('users as client','attendances.client_id','=','client.id')
+                                  ->orderBy('attendances.check_in','desc');
 
-        if(!Entrust::can('view_all_data')){
-          $attendances->where('attendances.employee_id','=',$employee_id);
-          $employees->where('added_by','=',$addedBy);
-          $clients->where('added_by','=',$addedBy);
+        if(Entrust::hasRole('contractor')){
+          $attendances->where('added_by',Auth::id());
+        }
+        if(!Entrust::hasRole(['contractor','superAdmin'])){
+          $attendances->where('attendances.employee_id','=',Auth::id());
         }
 
+        //Pluck Username and Clientnames for search
+        $users = $attendances->pluck('employee_name','employee_id')->toArray();
+        $clients = $attendances->pluck('client_name','client_id')->toArray();
+
+        // if Search
         if($request->all()){
           if($request->search_by_employee_id)
             $attendances->where('attendances.employee_id','=',$request->search_by_employee_id);
@@ -158,10 +157,7 @@ class AttendanceController extends Controller
             $attendances->where('attendances.client_id','=',$request->search_by_client_id);
         }
 
-        $employees = $employees->get();
-        $clients = $clients->get();
         $attendances = $attendances->get()->toArray();
-
         $collection = collect($attendances);
 
         if($request->search_date_from_to){
@@ -171,9 +167,6 @@ class AttendanceController extends Controller
 
           $collection = $collection->where('local_check_in.date','>=',$search_date_from)->where('local_check_in.date','<=',$search_date_to);
         }
-
-        // return $request->search_date_from_to;
-        // return $collection;
 
         $grouped_attendances = $collection->groupBy(['local_check_in.date','employee_id'])->toArray();
         
@@ -193,7 +186,7 @@ class AttendanceController extends Controller
         //                     ->orderBy('check_out','desc');
                             
 
-        return view('backend.pages.attendance_list',compact('clients', 'employees','grouped_attendances'));
+        return view('backend.pages.attendance_list',compact('clients', 'users','grouped_attendances'));
     }
 
     public function checkin(Request $request)
@@ -363,6 +356,7 @@ class AttendanceController extends Controller
                                                   'site_attendances.created_at',
                                                   'site_attendances.updated_at',
                                                   'users.id as user_id',
+                                                  'users.added_by as added_by',
                                                   'rooms.id as room_id',
                                                   'rooms.room_no',
                                                   'rooms.name as room_name',
@@ -371,14 +365,18 @@ class AttendanceController extends Controller
                                                   'buildings.id as building_id',
                                                   'buildings.name as building_name',
                                                   'site_attendances.login',
-                                                  'site_attendances.created_at as date',)
+                                                  'site_attendances.created_at as date')
                             ->join('rooms','rooms.id','=','site_attendances.room_id')
                             ->join('buildings','buildings.id','=','rooms.building_id')
                             ->join('users','users.id','=','site_attendances.user_id');
-        
-        if(!Entrust::can('view_all_data')){
+
+        if(Entrust::hasRole('contractor')){
+          $site_attendances->where('added_by',Auth::id());
+        }
+        if(!Entrust::hasRole(['contractor','superAdmin'])){
           $site_attendances->where('site_attendances.user_id',Auth::id());
-        } 
+        }
+
         $site_attendances_search = $site_attendances->get(); 
         
         // if search
@@ -391,11 +389,6 @@ class AttendanceController extends Controller
           
           if($request->search_by_room_id)
               $site_attendances->where('site_attendances.room_id','=',$request->search_by_room_id);
-          
-          // if($request->search_by_date){
-          //     $search_date = date('Y-m-d',strtotime($request->search_by_date));
-          //     $site_attendances->whereDate('site_attendances.created_at','=',$search_date);       
-          // }
         }
 
         $site_attendances = $site_attendances->get();
@@ -411,7 +404,7 @@ class AttendanceController extends Controller
           $search_date = date('Y-m-d',strtotime($request->search_by_date));
           $site_attendances = $site_attendances->where('tz_login_date',$search_date);
         }
-        // return $site_attendances;
+
         return view('backend.pages.site_attendance',compact('site_attendances','site_attendances_search'));
     }
 
