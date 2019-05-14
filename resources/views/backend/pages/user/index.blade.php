@@ -56,7 +56,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
       @endif
     </div>
     <div class="col-md-12">
-      <div class="box box-primary{{--  collapsed-box --}} box-solid">
+      <div class="box box-primary collapsed-box box-solid">
         <div class="box-header with-border">
           <h3 class="box-title">Add {{$title}}</h3>
           <div class="pull-right box-tools">
@@ -328,7 +328,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
 @endsection
 @push('scripts')
 <script type="text/javascript">
-    //Show Product Detail Modal
+    //Show User Detail Modal
     
     $('.view_user_details').on('click',function (e) {
         e.preventDefault();

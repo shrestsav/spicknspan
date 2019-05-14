@@ -56,4 +56,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(SiteAttendance::class);
     }
+
+    public function incident_reports()
+    {
+        return $this->hasMany(IncidentReport::class);
+    }
 }

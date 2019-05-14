@@ -185,7 +185,6 @@
 <script src="{{ asset('backend/js/moment-timezone-with-data-2012-2022.min.js') }}"></script>
 <script type="text/javascript">
   var timeZones = moment.tz.names();
-  console.log(timeZones);
 </script>
 <script src="{{ asset('backend/js/daterangepicker.js') }}"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>

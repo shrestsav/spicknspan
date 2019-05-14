@@ -37,6 +37,11 @@ Route::middleware(['auth'])->group(function () {
 	Route::post('/checkout', 'AttendanceController@checkout')->name('attendance.checkout');
 	Route::post('/ajax_in_out_stat', 'AttendanceController@ajax_in_out_stat')->name('ajax.in_out_stat');
 
+	Route::get('/incident_report', 'IncidentReportController@incident_report')->name('incident.create');
+	Route::post('/incident_report', 'IncidentReportController@incident_report')->name('incident.store');
+	Route::post('/ajax_incident_report_details', 'IncidentReportController@ajax_incident_report_details')->name('incident.view');
+	Route::get('/print_incident_report/{id}', 'IncidentReportController@print_incident_report')->name('incident.print');
+
 	Route::get('/scanner', function(){
 			return view('backend.pages.scanner');
 		})->name('scanner');

@@ -24,6 +24,8 @@
         </li>
         <li class="@if ($title === 'Site Attendance') active @endif"><a href="{{route('site.attendance')}}"><i class="fa fa-dashboard"></i> <span>Site Attendance</span></a>
         </li>
+        <li class="@if ($title === 'Incident Report') active @endif"><a href="{{route('incident.create')}}"><i class="fa fa-bug"></i> <span>Incident Report</span></a>
+        </li>
 
       {{-- Allow these menus for admin only --}}
 
@@ -71,7 +73,7 @@
           </ul>
         </li>
       @endrole
-
+        
        {{--  <li class="@if ($title === 'Mail') active @endif"><a href="{{route('mail.index')}}"><i class="fa fa-dashboard"></i> <span>Mail</span></a>
         </li> --}}
         

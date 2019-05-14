@@ -10,9 +10,12 @@ use Excel;
 use App\Exports\DataExport;
 use App\Imports\DataImport;
 use Illuminate\Http\Request;
+use Auth;
+
 
 class CoreController extends Controller
 {
+
     public function import_from_excel(Request $request){
     	$request->validate([
             'file' => 'required|mimes:xlsx'
@@ -75,4 +78,5 @@ class CoreController extends Controller
     	}
     	return Excel::download(new DataExport($data,$head), $user_type.'s.xlsx');
     }
+
 }
