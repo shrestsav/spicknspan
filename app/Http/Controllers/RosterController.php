@@ -139,50 +139,39 @@ class RosterController extends Controller
                 for ($i = 1; $i <= $k; $i++) {
                     $start_time    = $request['start_time_'.$i];
                     $end_time      = $request['end_time_'.$i];
-                    $timeIn        = \Carbon\Carbon::parse($start_time);
-                    $timeOut       = \Carbon\Carbon::parse($end_time);
-                    $diffInHours   = round($timeOut->diffInMinutes($timeIn) / 60);
                     
                     $full_dates  = \Carbon\Carbon::parse($full_date.'-'.$i);
                     $full_dates  = $full_dates->toDateString();
 
                     $roster_arr = [
-                        'rosters_id'    => $last_id,
+                        'roster_id'    => $last_id,
                         'full_date'     => $full_dates,
                         'start_time'    => $request['start_time_'.$i],
-                        'end_time'      => $request['end_time_'.$i],
-                        'total_hours'   => $diffInHours
+                        'end_time'      => $request['end_time_'.$i]
                     ];
                     RosterTimetable::create( $roster_arr);
                 }
             }
             else{
                 //edit the current data
-                $old_rosters_id = $request['old_rosters_id'];
-                $rosters_id     = $old_rosters_id[$x];
+                $old_roster_id = $request['old_roster_id'];
+                $roster_id     = $old_roster_id[$x];
                 echo 'old record';
                 // die();
                 for ($i = 1; $i <= $k; $i++) {
 
                     $start_time    = $request['start_time_'.($j)][$i-'1'];
                     $end_time      = $request['end_time_'.($j)][$i-'1'];
-                    // if($i == 1){
-                    //     echo $request['start_time_'.'0']['2'];
-                    //     die();
-                    // }
-                    $timeIn        = \Carbon\Carbon::parse($start_time);
-                    $timeOut       = \Carbon\Carbon::parse($end_time);
-                    $diffInHours   = round($timeOut->diffInMinutes($timeIn) / 60);
-                    // echo $full_dates; die();
+
 
                     $full_dates  = \Carbon\Carbon::parse($full_date.'-'.$i);
                     $full_dates  = $full_dates->toDateString();
 
-                    // echo '<br>'.$rosters_id.'<br>'.$full_dates.'<br>'.$start_time.'<br>'.$end_time.'<br>'.$diffInHours.'<br>';
+                    // echo '<br>'.$roster_id.'<br>'.$full_dates.'<br>'.$start_time.'<br>'.$end_time.'<br>'.$diffInHours.'<br>';
                     
-                    RosterTimetable::where('rosters_id', '=', $rosters_id)
+                    RosterTimetable::where('roster_id', '=', $roster_id)
                         ->whereDate('full_date', '=', $full_dates)
-                        ->update(['start_time' => $start_time, 'end_time' => $end_time, 'total_hours' => $diffInHours]);
+                        ->update(['start_time' => $start_time, 'end_time' => $end_time]);
                     // echo $full_dates; die();
                 }
             } 

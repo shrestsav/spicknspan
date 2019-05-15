@@ -85,8 +85,8 @@ Route::middleware(['auth'])->group(function () {
 		Route::delete('/rosterDeleteAll','RosterController@deleteAll')->name('roster.destroyAll');
 
 		Route::get('/roster-variation','RosterVariationController@index')->name('roster_variation.index');
-		Route::post('/roster-variation/accept/{id}','RosterVariationController@statusAccept')->name('roster_variation.approve_status');
-		Route::post('/roster-variation/decline/{id}','RosterVariationController@statusDecline')->name('roster_variation.decline_status');
+		Route::post('/roster-variation/accept/{id}/{date}','RosterVariationController@statusAccept')->name('roster_variation.approve_status');
+		Route::post('/roster-variation/decline/{id}/{date}','RosterVariationController@statusDecline')->name('roster_variation.decline_status');
 
 		Route::get('/site','SiteController@index')->name('site.index');
 		Route::post('/site','SiteController@store')->name('site.store');

@@ -13,13 +13,17 @@ class CreateRostersTimetable extends Migration
      */
     public function up()
     {
-        Schema::create('rosters_timetable', function (Blueprint $table) {
+        Schema::create('roster_timetables', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('rosters_id')->nullable();
+            $table->integer('roster_id')->unsigned();
             $table->date('full_date')->nullable();
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
-            $table->integer('total_hours')->nullable();
+            $table->smallInteger('status')->nullable()->comment('1:Approved, 2:Declined');
+            $table->integer('approved_by')->nullable()->unsigned();
+            $table->text('remarks')->nullable();
+            $table->foreign('roster_id')->references('id')->on('rosters')
+                ->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -31,6 +35,6 @@ class CreateRostersTimetable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rosters_timetable');
+        Schema::dropIfExists('roster_timetables');
     }
 }

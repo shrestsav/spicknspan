@@ -14,7 +14,7 @@ class CreateRosterTable extends Migration
     public function up()
     {
         Schema::create('rosters', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id');
             $table->integer('employee_id');
             $table->integer('client_id');
             $table->string('full_date')->nullable();

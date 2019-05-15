@@ -35,7 +35,7 @@
                   <input name="full_date" type="text" id="full_date" class="txtTime" style="width:85px;" value="<?php if(isset($_GET['full_date'])){
                       $date_filter = $_GET['full_date'];
                   } else {
-                      $date_filter = '2019-04';
+                      $date_filter = date("Y-m");
                   } echo $date_filter;?>" autocomplete="off" required>
                   <button type="submit" class="btn btn-warning"><i class="fa fa-refresh"></i></button>
               </p>
@@ -46,20 +46,11 @@
 
             {{ csrf_field() }}
 
-            <input name="full_date_add" type="hidden" id="full_dates" class="txtTime" style="width:85px;" value="<?php if(isset($_GET['full_date'])){
-                      $date_filter = $_GET['full_date'];
-                  } else {
-                      $date_filter = '2019-04';
-                  } echo $date_filter;?>" autocomplete="off" required>
+            <input name="full_date_add" type="hidden" id="full_dates" class="txtTime" style="width:85px;" value="<?= $date_filter;?>" autocomplete="off" required>
 
             <table id="tblRoster" class="table table-hover dataTable no-footer order-list table-striped" role="grid" aria-describedby="tblRoster_info">
               <thead>
                 <?php
-                  if(isset($_GET['full_date'])){
-                      $date_filter = $_GET['full_date'];
-                  } else {
-                      $date_filter = '2019-04';
-                  }
                   $month_part   = explode('-', $date_filter);
                   $month        = $month_part[1];
 
@@ -152,8 +143,8 @@
                       // echo $working_time[$j]['id'];
                       // echo '<br>';
                       // die();
-                      $time_table = DB::table('rosters_timetable')
-                                          ->where('rosters_id','=', $working_time[0]['id'])
+                      $time_table = DB::table('roster_timetables')
+                                          ->where('roster_id','=', $working_time[0]['id'])
                                           ->get()
                                           ->toArray();
 
@@ -161,7 +152,7 @@
                       // die();
                       $full_date  =  $time_table[0]->full_date;
                 ?>
-                  <input type="hidden" name="old_rosters_id[]" value="<?php echo $working_time[0]['id'];?>">
+                  <input type="hidden" name="old_roster_id[]" value="<?php echo $working_time[0]['id'];?>">
 
                   @for ($i = 0; $i<$m_days; $i++)
                       <td class="<?php if($i>=0 && $i<=6){ echo 'week_1';} if($i>=7 && $i<=13){ echo 'week_2';} if($i>=14 && $i<=20){ echo 'week_3';} if($i>=21 && $i<=27){ echo 'week_4';} if($i>=28 && $i<=31){ echo 'week_5';} ?>">
