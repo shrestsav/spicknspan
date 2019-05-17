@@ -57,11 +57,19 @@
 
 <!-- Main content -->
 <section class="content">
+  {{-- To display Errors from Javascript --}}
+  <div class="alert alert-danger access_error_msg" style="display: none;">   
+    @foreach ($errors->all() as $error)
+       {{ $error }}
+    @endforeach
+  </div>
+
   <div class="row">
     <div class="col-md-12">
       <div class="alert alert-danger" style="display: none;"></div>
       <div class="alert alert-success" style="display: none;"></div>
     </div>
+    <input type="hidden" name="lat_long" id="lat_long">
     <div class="col-md-6">
       <div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam or camera enabled)</div>
       <canvas id="canvas" hidden></canvas>
@@ -80,6 +88,31 @@
   <script src="{{ asset('backend/js/jsQR.js') }}"></script>
   
   <script>
+
+      if(navigator.geolocation) {
+        // Proceed only if User allows Location Access
+        navigator.geolocation.getCurrentPosition(function(qr_scanner){
+          var latitude = qr_scanner.coords.latitude;
+          var longitude = qr_scanner.coords.longitude;
+          
+          $('#lat_long').val(latitude+','+longitude);
+
+        }, function(){
+          $('.access_error_msg').html('Please Enable Location Access First');
+          $('.access_error_msg').slideDown("slow");
+        });
+      } else { 
+        x.innerHTML = "Geolocation is not supported by this browser. You cannot Login";
+      }
+
+
+
+
+
+
+
+
+
     var video = document.createElement("video");
     var canvasElement = document.getElementById("canvas");
     var canvas = canvasElement.getContext("2d");
@@ -128,6 +161,7 @@
           outputData.parentElement.hidden = false;
           outputData.innerText = code.data;
 
+          var lat_long = $('#lat_long').val();
           // swal({
           //   title: "Room "+code.data+" Connected",
           //   text: "Do you want to Log in ?",
@@ -143,7 +177,8 @@
                   url:'{{ route("ajax.qrLogin") }}',
                   dataType: 'json',
                   data:{
-                      room_id:code.data                 
+                      room_id:code.data,
+                      lat_long:lat_long
                   },
                   success:function(data) {
                       console.log(data);

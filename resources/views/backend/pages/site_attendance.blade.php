@@ -121,6 +121,7 @@
                 <th>Room No</th>
                 <th>Description</th>
                 <th>Login Time</th>
+                <th>Location</th>
                 <th>Date</th>
               </tr>
               </thead>
@@ -137,6 +138,13 @@
                   <td>{{$site_attendance->room_no}}</td>
                   <td>{{$site_attendance->description}}</td>
                   <td>{{$site_attendance->tz_login_time}}</td>
+                  <td class="loc" data-location = "{{$site_attendance->login_location}}">
+                    @if($site_attendance->login_location)
+                      <a href="javascript:;">{{$site_attendance->login_location}}</a>
+                    @else
+                      Not Available
+                    @endif
+                  </td>
                   <td>{{$date->format('d M Y')}}</td>
                 </tr>
               @endforeach
@@ -154,8 +162,25 @@
   </div>
 </section>
 
-@endsection
 
+
+
+<div class="modal modal-info fade" id="modal-info">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Location</h4>
+      </div>
+      <div class="modal-body no-padding" style="height: 700px;">
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+@endsection
 @push('scripts')
 <script type="text/javascript">
   $(function () {
@@ -189,6 +214,13 @@
     //   "pageLength": 8,
     //   "searching": false
     // });
+  })
+
+  $('.loc').on('click',function(){
+    var loc = $(this).data('location');
+    var src = "<iframe width='100%' height='100%' id='mapcanvas' src='https://maps.google.com/maps?q="+loc+"&amp;t=&amp;z=17&amp;ie=UTF8&amp;iwloc=&amp;output=embed' frameborder='0' scrolling='no' marginheight='0' marginwidth='0'><div class='zxos8_gm'></div><div style='overflow:hidden;'><div id='gmap_canvas' style='height:100%;width:100%;'></div></div><div><small>Powered by</small></div></iframe>";
+    $('#modal-info .modal-body').html(src);
+    $('#modal-info').modal();
   })
 </script>
   

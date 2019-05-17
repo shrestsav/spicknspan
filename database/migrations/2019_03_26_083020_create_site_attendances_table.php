@@ -18,7 +18,9 @@ class CreateSiteAttendancesTable extends Migration
             $table->integer('user_id');
             $table->integer('room_id');
             $table->dateTime('login');
+            $table->string('login_location')->nullable();            
             $table->dateTime('logout')->nullable();
+            $table->string('logout_location')->nullable();        
             $table->timestamps();
         });
     }

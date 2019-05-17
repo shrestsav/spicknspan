@@ -27,6 +27,14 @@
       width: 240px; 
       top: 14px;
     }
+    #employee_attendance_length{
+      float: left;
+    }
+    #employee_attendance_info{
+      text-align: center;
+      float: left;
+      width: 50%;
+    }
 </style>
 @endpush
 
@@ -117,7 +125,8 @@
             </table>
           </div> --}}
           <div class="box-body table-responsive no-padding">
-            <table class="table table-hover table-striped" id="employee_attendance">
+
+            <table class="table table-bordered table-striped table-hover datatable" id="employee_attendance">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -189,6 +198,13 @@
     $('#datepicker').datepicker({
       autoclose: true
     });
+    $('.datatable').DataTable({
+      "ordering": false,
+      "searching": false,
+      "dom": '<"top">rt<"bottom"flip><"clear">'
+    });
+    // $('#employee_attendance_wrapper .col-sm-6').addClass('pull-right');
+    // $('#employee_attendance_length').addClass('pull-right');
     $('#search_date_from_to').daterangepicker();
   });
 

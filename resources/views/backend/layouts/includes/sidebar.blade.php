@@ -26,6 +26,8 @@
         </li>
         <li class="@if ($title === 'Incident Report') active @endif"><a href="{{route('incident.create')}}"><i class="fa fa-bug"></i> <span>Incident Report</span></a>
         </li>
+        <li class="@if ($title === 'Leave Application') active @endif"><a href="{{route('leave.application')}}"><i class="fa fa-bug"></i> <span>Leave Application</span></a>
+        </li>
 
       {{-- Allow these menus for admin only --}}
 

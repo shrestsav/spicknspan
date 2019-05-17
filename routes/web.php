@@ -42,6 +42,10 @@ Route::middleware(['auth'])->group(function () {
 	Route::post('/ajax_incident_report_details', 'IncidentReportController@ajax_incident_report_details')->name('incident.view');
 	Route::get('/print_incident_report/{id}', 'IncidentReportController@print_incident_report')->name('incident.print');
 
+	Route::get('/leave_application', function(){
+		return view('backend.pages.leave_app_form');
+	})->name('leave.application');
+
 	Route::get('/scanner', function(){
 			return view('backend.pages.scanner');
 		})->name('scanner');

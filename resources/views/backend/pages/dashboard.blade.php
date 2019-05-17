@@ -160,7 +160,7 @@
         </div>
         @endif
         <!-- quick email widget -->
-        <div class="box box-info">
+{{--         <div class="box box-info">
           <div class="box-header">
             <i class="fa fa-envelope"></i>
 
@@ -188,7 +188,7 @@
             <button type="button" class="pull-right btn btn-default" id="sendEmail">Send
               <i class="fa fa-arrow-circle-right"></i></button>
           </div>
-        </div>
+        </div> --}}
       </div>
       @endrole
     </div>

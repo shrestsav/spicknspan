@@ -11,7 +11,7 @@ class SiteAttendance extends Model
 	// use HasLocalDates;
 	use FormatsDate;
     protected $dates = ['login'];
-    protected $fillable = ['user_id','room_id','login'];
+    protected $fillable = ['user_id','room_id','login','login_location'];
 
     public function user()
     {
