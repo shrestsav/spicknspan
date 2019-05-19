@@ -11,6 +11,7 @@ use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class RosterController extends Controller
 {
@@ -21,57 +22,49 @@ class RosterController extends Controller
      */
     public function index()
     {
-
-        $userId   = Auth::id();
-        
         if(isset($_GET['full_date'])){
             $date_filter = $_GET['full_date'];
         } else {
-            $date_filter = '2019-04';
+            $date_filter = '2019-05';
         }
 
-        $employee = User::select(
-                                'users.id',
-                                'users.name',
-                                'users.email',
-                                'users.user_type')
-                        ->where('users.user_type','=','employee');
-        
-        $client = User::select(
-                                'users.id',
+        $employees = User::select('users.id',
+                                 'users.name',
+                                 'users.email',
+                                 'users.user_type');
+                        
+        $clients = User::select( 'users.id',
                                 'users.name',
                                 'users.email',
                                 'users.user_type')
                         ->where('users.user_type','=','client');
 
-        $rosters = Roster::all()->where('full_date','=',$date_filter);
+        $rosters = Roster::select('rosters.id',
+                                  'rosters.employee_id',
+                                  'rosters.client_id',
+                                  'rosters.full_date',
+                                  'rosters.added_by',
+                                  'rt.id as rt_id',
+                                  'rt.date',
+                                  'rt.start_time',
+                                  'rt.end_time',
+                                  'rt.status')
+                        ->join('roster_timetables as rt','rt.roster_id','=','rosters.id')
+                        ->where('full_date','=',$date_filter)
+                        ->where('start_time','!=',null);
 
         if(Entrust::hasRole('contractor')){
-            $client = $client ->where('users.added_by','=',$userId);
-            $employee = $employee ->where('users.added_by','=',$userId);
-            $rosters = $rosters ->where('added_by','=',$userId);
+            $clients = $clients->where('users.added_by','=',Auth::id());
+            $employees = $employees ->where('users.added_by','=',Auth::id());
+            $rosters = $rosters ->where('added_by','=',Auth::id());
         }
 
-        $employee = $employee->get();
-        $client = $client->get();
+        $employees = $employees->get();
+        $clients = $clients->get();
+        $rosters = $rosters->get();
+        $rosters = $rosters->groupBy(['client_id','employee_id']);
 
-        $n_rosters = json_decode($rosters, true);
-
-        if($n_rosters == []) {
-            // echo 'empty';
-            $arr_rosters = '';
-        } else {
-            // echo 'not empty';
-            foreach($rosters as $abcd)
-            {
-                $arr_rosters[] = $abcd->toArray();
-            }
-        }
-        
-        $rostersTimetable = RosterTimetable::all();
-        $rostersTimetable = json_decode($rostersTimetable, true);
-
-        return view('backend.pages.roster',compact('arr_rosters', 'rostersTimetable', 'employee', 'client'));
+        return view('backend.pages.roster',compact('rosters','employees', 'clients'));
     }
 
     /**
@@ -95,8 +88,6 @@ class RosterController extends Controller
         $j = 0;
         $x = 0;
         $full_dates = '';
-
-        $userId   = Auth::id();
 
         $arr_employee_id   = $request['employee_id'];
         $arr_client_id     = $request['client_id'];
@@ -133,7 +124,7 @@ class RosterController extends Controller
             if(empty($check)){
                 echo 'new record';
                 // die();
-                Roster::create(['employee_id'=> $emp_id,'client_id'=>$arr_client_id[$j],'full_date'=>$full_date,'added_by'=>$userId]);
+                Roster::create(['employee_id'=> $emp_id,'client_id'=>$arr_client_id[$j],'full_date'=>$full_date,'added_by'=>Auth::id()]);
                 $last_id = DB::getPdo()->lastInsertId();
 
                 for ($i = 1; $i <= $k; $i++) {
@@ -181,40 +172,6 @@ class RosterController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Roster  $roster
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Roster $roster)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Roster  $roster
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Roster $roster)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Roster  $roster
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Roster  $roster
@@ -241,4 +198,75 @@ class RosterController extends Controller
         DB::table("rosters")->whereIn('id',explode(",",$ids))->delete();
         return response()->json(['success'=>"Rosters Deleted successfully."]);
     }
+
+    public function ajax_store_roster(Request $request)
+    {   
+        $type = $request->type;
+        $client_id = $request->client_id;
+        $employee_id = $request->employee_id;
+        $time = $request->time;
+        $full_date = Carbon::parse($request->date)->format('Y-m');
+        $request->merge(['full_date' => $full_date,'added_by' => Auth::id()]);
+
+        //Check if exists
+        $check_roster = Roster::where('employee_id',$employee_id)->where('client_id',$client_id)->where('full_date',$full_date);
+        if(!$check_roster->exists()){
+            $roster = Roster::Create($request->all());
+            if($roster){
+                if($type=='start_time')
+                    $request->merge(['roster_id' => $roster->id,'start_time' => $time]);
+                elseif($type=='end_time')
+                    $request->merge(['roster_id' => $roster->id,'end_time' => $time]);
+                RosterTimetable::Create($request->all());
+                return json_encode('Create New');
+            }
+        }
+        else{
+            $roster_id = $check_roster->first()->id;
+            $check_roster_timetable = RosterTimetable::where('roster_id',$roster_id)->where('date',$request->date);
+            if($check_roster_timetable->exists()){
+                if($type=='start_time')
+                   $update_field = 'start_time';
+                elseif($type=='end_time')
+                    $update_field = 'end_time';
+                $check_roster_timetable->update([$update_field => $time]);
+                return json_encode('Roster exists and timetable exists');
+            }
+            else{
+                if($type=='start_time')
+                    $request->merge(['roster_id' => $roster_id,'start_time' => $time]);
+                elseif($type=='end_time')
+                    $request->merge(['roster_id' => $roster_id,'end_time' => $time]);
+                RosterTimetable::Create($request->all());
+                return json_encode('Roster exits timetable not');
+            }
+        }
+        
+    }
+
+    public function ajax_update_roster(Request $request)
+    {
+        $type = $request->type;
+        $roster_id = $request->roster_id;
+        $time = $request->time;
+        $date = $request->date;
+        if($type=='start_time')
+            $update_field = 'start_time';
+        elseif($type=='end_time')
+            $update_field = 'end_time';
+
+        //Check if Timetable exists
+        $check_roster_timetable = RosterTimetable::where('roster_id',$roster_id)->where('date',$date);
+        if($check_roster_timetable->exists()){
+            $update_roster = RosterTimetable::where('roster_id',$roster_id)->whereDate('date',$date)->update([$update_field => $time]);
+            if($update_roster)
+                return json_encode('Updated Successfully');
+        }
+        else{
+            $request->merge([$update_field => $time]);
+            RosterTimetable::create($request->all());
+            return json_encode('Roster Timetable Created');
+        }
+    }
+
 }

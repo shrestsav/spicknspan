@@ -16,7 +16,7 @@ class CreateRostersTimetable extends Migration
         Schema::create('roster_timetables', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('roster_id')->unsigned();
-            $table->date('full_date')->nullable();
+            $table->date('date')->nullable();
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
             $table->smallInteger('status')->nullable()->comment('1:Approved, 2:Declined');

@@ -11,10 +11,23 @@ use App\Exports\DataExport;
 use App\Imports\DataImport;
 use Illuminate\Http\Request;
 use Auth;
+use Carbon\Carbon;
+use App\LeaveRequest;
 
 
 class CoreController extends Controller
 {
+    public function leave_requests(Request $request){
+        if($request->all()){
+            $from_to = explode('-', $request->from_to);
+            $from = Carbon::parse($from_to[0]);
+            $to = Carbon::parse($from_to[1]);
+            $request->merge(['from'=>$from,'to'=>$to,'user_id' => Auth::id()]);
+            LeaveRequest::create($request->all());
+        }
+        return view('backend.pages.leave_app_form');
+    }
+
 
     public function import_from_excel(Request $request){
     	$request->validate([

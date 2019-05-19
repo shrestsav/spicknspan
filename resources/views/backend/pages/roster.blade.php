@@ -15,6 +15,35 @@
 
 @section('content')
 
+@php
+  function dates_month($month, $year) {
+      $num = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+      $dates_month = array();
+      for ($i = 1; $i <= $num; $i++) {
+          $mktime = mktime(0, 0, 0, $month, $i, $year);
+          $date = date("D-M-d", $mktime);
+          $dates_month[$i] = $date;
+      }
+      return $dates_month;
+  }
+  
+  $yr = date('Y');
+  $mth = date('m');
+  if(isset($_GET['full_date']) && $_GET['full_date']){
+    $year_month = explode('-',$_GET['full_date']);
+    $yr = $year_month[0];
+    $mth = $year_month[1];
+  }
+
+  $all_days = dates_month($mth, $yr);
+  echo"<pre>"; print_r($all_days); echo"</pre>";   
+
+
+
+@endphp
+
+
+
 <!-- Main content -->
 <section class="content">
   <div class="row">
@@ -64,122 +93,94 @@
                 @php
                   $month_part   = explode('-', $date_filter);
                   $month        = $month_part[1];
-
-                  if(($month == '01') || ($month == '03') || ($month == '05') || ($month == '07') || ($month == '08') || ($month == '10') || ($month == '12'))
-                    $m_days = 31;
-
-                  elseif(($month == '04') || ($month == '06') || ($month == '09') || ($month == '11'))
-                    $m_days = 30;
-                  
-                  elseif($month == '02')
-                    $m_days = 28;
+                  $total_days =  count($all_days);
                 @endphp
-                <button id='b_week_1' class="btn btn-primary week_selector" onclick="event.preventDefault();">Week 1</button>
-                <button id='b_week_2' class="btn btn-primary week_selector" onclick="event.preventDefault();">Week 2</button>
-                <button id='b_week_3' class="btn btn-primary week_selector" onclick="event.preventDefault();">Week 3</button>
-                <button id='b_week_4' class="btn btn-primary week_selector" onclick="event.preventDefault();">Week 4</button>
-                <button id='b_week_5' class="btn btn-primary week_selector" onclick="event.preventDefault();">Week 5</button>
-                <br>
-                <br>
-                  <tr role="row">
-                    <th width="50px"><input type="checkbox" id="master"></th>
-                      <!-- <th>Action</th> -->
-                    <th width="100px" class="sorting_disabled" rowspan="1" colspan="1">Employee</th>
-                    <th width="100px" class="sorting_disabled" rowspan="1" colspan="1">Client</th>
+                <div class="col-md-12 text-center">
+                  <button id='b_week_1' class="btn btn-default week_selector" onclick="event.preventDefault();">Week 1</button>
+                  <button id='b_week_2' class="btn btn-default week_selector" onclick="event.preventDefault();">Week 2</button>
+                  <button id='b_week_3' class="btn btn-default week_selector" onclick="event.preventDefault();">Week 3</button>
+                  <button id='b_week_4' class="btn btn-default week_selector" onclick="event.preventDefault();">Week 4</button>
+                  <button id='b_week_5' class="btn btn-default week_selector" onclick="event.preventDefault();">Week 5</button>
 
-                    @for($i=1; $i<=$m_days; $i++)
-                      <th class="sorting_disabled <?php if($i>=1 && $i<=7){ echo 'week_1';} if($i>=8 && $i<=14){ echo 'week_2';} if($i>=15 && $i<=21){ echo 'week_3';} if($i>=22 && $i<=28){ echo 'week_4';} if($i>=29 && $i<=31){ echo 'week_5';} ?>" rowspan="1" colspan="1" style="width: 20px;" ><?php echo $i; ?></th>
-                    @endfor
+                <br>
+                <br>
+                </div>
+                  <tr role="row">
+                    <th><input type="checkbox" id="master"></th>
+                    <th class="">Employee</th>
+                    <th class="" >Client</th>
+                    @foreach($all_days as $date => $day)
+                      @php
+                        if($date>=1 && $date<=7)
+                         $week = 'week_1';
+                        if($date>=8 && $date<=14)
+                          $week = 'week_2'; 
+                        if($date>=15 && $date<=21)
+                          $week = 'week_3'; 
+                        if($date>=22 && $date<=28)
+                          $week = 'week_4'; 
+                        if($date>=29 && $date<=31)
+                          $week = 'week_5'; 
+                      @endphp
+                      <th class=" {{$week}}">
+                        {{$day}}
+                      </th>
+                    @endforeach
 
                   </tr>
               </thead>
 
               <tbody class="roster-list">
-
-              @php 
-              if(empty($arr_rosters)){ $empty_val = 'true'; }
-              @endphp
-
-              @if(!empty($arr_rosters))
-                @php
-                $k = count($arr_rosters); $x = 0; 
-                @endphp
-
-                @for($j=0; $j<$k; $j++)
-                  @php
-                    $id   = $arr_rosters[$j]['id'];
-                    $employee_id   = $arr_rosters[$j]['employee_id'];
-                    $client_id     = $arr_rosters[$j]['client_id'];
-                  @endphp
-                  <tr style="text-align: center;" role="row" class="odd" id="tr_{{$id}}">
-                    <input type="hidden" name="counter" value="0">
-                    <td>
-                        <input type="checkbox" class="sub_chk" data-id="{{$id}}">
-                    </td>
-                    <td>
-                      <select name="employee_id[]" id="emp_name" class="form-control select2 select2-hidden-accessible" style="width: 100%;" tabindex="-1" aria-hidden="true">
-                          
-                      @if ($employee->count())
-                        <option selected disabled>Select Employee</option>
-                          @foreach($employee as $user)
-                            <option value="{{ $user->id }}" {{$employee_id == $user->id  ? 'selected' : ''}}>{{ $user->name}}</option>
-                          @endforeach
-                      @endif
-                          
-                      </select>
-                    </td>
-
-                    <td>
-                      <select name="client_id[]" id="client_name" class="form-control select2 select2-hidden-accessible" style="width: 100%;" tabindex="-1" aria-hidden="true">
-                        
-                      @if ($client->count())
-                        <option selected disabled>Select Client</option>
-                          @foreach($client as $user)
-                            <option value="{{ $user->id }}" {{$client_id == $user->id  ? 'selected' : ''}}>{{ $user->name}}</option>
-                          @endforeach
-                      @endif
-                        
-                      </select>
-                    </td>
-
+              @foreach($rosters as $client_id => $roster_by_clients)
+                @foreach($roster_by_clients as $emp_id => $emp_rosters)
+                <tr style="text-align: center;" role="row" class="" id="" data-roster-id="{{$emp_rosters[0]->id}}" data-row-type="old_row">
+                  <td>
+                      <input type="checkbox" class="sub_chk" data-id="">
+                  </td>
+                  <td>
+                    {{\App\User::find($emp_id)->name}}
+                  </td>
+                  <td>
+                    {{\App\User::find($client_id)->name}}
+                  </td>
+                  @for ($i = 1; $i<=$total_days; $i++)
                     @php
-                     $working_time = DB::table('rosters')
-                                              ->where('employee_id','=', $employee_id)
-                                              ->where('client_id','=', $client_id)
-                                              ->where('full_date', '=', $date_filter)
-                                              ->get();
-                      $working_time = json_decode($working_time, true);
-                      $r_id = $working_time[0]['id'];
-                      // echo $working_time[$j]['id'];
-                      // echo '<br>';
-                      // die();
-                      $time_table = DB::table('roster_timetables')
-                                          ->where('roster_id','=', $working_time[0]['id'])
-                                          ->get()
-                                          ->toArray();
+                      if($i>=1 && $i<=7)
+                        $week = 'week_1';
+                      elseif($i>=8 && $i<=14)
+                        $week = 'week_2';
+                      elseif($i>=15 && $i<=21)
+                        $week = 'week_3';
+                      elseif($i>=22 && $i<=28)
+                        $week = 'week_4';
+                      elseif($i>=29 && $i<=32)
+                        $week = 'week_5'; 
 
-                      // print_r($time_table);
-                      // die();
-                      $full_date  =  $time_table[0]->full_date;
+                      $start_time = '';
+                      $end_time = '';
+                      foreach($emp_rosters as $roster){
+                        $day = \Carbon\Carbon::parse($roster->date)->format('d');
+                        if($day==$i){
+                          $start_time = $roster->start_time;
+                          $end_time = $roster->end_time;
+                        }
+                      }
                     @endphp
-                    <input type="hidden" name="old_roster_id[]" value="{{$working_time[0]['id']}}">
-
-                    @for ($i = 0; $i<$m_days; $i++)
-                      <td class="<?php if($i>=0 && $i<=6){ echo 'week_1';} if($i>=7 && $i<=13){ echo 'week_2';} if($i>=14 && $i<=20){ echo 'week_3';} if($i>=21 && $i<=27){ echo 'week_4';} if($i>=28 && $i<=31){ echo 'week_5';} ?>">
-                          <input name="start_time_<?php echo $j;?>[<?php echo $i;?>]" type="text" id="start_time" class="timepicker txtTime" value="<?php echo $time_table[$i]->start_time;?>">
-                            <br>-<br>
-                          <input name="end_time_<?php echo $j;?>[<?php echo $i;?>]" type="text" id="end_time" class="timepicker txtTime" value="<?php echo $time_table[$i]->end_time;?>">
-                      </td>
-                    @endfor
-                  </tr>
-                @endfor
-              @endif
-            </tbody>
+                    <td class="{{$week}}">
+                      <input type="text" class="timepicker txtTime time_from" value="{{$start_time}}" data-date = "{{$yr.'-'.$mth.'-'.$i}}">
+                        <br>-<br>
+                      <input type="text" class="timepicker txtTime time_to" value="{{$end_time}}" data-date = "{{$yr.'-'.$mth.'-'.$i}}">
+                    </td>
+                  @endfor
+                </tr>
+                @endforeach
+              @endforeach
+              </tbody>
           </table>
 
           <div class="container box-roster row">
             <div class="box-footer-left col-md-11">
-              <button type="submit" class="btn btn-primary">Update</button>
+              {{-- <button type="submit" class="btn btn-primary">Update</button> --}}
               <button class="btn btn-danger delete_all" data-url="{{ url('rosterDeleteAll') }}">Delete All Selected</button>
               <!-- <button type="" class="btn btn-danger delete_all">Delete</button> -->
             </div>
@@ -197,14 +198,105 @@
 @endsection
 
 @push('scripts')
+<script type="text/javascript">
+ function getMonths(month,year){
+    var ar = [];
+    var days = [];
+    var start = moment(year+"-"+month,"YYYY-MMM");
+    for(var end = moment(start).add(1,'month');  start.isBefore(end); start.add(1,'day')){
+        ar.push(start.format('D-ddd'));
+        days[start.format('D')] = start.format('ddd,MMM-D');
+    }
+    return days;
+}
+console.log(getMonths('Mar',2011))
+
+  $('body').on('change','.time_from',function(e){
+    e.preventDefault();
+    var row_type = $(this).parent().parent().data('row-type');
+    var type = 'start_time';
+    var time_from = $(this).val();
+    var date = $(this).data('date');
+    var roster_id = $(this).parent().parent().data('roster-id');
+    if(row_type=='new_row'){
+      var client_id = $(this).parent().siblings('.client_td').children('.client_name').val();
+      var employee_id = $(this).parent().siblings('.employee_td').children('.employee_name').val();
+      newTimetable(type,client_id,employee_id,time_from,date);
+    }
+    else if(row_type=='old_row'){
+      updateTimetable(type,roster_id,time_from,date);
+    }
+    
+  });
+
+  $('body').on('change','.time_to',function(e){
+    e.preventDefault();
+    var row_type = $(this).parent().parent().data('row-type');
+    var type = 'end_time';
+    var time_to = $(this).val();
+    var date = $(this).data('date');
+    var roster_id = $(this).parent().parent().data('roster-id');
+    if(row_type=='new_row'){
+      var client_id = $(this).parent().siblings('.client_td').children('.client_name').val();
+      var employee_id = $(this).parent().siblings('.employee_td').children('.employee_name').val();
+      newTimetable(type,client_id,employee_id,time_to,date);
+    }
+    else if(row_type=='old_row'){
+      updateTimetable(type,roster_id,time_to,date);
+    }
+  });
+  
+  // $('body').on('change','.employee_name',function(e){
+  //    e.preventDefault();
+  //    $('.time_from').prop('readonly','true');
+  // })
+
+  function updateTimetable(type,roster_id,time,date){
+    $.ajax({
+      type:'post',
+      url: SITE_URL+'ajax_update_roster',
+      dataType: 'json',
+      data:{
+        type: type,                
+        roster_id: roster_id,                
+        time: time,                
+        date: date,                
+      },
+      success:function(data) {
+        console.log(data);
+      },
+      error: function(response){
+      
+      }
+    });
+  }
+
+  function newTimetable(type,client_id,employee_id,time,date){
+    $.ajax({
+      type:'post',
+      url: SITE_URL+'ajax_store_roster',
+      dataType: 'json',
+      data:{
+        type: type,                
+        client_id: client_id,                
+        employee_id: employee_id,                
+        time: time,                
+        date: date,                
+      },
+      success:function(data) {
+        console.log(data);
+      },
+      error: function(response){
+      
+      }
+    });
+  }
+
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-confirmation/1.0.5/bootstrap-confirmation.min.js"></script>
 <script type="text/javascript">
   $(function () {
-    $('#tblRoster').DataTable( {
-        'scrollX': false,
-        'searching': false,
-        'paging': false
-    } );
+
     $('.timepicker').timepicker({ 'timeFormat': 'H:i' });
     $('#full_date').datepicker({
         autoclose: true,
@@ -213,26 +305,24 @@
     });
 
     var counter = 1;
-    $("#addrow").on("click", function () {
-        event.preventDefault();
-        <?php $empty_val = 'false';?>
-        var newRow = $("<tr style='text-align: center;' role='row' class='odd'>");
+    $('body').on('click','#addrow',function(e){
+        e.preventDefault();
+        var newRow = $("<tr style='text-align: center;' role='row' data-row-type='new_row'>");
         var cols = "";
-        // cols += '<td><span class="chkRow"><input type="checkbox" name="roster_check"></span></td>';
-        cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger" value="X"></td>';
-        cols += '<td><select name="employee_id[]" class="form-control select2" style="width: 100%;" tabindex="-1" aria-hidden="true" required><?php if ($employee->count()){?><option value="" selected disabled>Select Employee</option><?php foreach($employee as $user){?><option value="<?php echo $user->id;?>"><?php echo $user->name;?></option><?php } } ?></select></td>';
-        cols += '<td><select name="client_id[]" id="client_name" class="form-control select2" style="width: 100%;" tabindex="-1" aria-hidden="true" required><?php if ($client->count()){?><option value="" selected disabled>Select Client</option><?php foreach($client as $user){?><option value="<?php echo $user->id;?>"><?php echo $user->name;?></option><?php } } ?></select></td>';
-        cols += '<?php for ($i = 1; $i <= $m_days; $i++){?><td class="<?php if($i>=1 && $i<=7){ echo 'week_1';} if($i>=8 && $i<=14){ echo 'week_2';} if($i>=15 && $i<=21){ echo 'week_3';} if($i>=22 && $i<=28){ echo 'week_4';} if($i>=29 && $i<=31){ echo 'week_5';} ?>"><input name="start_time_<?php echo $i;?>" type="text" id="start_time" class="timepicker txtTime"><br>-<br><input name="end_time_<?php echo $i;?>" type="text" id="end_time" class="timepicker txtTime"></td><?php } ?>';
+        cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger" value="X"><input type="button" class="ibtnSave btn btn-md btn-success" value="Y"></td>';
+        cols += '<td class="employee_td"><select class="form-control employee_name" required><option value="" selected disabled>Select Employee</option>@foreach($employees as $user)<option value="{{$user->id}}">{{$user->name}}</option>@endforeach</select></td>';
+        cols += '<td class="client_td"><select class="form-control client_name" required><option value selected disabled>Select Client</option>@foreach($clients as $user)<option value="{{$user->id}}">{{$user->name}}</option>@endforeach</select></td>';
+        cols += '@for($i=1; $i<=$total_days; $i++) @php if($i>=1 && $i<=7)$week = "week_1";elseif($i>=8 && $i<=14)$week = "week_2";elseif($i>=15 && $i<=21)$week = "week_3";elseif($i>=22 && $i<=28)$week = "week_4";elseif($i>=29 && $i<=31)$week = "week_5"; @endphp <td class="{{$week}}"><input type="text" class="timepicker txtTime time_from"  data-date = "{{$yr.'-'.$mth.'-'.$i}}"><br>-<br><input type="text" class="timepicker txtTime time_to"  data-date = "{{$yr.'-'.$mth.'-'.$i}}"></td>@endfor';
         newRow.append(cols);
         $("tbody.roster-list").append(newRow);
         $('.timepicker').timepicker({ 'timeFormat': 'H:i' });
 
         counter++;
         $('#addrow').hide();
-            $('.week_2').hide();
-    $('.week_3').hide();
-    $('.week_4').hide();
-    $('.week_5').hide();
+        $('.week_2').hide();
+        $('.week_3').hide();
+        $('.week_4').hide();
+        $('.week_5').hide();
     });
 
     $("tbody.roster-list").on("click", ".ibtnDel", function (event) {
@@ -335,8 +425,14 @@
       $('.week_4').hide();
       $('.week_5').hide();
 
+
     $('#b_week_1').on('click', function(e) {
       $('.week_1').show();
+      $(this).addClass('btn-success').css('color','white');
+      $(this).addClass('btn-success').css('color','white');
+      $(this).addClass('btn-success').css('color','white');
+      $(this).addClass('btn-success').css('color','white');
+      $(this).addClass('btn-success').css('color','white');
       $('.week_2').hide();
       $('.week_3').hide();
       $('.week_4').hide();

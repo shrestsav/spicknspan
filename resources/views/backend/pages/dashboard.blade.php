@@ -15,7 +15,7 @@
       </div>
       @role('superAdmin')
       @if(count($supportMails))
-      <div class="col-md-6">
+      <div class="col-md-8">
         @if ($errors->any())
           <div class="alert alert-danger">
               @foreach ($errors->all() as $error)
@@ -123,21 +123,15 @@
             </div>
           </div>
         </div>
-
-
-
-
-
       </div>
       @endif
-      <div class="col-md-6">
+      <div class="col-md-4">
         @if(count($assignedTasks))
         <div class="box box-primary">
           <div class="box-header">
             <i class="ion ion-clipboard"></i>
             <h3 class="box-title">Assigned Tasks</h3>
           </div>
-
           <div class="box-body">
             <ul class="todo-list">
               @foreach($assignedTasks as $assignedTask)

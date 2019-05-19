@@ -37,7 +37,7 @@
     <div class="col-md-12">
       <div class="box box-primary {{-- collapsed-box --}} box-solid">
         <div class="box-header with-border">
-          <h3 class="box-title">Create Incident Report</h3>
+          <h3 class="box-title">Create Leave Application</h3>
           <div class="pull-right box-tools">
             <button type="button" class="btn btn-info btn-sm" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
               <i class="fa fa-plus"></i></button>
@@ -46,20 +46,16 @@
           </div>
         </div>
         <div class="box-body padding">
-          <form role="form" action="" method="POST" data-toggle="validator" enctype="multipart/form-data">
+          <form role="form" action="{{route('leave_request.store')}}" method="POST" data-toggle="validator" enctype="multipart/form-data">
             @csrf
             <div class="col-md-6 col-md-offset-3">
-              
               <div class="form-group">
                 <label>Select the type of leave you are requesting</label>
-                <select name="" class="form-control select2">
-                  <option value="" selected>ANNUAL LEAVE</option>
-                  <option value="">BEREAVEMENT LEAVE</option>
-                  <option value="">CARERS LEAVE</option>
-                  <option value="">TIME OFF IN LIEU</option>
-                  <option value="">UNPAID CARERS LEAVE</option>
-                  <option value="">UNPAID LEAVE</option>
-                  <option value="">UNPAID SICK LEAVE</option>
+                <select name="leave_type" class="form-control select2" required>
+                  <option value disabled selected>Select Leave Type</option>
+                  @foreach(config('setting.leave_types') as $id => $leave_typ)
+                    <option value="{{$id}}">{{$leave_typ}}</option>
+                  @endforeach
                 </select>
               </div>
 
@@ -73,17 +69,17 @@
                     $today = date('m/d/Y');
                     $postOneMonth = date("m/d/Y", strtotime( date( "m/d/Y", strtotime( date("m/d/Y") ) ) . "+1 month" ) );
                   @endphp
-                  <input type="text" class="form-control pull-right" id="search_date_from_to" name="search_date_from_to" @if(Request::input('search_date_from_to')) value="{{Request::input('search_date_from_to')}}" @else value="{{$today.' - '.$postOneMonth}}" @endif>
+                  <input type="text" class="form-control pull-right" id="from_to" name="from_to" value="{{$today.' - '.$postOneMonth}}" required>
                 </div>
               </div>
               <div class="form-group">
                 <label for="">Describe your reasons for leave</label>
-                <textarea class="form-control" rows="4" name="" placeholder="" maxlength=""></textarea>
+                <textarea class="form-control" rows="4" name="description" placeholder="Describe why you need this leave" maxlength="" required></textarea>
               </div>
             </div>
-            <div class="col-md-12">
+            <div class="col-md-6 col-md-offset-3">
               <div class="box-footer">
-                <button type="button" class="btn btn-primary">Submit</button>
+                <button type="Submit" class="btn btn-primary">Submit</button>
               </div>
             </div>
           </form>
