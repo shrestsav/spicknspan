@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Roster;
 use App\RosterTimetable;
+use App\LeaveRequest;
 use DB;
 use Auth;
 use App\User;
@@ -50,21 +51,19 @@ class RosterController extends Controller
                                   'rt.end_time',
                                   'rt.status')
                         ->join('roster_timetables as rt','rt.roster_id','=','rosters.id')
-                        ->where('full_date','=',$date_filter)
-                        ->where('start_time','!=',null);
+                        ->where('full_date','=',$date_filter);
 
         if(Entrust::hasRole('contractor')){
             $clients = $clients->where('users.added_by','=',Auth::id());
             $employees = $employees ->where('users.added_by','=',Auth::id());
             $rosters = $rosters ->where('added_by','=',Auth::id());
         }
-
+        $leaves = LeaveRequest::where('status',1)->get();
         $employees = $employees->get();
         $clients = $clients->get();
         $rosters = $rosters->get();
         $rosters = $rosters->groupBy(['client_id','employee_id']);
-
-        return view('backend.pages.roster',compact('rosters','employees', 'clients'));
+        return view('backend.pages.roster',compact('rosters','employees', 'clients','leaves'));
     }
 
     /**
@@ -92,8 +91,7 @@ class RosterController extends Controller
         $arr_employee_id   = $request['employee_id'];
         $arr_client_id     = $request['client_id'];
         $full_date         = $request['full_date_add'];
-        // echo $full_date;
-        // die();
+
         $month_part        = explode('-', $full_date);
         $month             = $month_part[1];
 
@@ -123,7 +121,7 @@ class RosterController extends Controller
             //add the data if it is new
             if(empty($check)){
                 echo 'new record';
-                // die();
+
                 Roster::create(['employee_id'=> $emp_id,'client_id'=>$arr_client_id[$j],'full_date'=>$full_date,'added_by'=>Auth::id()]);
                 $last_id = DB::getPdo()->lastInsertId();
 
@@ -148,7 +146,7 @@ class RosterController extends Controller
                 $old_roster_id = $request['old_roster_id'];
                 $roster_id     = $old_roster_id[$x];
                 echo 'old record';
-                // die();
+
                 for ($i = 1; $i <= $k; $i++) {
 
                     $start_time    = $request['start_time_'.($j)][$i-'1'];
@@ -158,12 +156,12 @@ class RosterController extends Controller
                     $full_dates  = \Carbon\Carbon::parse($full_date.'-'.$i);
                     $full_dates  = $full_dates->toDateString();
 
-                    // echo '<br>'.$roster_id.'<br>'.$full_dates.'<br>'.$start_time.'<br>'.$end_time.'<br>'.$diffInHours.'<br>';
+
                     
                     RosterTimetable::where('roster_id', '=', $roster_id)
                         ->whereDate('full_date', '=', $full_dates)
                         ->update(['start_time' => $start_time, 'end_time' => $end_time]);
-                    // echo $full_dates; die();
+
                 }
             } 
             $x++; $j++;
@@ -171,32 +169,12 @@ class RosterController extends Controller
         return redirect()->back()->with('message', 'Roster Added Successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Roster  $roster
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        DB::table("rosters")->delete($id);
-
-        return response()->json(['success'=>"Roster Deleted successfully.", 'tr'=>'tr_'.$id]);
-    }
-
-
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function deleteAll(Request $request)
-    {
-        $ids = $request->ids;
-        // echo $ids;
-        // die();
-        DB::table("rosters")->whereIn('id',explode(",",$ids))->delete();
-        return response()->json(['success'=>"Rosters Deleted successfully."]);
+        foreach($request->sel_Rows as $sel_Row){
+            Roster::find($sel_Row)->delete();
+        }
+        return response()->json("Roster Deleted successfully");
     }
 
     public function ajax_store_roster(Request $request)
@@ -208,7 +186,7 @@ class RosterController extends Controller
         $full_date = Carbon::parse($request->date)->format('Y-m');
         $request->merge(['full_date' => $full_date,'added_by' => Auth::id()]);
 
-        //Check if exists
+        //Check if roster exists
         $check_roster = Roster::where('employee_id',$employee_id)->where('client_id',$client_id)->where('full_date',$full_date);
         if(!$check_roster->exists()){
             $roster = Roster::Create($request->all());
@@ -223,6 +201,8 @@ class RosterController extends Controller
         }
         else{
             $roster_id = $check_roster->first()->id;
+
+            //check if roster timetable exists
             $check_roster_timetable = RosterTimetable::where('roster_id',$roster_id)->where('date',$request->date);
             if($check_roster_timetable->exists()){
                 if($type=='start_time')

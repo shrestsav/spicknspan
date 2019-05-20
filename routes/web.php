@@ -45,6 +45,9 @@ Route::middleware(['auth'])->group(function () {
 	Route::get('/leave_application','CoreController@leave_requests')->name('leave_request.index');
 	Route::post('/leave_application','CoreController@leave_requests')->name('leave_request.store');
 
+	//this goes to admin route
+	Route::post('/updateLeaveRequestStatus','CoreController@updateStatus')->name('leave_request.status');
+
 	Route::get('/scanner', function(){
 			return view('backend.pages.scanner');
 		})->name('scanner');
@@ -83,9 +86,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('/wages/{id}','WagesController@destroy')->name('wages.destroy');
 
 		Route::get('/roster','RosterController@index')->name('roster.index');
-		// Route::post('/add_roster','RosterController@store')->name('roster.store');
-		Route::delete('/roster_delete/{id}','RosterController@destroy')->name('roster.destroy');
-		Route::delete('/rosterDeleteAll','RosterController@deleteAll')->name('roster.destroyAll');
+		Route::delete('/deleteRoster','RosterController@destroy')->name('roster.destroy');
 		Route::post('/ajax_update_roster','RosterController@ajax_update_roster')->name('roster.update');
 		Route::post('/ajax_store_roster','RosterController@ajax_store_roster')->name('roster.store');
 

@@ -8,6 +8,7 @@ use App\SupportMail;
 use App\User;
 use Entrust;
 use Auth;
+use App\LeaveRequest;
 
 class HomeController extends Controller
 {
@@ -31,6 +32,7 @@ class HomeController extends Controller
       $supportMails = [];
       $superUsers = [];
       $assignedTasks = [];
+      $leave_apps = [];
       
       if(Entrust::hasRole('superAdmin')){
           $supportMails = SupportMail::select('support_mails.id',
@@ -50,35 +52,35 @@ class HomeController extends Controller
                                 $query->where('name', '=', 'contractor')
                                       ->orWhere('name', '=', 'superAdmin');
                              })->get();
+          $leave_apps = LeaveRequest::get();
       }
 
       if(Entrust::hasRole(['contractor','superAdmin'])){
         $assignedTasks = SupportMail::where('assigned_to',Auth::id())->where('status',0)->get();
       }
 
-      return view('backend.pages.dashboard',compact('supportMails','superUsers','assignedTasks'));
+      return view('backend.pages.dashboard',compact('supportMails','superUsers','assignedTasks','leave_apps'));
     }
 
     public function assignSupportTask(Request $request)
     {
+      $validatedData = $request->validate([
+                          'type' => 'required',
+                          'support_message_id' => 'required'
+                        ]);
+      if($request->type=='assign'){
+          $validatedData = $request->validate([
+                          'assign_user_id' => 'required'
+                        ]);
+          $assign = SupportMail::where('id',$request->support_message_id)
+                          ->update(['assigned_to' => $request->assign_user_id]);
 
-        $validatedData = $request->validate([
-                            'type' => 'required',
-                            'support_message_id' => 'required'
-                          ]);
-        if($request->type=='assign'){
-            $validatedData = $request->validate([
-                            'assign_user_id' => 'required'
-                          ]);
-            $assign = SupportMail::where('id',$request->support_message_id)
-                            ->update(['assigned_to' => $request->assign_user_id]);
-
-            return back()->with('message','Assigned Succesfully');
-        }
-        if($request->type=='mark_done'){
-            $mark_done = SupportMail::where('id',$request->support_message_id)
-                            ->update(['status' => 3]);
-            return back()->with('message','Marked as Done');
-        }
+          return back()->with('message','Assigned Succesfully');
+      }
+      if($request->type=='mark_done'){
+          $mark_done = SupportMail::where('id',$request->support_message_id)
+                          ->update(['status' => 3]);
+          return back()->with('message','Marked as Done');
+      }
     }
 }
