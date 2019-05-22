@@ -127,7 +127,7 @@
     });
 </script>
 <script type="text/javascript">
-    $('#search_date_from_to').daterangepicker();
+    $('#from_to').daterangepicker();
   </script>
 
 @endpush

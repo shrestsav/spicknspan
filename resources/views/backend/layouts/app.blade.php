@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="{{ asset('backend/css/skin-green.min.css') }}">
   <link rel="stylesheet" href="{{ asset('backend/css/jquery-filestyle.min.css') }}">
   <link rel="stylesheet" href="{{ asset('backend/css/daterangepicker.css') }}">
+  <link rel="stylesheet" href="{{ asset('backend/css/animate.css') }}">
 
   {{-- CUSTOM CSS BY SHRESTSAV --}}
   <link rel="stylesheet" href="{{ asset('backend/css/style.css') }}">
@@ -54,6 +55,14 @@
     }
     .logo-mini_blue{
 
+    }
+    [data-notify="progressbar"] {
+      margin-bottom: 0px;
+      position: absolute;
+      bottom: 0px;
+      left: 0px;
+      width: 100%;
+      height: 5px;
     }
   </style>
   <style type="text/css" media="print">
@@ -175,6 +184,7 @@
 <script src="{{ asset('backend/js/sweetalert.min.js') }}"></script>
 <script src="{{ asset('backend/js/validator.min.js') }}"></script>
 <script src="{{ asset('backend/js/jquery-filestyle.min.js') }}"></script>
+<script src="{{ asset('backend/js/bootstrap-notify.min.js') }}"></script>
 
 <script src="{{ asset('backend/js/custom.js') }}"></script>
 

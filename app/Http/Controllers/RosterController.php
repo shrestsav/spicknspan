@@ -21,24 +21,36 @@ class RosterController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        if(isset($_GET['full_date'])){
-            $date_filter = $_GET['full_date'];
-        } else {
-            $date_filter = '2019-05';
+        if($request->all()){
+            $year_month = explode('-', $request->year_month);
+            $year = $year_month[0];
+            $month = $year_month[1];
         }
+        else{
+            $year = date('Y');
+            $month = date('m');
+        }
+
+        $all_days = $this->dates_month($month,$year);
 
         $employees = User::select('users.id',
                                  'users.name',
                                  'users.email',
-                                 'users.user_type');
+                                 'users.user_type')
+                            ->whereHas('roles', function ($query) {
+                                $query->where('name', '=', 'employee')->orWhere('name', '=', 'superAdmin');
+                            });
+
                         
         $clients = User::select( 'users.id',
                                 'users.name',
                                 'users.email',
                                 'users.user_type')
-                        ->where('users.user_type','=','client');
+                        ->whereHas('roles', function ($query) {
+                            $query->where('name', '=', 'client');
+                        });
 
         $rosters = Roster::select('rosters.id',
                                   'rosters.employee_id',
@@ -51,7 +63,8 @@ class RosterController extends Controller
                                   'rt.end_time',
                                   'rt.status')
                         ->join('roster_timetables as rt','rt.roster_id','=','rosters.id')
-                        ->where('full_date','=',$date_filter);
+                        ->with('client','employee')
+                        ->where('full_date','=',$year.'-'.$month);
 
         if(Entrust::hasRole('contractor')){
             $clients = $clients->where('users.added_by','=',Auth::id());
@@ -59,21 +72,30 @@ class RosterController extends Controller
             $rosters = $rosters ->where('added_by','=',Auth::id());
         }
         $leaves = LeaveRequest::where('status',1)->get();
+        // return $leaves;
         $employees = $employees->get();
         $clients = $clients->get();
         $rosters = $rosters->get();
         $rosters = $rosters->groupBy(['client_id','employee_id']);
-        return view('backend.pages.roster',compact('rosters','employees', 'clients','leaves'));
+        // return $rosters;
+        return view('backend.pages.roster',compact('rosters','employees', 'clients','leaves','all_days','year','month'));
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Returns all days of perticular month
      */
-    public function create()
+    public function dates_month($month, $year)
     {
-        //
+        $num = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        $dates_month = array();
+
+        for ($i = 1; $i <= $num; $i++) {
+            $mktime = mktime(0, 0, 0, $month, $i, $year);
+            $date = date("D-M-d", $mktime);
+            $dates_month[$i] = $date;
+        }
+
+        return $dates_month;
     }
 
     /**
@@ -84,6 +106,7 @@ class RosterController extends Controller
      */
     public function store(Request $request)
     {
+        //Not in use
         $j = 0;
         $x = 0;
         $full_dates = '';
@@ -179,6 +202,23 @@ class RosterController extends Controller
 
     public function ajax_store_roster(Request $request)
     {   
+        $rule = ['type' => 'required',
+                'client_id' => 'required|numeric',
+                'employee_id' => 'required|numeric',
+                'time' => 'required|date_format:H:i',
+                ];
+        $msg = ['type.required' => 'Type Missing',
+                'client_id.required' => 'Please Select Client First',
+                'employee_id.required' => 'Please Select Employee First',
+                'time.required' => 'Please Select Time',
+                'time.date_format' => 'Please select correct time from dropdown',
+                ];
+
+        $validate = Validator::make($request->all(), $rule, $msg);
+        if($validate->fails()){
+            return response($validate->errors(),401);
+        }
+
         $type = $request->type;
         $client_id = $request->client_id;
         $employee_id = $request->employee_id;
@@ -218,7 +258,7 @@ class RosterController extends Controller
                 elseif($type=='end_time')
                     $request->merge(['roster_id' => $roster_id,'end_time' => $time]);
                 RosterTimetable::Create($request->all());
-                return json_encode('Roster exits timetable not');
+                return json_encode('Roster exits timetable doesnot');
             }
         }
         
@@ -226,6 +266,23 @@ class RosterController extends Controller
 
     public function ajax_update_roster(Request $request)
     {
+        $rule = ['type' => 'required',
+                'roster_id' => 'required|numeric',
+                'date' => 'required',
+                'time' => 'required|date_format:H:i',
+                ];
+        $msg = ['type.required' => 'Type Missing',
+                'roster_id.required' => 'Roster ID missing',
+                'date.required' => 'Date Missing',
+                'time.required' => 'Please Select Time',
+                'time.date_format' => 'Please select correct time from dropdown',
+                ];
+
+        $validate = Validator::make($request->all(), $rule, $msg);
+        if($validate->fails()){
+            return response($validate->errors(),401);
+        }
+
         $type = $request->type;
         $roster_id = $request->roster_id;
         $time = $request->time;
@@ -247,6 +304,15 @@ class RosterController extends Controller
             RosterTimetable::create($request->all());
             return json_encode('Roster Timetable Created');
         }
+    }
+
+    public function ajaxCheckIfRosterExists(Request $request)
+    {
+        $check = Roster::where('employee_id',$request->employee_id)->where('client_id',$request->client_id)->where('full_date',$request->year_month);
+        if($check->exists())
+            return response()->json(['error'=>'Roster Already Exists for selected User and Client for this month, Try editing existing Record Instead'],401);
+        else
+            return response()->json(['success'=>'Safe to Proceed']);
     }
 
 }

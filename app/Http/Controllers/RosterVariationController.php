@@ -23,7 +23,7 @@ class RosterVariationController extends Controller
         $r_date = [];
         $roster_variations = Roster::select('rosters.id',
                                             'rt.status',
-                                            'rt.full_date',
+                                            'rt.date',
                                             'rt.start_time',
                                             'rt.end_time',
                                             'rosters.employee_id',
@@ -53,7 +53,7 @@ class RosterVariationController extends Controller
 
         //Collect all rostered dates in array 
         foreach($roster_variations as $r_variation){
-            $r_date[] = \Carbon\Carbon::parse($r_variation->full_date)->format('Y-m-d');
+            $r_date[] = \Carbon\Carbon::parse($r_variation->date)->format('Y-m-d');
             $ros_startTime = \Carbon\Carbon::parse($r_variation->start_time);
             $ros_endTime = \Carbon\Carbon::parse($r_variation->end_time);
             $ros_totalDuration = $ros_endTime->diffInSeconds($ros_startTime);
@@ -79,14 +79,14 @@ class RosterVariationController extends Controller
                     }
                 }
                 foreach($roster_variations as $r_variation){
-                    if($r_variation->full_date==$details[0]['local_check_in']['date'] && $r_variation->client_id==$details[0]['client_id'] && $r_variation->employee_id==$details[0]['employee_id']){
+                    if($r_variation->date==$details[0]['local_check_in']['date'] && $r_variation->client_id==$details[0]['client_id'] && $r_variation->employee_id==$details[0]['employee_id']){
                         $r_variation['variation'] = $r_variation['roster_period']-$totalSec;
                         $r_variation['attended_period'] = $totalSec;
                     }
                 }
             }
         }  
-        // return $roster_variations;
+        
         return view('backend.pages.roster_variation',compact('roster_variations'));
     }
 
@@ -158,7 +158,7 @@ class RosterVariationController extends Controller
 
     public function statusAccept(Request $request, $id, $date)
     {
-        $approve = RosterTimetable::where('roster_id',$id)->whereDate('full_date',$date)->update(['status' => 1, 'approved_by' => Auth::id()]);
+        $approve = RosterTimetable::where('roster_id',$id)->whereDate('date',$date)->update(['status' => 1, 'approved_by' => Auth::id()]);
         if($approve)
             return redirect()->back()->with('message', 'Variation Approved');
 
@@ -167,7 +167,7 @@ class RosterVariationController extends Controller
 
     public function statusDecline(Request $request, $id, $date)
     {
-        $decline = RosterTimetable::where('roster_id',$id)->whereDate('full_date',$date)->update(['status'=>2, 'approved_by' => Auth::id()]);
+        $decline = RosterTimetable::where('roster_id',$id)->whereDate('date',$date)->update(['status'=>2, 'approved_by' => Auth::id()]);
         if($decline)
             return redirect()->back()->with('message', 'Variation Decline');
 

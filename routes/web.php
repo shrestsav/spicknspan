@@ -42,11 +42,12 @@ Route::middleware(['auth'])->group(function () {
 	Route::post('/ajax_incident_report_details', 'IncidentReportController@ajax_incident_report_details')->name('incident.view');
 	Route::get('/print_incident_report/{id}', 'IncidentReportController@print_incident_report')->name('incident.print');
 
-	Route::get('/leave_application','CoreController@leave_requests')->name('leave_request.index');
-	Route::post('/leave_application','CoreController@leave_requests')->name('leave_request.store');
+	Route::get('/leave_application','LeaveRequestController@leave_requests')->name('leave_request.index');
+	Route::post('/leave_application','LeaveRequestController@leave_requests')->name('leave_request.store');
 
 	//this goes to admin route
-	Route::post('/updateLeaveRequestStatus','CoreController@updateStatus')->name('leave_request.status');
+	Route::post('/updateLeaveRequestStatus','LeaveRequestController@updateStatus')->name('leave_request.status');
+	Route::post('/ajaxUserLeaveRecord','LeaveRequestController@ajaxUserLeaveRecord')->name('leaveRequest.record');
 
 	Route::get('/scanner', function(){
 			return view('backend.pages.scanner');
@@ -86,9 +87,11 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('/wages/{id}','WagesController@destroy')->name('wages.destroy');
 
 		Route::get('/roster','RosterController@index')->name('roster.index');
+		Route::post('/roster','RosterController@index')->name('roster.index');
 		Route::delete('/deleteRoster','RosterController@destroy')->name('roster.destroy');
 		Route::post('/ajax_update_roster','RosterController@ajax_update_roster')->name('roster.update');
 		Route::post('/ajax_store_roster','RosterController@ajax_store_roster')->name('roster.store');
+		Route::post('/ajaxCheckIfRosterExists','RosterController@ajaxCheckIfRosterExists')->name('roster.check');
 
 		Route::get('/roster-variation','RosterVariationController@index')->name('roster_variation.index');
 		Route::post('/roster-variation/accept/{id}/{date}','RosterVariationController@statusAccept')->name('roster_variation.approve_status');

@@ -58,7 +58,7 @@
 
         <li class="treeview">
           <a href="#">
-            <i class="fa fa-folder"></i> <span>Operations</span>
+            <i class="fa fa-folder"></i> <span>Utilities</span>
             <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>

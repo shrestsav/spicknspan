@@ -55,7 +55,7 @@
                 @endphp
 
                 <tr>
-                  <td>{{$r_variation->full_date}}</td>
+                  <td>{{$r_variation->date}}</td>
                   <td>{{$r_variation->client_name}}</td>
                   <td>{{$r_variation->employee_name}}</td>
                   <td>{{gmdate('H:i', $r_variation->roster_period)}}</td>
@@ -69,11 +69,11 @@
                   </td>
                   <td>
                     @if($r_variation->variation)
-                      <form action="{{ url('/roster-variation/accept/').'/'.$r_variation->id.'/'.$r_variation->full_date}}" method="POST" style="display: inline-block;">
+                      <form action="{{ url('/roster-variation/accept/').'/'.$r_variation->id.'/'.$r_variation->date}}" method="POST" style="display: inline-block;">
                         {{ csrf_field() }}
                         <button type="submit" class="btn btn-success">Approve</button>
                       </form>
-                      <form action="{{ url('/roster-variation/decline/').'/'.$r_variation->id.'/'.$r_variation->full_date}}" method="POST" style="display: inline-block;">
+                      <form action="{{ url('/roster-variation/decline/').'/'.$r_variation->id.'/'.$r_variation->date}}" method="POST" style="display: inline-block;">
                         {{ csrf_field() }}
                         <button type="submit"class="btn btn-warning">Decline</button>
                       </form>
@@ -125,16 +125,16 @@
                 @endphp
 
                 <tr>
-                  <td>{{$r_variation->full_date}}</td>
+                  <td>{{$r_variation->date}}</td>
                   <td>{{$r_variation->client_name}}</td>
                   <td>{{$r_variation->employee_name}}</td>
                   <td>{{gmdate('H:i', $r_variation->roster_period)}}</td>
                   <td>{{$attended_period}}</td>
                   <td>
                     @if($r_variation->variation < 0)
-                    {{gmdate('H:i', abs($r_variation->variation))}} plus attended
+                      {{gmdate('H:i', abs($r_variation->variation))}} plus attended
                     @elseif($r_variation->variation > 0)
-                    {{gmdate('H:i', $r_variation->variation)}} left
+                      {{gmdate('H:i', $r_variation->variation)}} left
                     @endif
                   </td>
                   <td>
@@ -164,7 +164,7 @@
 <script type="text/javascript">
   $(function () {
 
-    $('#full_date').datepicker({
+    $('#date').datepicker({
         autoclose: true,
         minViewMode: 1,
         format: 'yyyy-mm'
