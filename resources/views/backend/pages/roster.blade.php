@@ -79,7 +79,7 @@
             
           </div>
           <div class="box-body {{-- table-responsive  --}}no-padding">
-            <table id="tblRoster" class="table table-hover table-bordered dataTable no-footer order-list" role="grid" aria-describedby="tblRoster_info">
+            <table id="rosterTable" class="table table-hover table-bordered dataTable">
               <thead class="thead-dark">
                 <tr role="row">
                   <th><input type="checkbox" id="check_all"></th>

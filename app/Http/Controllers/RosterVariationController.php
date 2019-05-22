@@ -34,8 +34,9 @@ class RosterVariationController extends Controller
                                     ->join('users as employee','rosters.employee_id','=','employee.id')
                                     ->join('users as client','rosters.client_id','=','client.id')
                                     ->where('rt.start_time','!=',null)
+                                    ->where('rt.end_time','!=',null)
                                     ->get();
-         // return $roster_variations;                               
+                              
         $attendances = Attendance::select('attendances.client_id',
                                          'attendances.employee_id',
                                          'attendances.check_in',
@@ -86,7 +87,7 @@ class RosterVariationController extends Controller
                 }
             }
         }  
-        
+
         return view('backend.pages.roster_variation',compact('roster_variations'));
     }
 

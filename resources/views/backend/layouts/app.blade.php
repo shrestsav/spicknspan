@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="{{ asset('backend/css/jquery-filestyle.min.css') }}">
   <link rel="stylesheet" href="{{ asset('backend/css/daterangepicker.css') }}">
   <link rel="stylesheet" href="{{ asset('backend/css/animate.css') }}">
+  <link rel="stylesheet" href="{{ asset('backend/iCheck/all.css') }}">
 
   {{-- CUSTOM CSS BY SHRESTSAV --}}
   <link rel="stylesheet" href="{{ asset('backend/css/style.css') }}">
@@ -185,6 +186,7 @@
 <script src="{{ asset('backend/js/validator.min.js') }}"></script>
 <script src="{{ asset('backend/js/jquery-filestyle.min.js') }}"></script>
 <script src="{{ asset('backend/js/bootstrap-notify.min.js') }}"></script>
+<script src="{{ asset('backend/iCheck/icheck.min.js') }}"></script>
 
 <script src="{{ asset('backend/js/custom.js') }}"></script>
 
@@ -193,6 +195,11 @@
 <script src="{{ asset('backend/js/moment-timezone-with-data-2012-2022.min.js') }}"></script>
 <script type="text/javascript">
   var timeZones = moment.tz.names();
+  //Red color scheme for iCheck
+    // $('input[type="checkbox"], input[type="radio"].minimal-red').iCheck({
+    //   checkboxClass: 'icheckbox_flat-green',
+    //   radioClass   : 'iradio_flat-green'
+    // })
 </script>
 <script src="{{ asset('backend/js/daterangepicker.js') }}"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>

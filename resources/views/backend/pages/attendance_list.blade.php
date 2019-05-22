@@ -210,7 +210,6 @@
 
 $("table").tableExport({
         formats: ["xlsx"],
-        ignoreCols: Number[3],  
     });
 
 

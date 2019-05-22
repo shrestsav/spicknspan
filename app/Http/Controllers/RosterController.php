@@ -40,7 +40,8 @@ class RosterController extends Controller
                                  'users.email',
                                  'users.user_type')
                             ->whereHas('roles', function ($query) {
-                                $query->where('name', '=', 'employee')->orWhere('name', '=', 'superAdmin');
+                                $query->where('name', '=', 'employee')
+                                      ->orWhere('name', '=', 'superAdmin');
                             });
 
                         
