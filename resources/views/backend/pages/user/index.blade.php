@@ -362,8 +362,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
     icon: "warning",
     buttons: true,
     dangerMode: true,
-  })
-    .then((willDelete) => {
+  }).then((willDelete) => {
       if (willDelete) {
         window.location.href = "{{url('delete_user/')}}/"+user_id;
       } 

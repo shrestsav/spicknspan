@@ -1,6 +1,7 @@
 @extends('backend.layouts.app',['title'=>'Leave Application'])
 
 @push('styles')
+<link rel="stylesheet" href="{{ asset('backend/excel-plugins/tableexport.css') }}">
 <style type="text/css">
   label.checkbox.mark_default {
     padding-left: 20px;
@@ -35,7 +36,7 @@
       @endif
     </div>
     <div class="col-md-12">
-      <div class="box box-primary {{-- collapsed-box --}} box-solid">
+      <div class="box box-primary collapsed-box box-solid">
         <div class="box-header with-border">
           <h3 class="box-title">Create Leave Application</h3>
           <div class="pull-right box-tools">
@@ -46,7 +47,7 @@
           </div>
         </div>
         <div class="box-body padding">
-          <form role="form" action="{{route('leave_request.store')}}" method="POST" data-toggle="validator" enctype="multipart/form-data">
+          <form role="form" action="{{route('leaveRequest.store')}}" method="POST" data-toggle="validator" enctype="multipart/form-data">
             @csrf
             <div class="col-md-6 col-md-offset-3">
               <div class="form-group">
@@ -88,6 +89,54 @@
       </div>
     </div>
 
+    @if($leave_requests)
+    <div class="col-xs-12">
+      <div class="box">
+        <div class="box-body table-responsive no-padding">
+          <table class="table table-bordered table-striped table-hover datatable" id="leave_applications">
+            <thead>
+              <tr>
+                <th>Submitted On</th>
+                <th>Employee Name</th>
+                <th>Leave Type</th>
+                <th>Duration</th>
+                <th>Days</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($leave_requests as $lr)
+                @php 
+                  $from = \Carbon\Carbon::parse($lr->from);
+                  $to = \Carbon\Carbon::parse($lr->to);
+                  $submitted = \Carbon\Carbon::parse($lr->created_at)->format('dS F Y');
+                  $days = $from->diffInDays($to);
+                @endphp
+              <tr>
+                <td>{{$submitted}}</td>
+                <td>{{$lr->name}}</td>
+                <td>{{config('setting.leave_types')[$lr->leave_type]}}</td>
+                <td>{{$from->format('dS F Y')}} - {{$to->format('dS F Y')}}</td>
+                <td>{{$days}} Days</td>
+                <td>
+                  @if($lr->status==0)
+                    Pending
+                  @elseif($lr->status==1)
+                    Approved
+                  @else
+                    Denied
+                  @endif
+                </td>
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    @endif
+
+
 
   </div>
 </section>
@@ -101,11 +150,25 @@
 
 @endsection
 @push('scripts')
-
+<script src="{{ asset('backend/excel-plugins/xlsx.core.min.js') }}"></script>
+<script src="{{ asset('backend/excel-plugins/Blob.js') }}"></script>
+<script src="{{ asset('backend/excel-plugins/FileSaver.js') }}"></script>
+<script src="{{ asset('backend/excel-plugins/Export2Excel.js') }}"></script>
+<script src="{{ asset('backend/excel-plugins/jquery.tableexport.v2.js') }}"></script>
 <script src="{{ asset('backend/js/character-counter.js') }}"></script>
 <script type="text/javascript">
     //Show Incident Detail Modal
-    
+    $('.datatable').DataTable({
+      "searching": false,
+      "paging": false,
+      "bInfo": false,
+      "dom": '<"top">rt<"bottom"flip><"clear">'
+    });
+
+    $("table").tableExport({
+      formats: ["xlsx"],
+    });
+
     $('.view_incident_details').on('click',function (e) {
         e.preventDefault();
         var incident_id = $(this).data('incident-id');

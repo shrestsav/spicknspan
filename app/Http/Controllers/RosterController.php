@@ -73,12 +73,12 @@ class RosterController extends Controller
             $rosters = $rosters ->where('added_by','=',Auth::id());
         }
         $leaves = LeaveRequest::where('status',1)->get();
-        // return $leaves;
+
         $employees = $employees->get();
         $clients = $clients->get();
         $rosters = $rosters->get();
         $rosters = $rosters->groupBy(['client_id','employee_id']);
-        // return $rosters;
+
         return view('backend.pages.roster',compact('rosters','employees', 'clients','leaves','all_days','year','month'));
     }
 

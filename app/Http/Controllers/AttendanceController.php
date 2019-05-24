@@ -68,74 +68,8 @@ class AttendanceController extends Controller
         return view('backend.pages.check_in_out',compact('clients','last_check_in_out_client'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
     public function list(Request $request)
     {
-        $addedBy  = Auth::user()->added_by;
         $attendances = Attendance::select('attendances.client_id',
                                          'attendances.employee_id',
                                          'attendances.check_in',
@@ -148,15 +82,18 @@ class AttendanceController extends Controller
                                   ->orderBy('attendances.check_in','desc');
 
         if(Entrust::hasRole('contractor')){
-          $attendances->where('added_by',Auth::id());
+          $attendances->where('employee.added_by',Auth::id());
         }
         if(!Entrust::hasRole(['contractor','superAdmin'])){
           $attendances->where('attendances.employee_id','=',Auth::id());
         }
 
         //Pluck Username and Clientnames for search
-        $users = $attendances->pluck('employee_name','employee_id')->toArray();
-        $clients = $attendances->pluck('client_name','client_id')->toArray();
+        $users_clients = $attendances->get();
+        // $users = $attendances->pluck('employee_name','employee_id')->toArray();
+        // $clients = $attendances->pluck('client_name','client_id')->toArray();
+        $users = $users_clients->pluck('employee_name','employee_id')->toArray();
+        $clients = $users_clients->pluck('client_name','client_id')->toArray();
 
         // if Search
         if($request->all()){

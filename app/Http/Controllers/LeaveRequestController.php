@@ -6,22 +6,43 @@ use Auth;
 use Carbon\Carbon;
 use App\LeaveRequest;
 use Illuminate\Http\Request;
+use Entrust;
 
 class LeaveRequestController extends Controller
 {
 
-    public function leave_requests(Request $request)
+    public function leaveRequests()
     {
-        if($request->all()){
-            $from_to = explode('-', $request->from_to);
-            $from = Carbon::parse($from_to[0]);
-            $to = Carbon::parse($from_to[1]);
-            $request->merge(['from'=>$from,'to'=>$to,'user_id' => Auth::id()]);
-            LeaveRequest::create($request->all());
+        $leave_requests = LeaveRequest::select('users.name',
+                                                'users.added_by',
+                                                'leave_requests.id',
+                                                'leave_requests.user_id',
+                                                'leave_requests.leave_type',
+                                                'leave_requests.from',
+                                                'leave_requests.to',
+                                                'leave_requests.description',
+                                                'leave_requests.status',
+                                                'leave_requests.created_at',)
+                                        ->join('users','users.id','leave_requests.user_id');
+                                        
+        if(Entrust::hasRole('contractor')){
+          $leave_requests->where('users.added_by',Auth::id());
         }
-        return view('backend.pages.leave_app_form');
+        if(!Entrust::hasRole(['contractor','superAdmin'])){
+          $leave_requests->where('user_id','=',Auth::id());
+        }                  
+        $leave_requests = $leave_requests->get();
+        return view('backend.pages.leave_app_form',compact('leave_requests'));
     }
-
+    public function createLeaveRequests(Request $request)
+    {
+        $from_to = explode('-', $request->from_to);
+        $from = Carbon::parse($from_to[0]);
+        $to = Carbon::parse($from_to[1]);
+        $request->merge(['from'=>$from,'to'=>$to,'user_id' => Auth::id()]);
+        LeaveRequest::create($request->all());
+        return back()->with('message','Leave Application Submitted Successfully');
+    }
     public function updateStatus(Request $request)
     {
         if($request->type=='approve'){

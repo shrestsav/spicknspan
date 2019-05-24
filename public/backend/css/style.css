@@ -100,3 +100,11 @@ text-align: left;
   cursor: pointer;
   color: red;
 }
+.display-time{
+  margin-top: 4px;
+}
+.display-now-time{
+  font-size: 12px !important;
+  padding: 7px 10px !important;
+  border-radius: 12px;
+}

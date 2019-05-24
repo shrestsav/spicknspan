@@ -201,6 +201,7 @@
     $('.datatable').DataTable({
       "ordering": false,
       "searching": false,
+      "pageLength": 25,
       "dom": '<"top">rt<"bottom"flip><"clear">'
     });
     // $('#employee_attendance_wrapper .col-sm-6').addClass('pull-right');

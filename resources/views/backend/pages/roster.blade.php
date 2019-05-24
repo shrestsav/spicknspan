@@ -23,6 +23,16 @@
   .ibtnDel:hover{
     cursor: pointer;
   }
+  td.week_1,td.week_2,td.week_3,td.week_4,td.week_5{
+    padding: 0px !important;
+  }
+  .week_1 input,.week_2 input,.week_3 input,.week_4 input,.week_5 input{
+    border: 0px !important;
+  }
+  .week_1 input:hover,.week_2 input:hover,.week_3 input:hover,.week_4 input:hover,.week_5 input:hover{
+    border: 0.5px solid #00a65a !important;
+    cursor: pointer;
+  }
 </style>
 @endpush
 
@@ -79,12 +89,12 @@
             
           </div>
           <div class="box-body {{-- table-responsive  --}}no-padding">
-            <table id="rosterTable" class="table table-hover table-bordered dataTable">
+            <table id="rosterTable" class="table {{-- table-hover --}} table-bordered dataTable">
               <thead class="thead-dark">
                 <tr role="row">
                   <th><input type="checkbox" id="check_all"></th>
-                  <th class="" style="min-width: 120px;">EMPLOYEE</th>
-                  <th class="" style="min-width: 120px;">CLIENT</th>
+                  <th class="employee_head" style="min-width: 120px;">EMPLOYEE</th>
+                  <th class="client_head" style="min-width: 120px;">CLIENT</th>
                   @foreach($all_days as $day => $date)
                     @php
                       if($day>=1 && $day<=7)
@@ -156,7 +166,7 @@
                     @endphp
                     <td class="{{$week}}">
                       <input type="text" class="form-control timepicker txtTime time_from" value=" @if($status){{config('setting.leave_types')[$leave_type]}} @else{{$start_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif>
-                        -
+                         
                       <input type="text" class="form-control timepicker txtTime time_to" value="@if($status){{config('setting.leave_types')[$leave_type]}} @else{{$end_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif>
                     </td>
                   @endforeach
@@ -192,7 +202,7 @@
     });
 
   //Not used kaam lagna sakxa
- function getMonths(month,year){
+  function getMonths(month,year){
     var ar = [];
     var days = [];
     var start = moment(year+"-"+month,"YYYY-MMM");
@@ -201,7 +211,7 @@
         days[start.format('D')] = start.format('ddd,MMM-D');
     }
     return days;
-}
+  }
 // console.log(getMonths('Mar',2011))
 
   $('body').on('change','.time_from',function(e){
@@ -437,6 +447,7 @@
         }
       });
     });
+
     $('body').on('change','.client_name',function(e){
       e.preventDefault();
       var my = $(this);
@@ -470,51 +481,95 @@
         counter -= 1;
         $('#addrow').show();
     });
-    
-    $('.select2').select2();
-
-    //delete roster rows
-    $('#check_all').on('click', function(e){
-      e.preventDefault();
-      if($(this).is(':checked',true))  
-        $(".sub_chk").prop('checked', true);  
-      else  
-        $(".sub_chk").prop('checked',false); 
-    });
 
     $('.delete_all').on('click', function(e) {
       e.preventDefault();
       var sel_Rows = []; 
       $(".sub_chk:checked").each(function() {  
-          sel_Rows.push($(this).parent().parent().data('roster-id'));
+          sel_Rows.push($(this).parent().parent().parent().data('roster-id'));
       });  
+      console.log(sel_Rows);
       if(sel_Rows.length <= 0)  
       {  
-        alert("Please select row to delete.");
+        swal({
+          title: "ERROR !!",
+          text: "Please select row to delete.",
+          icon: "warning",
+          dangerMode: true,
+        });
         e.preventDefault();
       }  
       else {
-          var check = confirm("Are you sure you want to delete this row?");  
-          if(check == true){  
-            $.ajax({
-              type:'delete',
-              url: SITE_URL+'deleteRoster',
-              dataType: 'json',
-              data:{                
-                sel_Rows: sel_Rows,                
-              },
-              success:function(data) {
-                location.reload();
-              },
-              error: function(response){
-              
-              }
-            });
-          }  
+        swal({
+          title: "Are you sure?",
+          text: "Once deleted, you will not be able to recover this data!",
+          icon: "warning",
+          buttons: true,
+          dangerMode: true,
+        })
+          .then((willDelete) => {
+            if (willDelete) {
+              $.ajax({
+                type:'delete',
+                url: SITE_URL+'deleteRoster',
+                dataType: 'json',
+                data:{                
+                  sel_Rows: sel_Rows,                
+                },
+                success:function(data) {
+                  location.reload();
+                },
+                error: function(response){
+                
+                }
+              });
+            } 
+          }); 
       }  
     });
 
   });
+</script>
+
+<script type="text/javascript">
+
+  var checkAll = $('#check_all');
+  var checkboxes = $('.sub_chk');
+
+  //Red color scheme for iCheck
+  $('input[type="checkbox"], input[type="radio"].minimal-red').iCheck({
+    checkboxClass: 'icheckbox_flat-green',
+    radioClass   : 'iradio_flat-green'
+  });
+
+  checkAll.on('ifChecked ifUnchecked', function(event) {        
+      if (event.type == 'ifChecked') {
+          checkboxes.iCheck('check');
+      } else {
+          checkboxes.iCheck('uncheck');
+      }
+  });
+  checkboxes.on('ifChanged', function(event){
+      if(checkboxes.filter(':checked').length == checkboxes.length) {
+          checkAll.prop('checked', 'checked');
+      } else {
+          checkAll.prop( "checked", false );
+      }
+      checkAll.iCheck('update');
+  });
+
+    //For default checkboxes
+    // $('#check_all').on('click', function(e){
+    //   alert('fsdf');
+    //   if($(this).is(':checked',true)){  
+    //     alert('fasdf');
+    //     $(".sub_chk").prop('checked', true);
+    //   }  
+    //   else{ 
+    //     alert('no'); 
+    //     $(".sub_chk").prop('checked',false);
+    //   } 
+    // });
 </script>
   
 @endpush

@@ -42,8 +42,8 @@ Route::middleware(['auth'])->group(function () {
 	Route::post('/ajax_incident_report_details', 'IncidentReportController@ajax_incident_report_details')->name('incident.view');
 	Route::get('/print_incident_report/{id}', 'IncidentReportController@print_incident_report')->name('incident.print');
 
-	Route::get('/leave_application','LeaveRequestController@leave_requests')->name('leave_request.index');
-	Route::post('/leave_application','LeaveRequestController@leave_requests')->name('leave_request.store');
+	Route::get('/leaveApplication','LeaveRequestController@leaveRequests')->name('leaveRequest.index');
+	Route::post('/createLeaveApplication','LeaveRequestController@createLeaveRequests')->name('leaveRequest.store');
 
 	//this goes to admin route
 	Route::post('/updateLeaveRequestStatus','LeaveRequestController@updateStatus')->name('leave_request.status');
@@ -85,6 +85,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/wages','WagesController@index')->name('wages.index');
 		Route::post('/wages','WagesController@store')->name('wages.store');
 		Route::post('/wages/{id}','WagesController@destroy')->name('wages.destroy');
+
 
 		Route::get('/roster','RosterController@index')->name('roster.index');
 		Route::post('/roster','RosterController@index')->name('roster.index');

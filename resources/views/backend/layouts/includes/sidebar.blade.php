@@ -20,13 +20,13 @@
         </li> 
         <li class="@if ($title === 'Attendance') active @endif"><a href="{{route('attendance.list')}}"><i class="fa fa-book"></i> <span>View Attendance</span></a>
         </li>
-        <li class="@if ($title === 'QR Scanner') active @endif"><a href="{{route('scanner')}}"><i class="fa fa-search-plus"></i> <span>QR Login</span></a>
+        <li class="@if ($title === 'QR Scanner') active @endif"><a href="{{route('scanner')}}"><i class="fa fa-qrcode"></i> <span>QR Login</span></a>
         </li>
         <li class="@if ($title === 'Site Attendance') active @endif"><a href="{{route('site.attendance')}}"><i class="fa fa-dashboard"></i> <span>Site Attendance</span></a>
         </li>
-        <li class="@if ($title === 'Incident Report') active @endif"><a href="{{route('incident.create')}}"><i class="fa fa-bug"></i> <span>Incident Report</span></a>
+        <li class="@if ($title === 'Incident Report') active @endif"><a href="{{route('incident.create')}}"><i class="fa fa-fire"></i> <span>Incident Report</span></a>
         </li>
-        <li class="@if ($title === 'Leave Application') active @endif"><a href="{{route('leave_request.index')}}"><i class="fa fa-bug"></i> <span>Leave Application</span></a>
+        <li class="@if ($title === 'Leave Application') active @endif"><a href="{{route('leaveRequest.index')}}"><i class="fa fa-suitcase"></i> <span>Leave Application</span></a>
         </li>
 
       {{-- Allow these menus for admin only --}}
@@ -58,7 +58,7 @@
 
         <li class="treeview">
           <a href="#">
-            <i class="fa fa-folder"></i> <span>Utilities</span>
+            <i class="fa fa-folder-open"></i> <span>Utilities</span>
             <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>

@@ -85,7 +85,6 @@
       @include('backend.layouts.includes.header')
     </header>
 
-
     <!-- Left side column. contains the logo and sidebar -->
     <aside class="main-sidebar">
       @include('backend.layouts.includes.sidebar');
@@ -144,7 +143,21 @@
     }
   });
 
-  
+  // Display Current Time
+  var datetime = null,
+          date = null;
+
+  var update = function () {
+      date = moment(new Date()).tz('{{Auth::user()->timezone}}');
+      datetime.html(date.format('h:mm:ss A'));
+  };
+
+  $(document).ready(function(){
+      datetime = $('.display-now-time')
+      update();
+      setInterval(update, 1000);
+  });
+  // Display Current Time Ends
 
   $(function () {
       $('.select2').select2();
@@ -195,11 +208,6 @@
 <script src="{{ asset('backend/js/moment-timezone-with-data-2012-2022.min.js') }}"></script>
 <script type="text/javascript">
   var timeZones = moment.tz.names();
-  //Red color scheme for iCheck
-    // $('input[type="checkbox"], input[type="radio"].minimal-red').iCheck({
-    //   checkboxClass: 'icheckbox_flat-green',
-    //   radioClass   : 'iradio_flat-green'
-    // })
 </script>
 <script src="{{ asset('backend/js/daterangepicker.js') }}"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
