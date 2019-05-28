@@ -12,12 +12,19 @@
 */
 
 //This route is for testing purpose only, please delete this in deployed application or leave it as it is
-Route::get('testing',function(){
-	// return encrypt('client');
-	return decrypt('eyJpdiI6IlBMdzdwRUExdlN1OXQxNzVpTXNDckE9PSIsInZhbHVlIjoiZVwvNDluR2RGNk0rZGk1czlwMGw3N3c9PSIsIm1hYyI6IjZlZWQ4NGIwYzYzNGZhZDg2YTFmMGRjNGVmMmIzODg0ZDkyOWJhMzFkYjFjNzc5Mjk4MjZmOTM1NjE4ZDM5MWUifQ==');
-});
+
+Route::get('testing','Tests\TestController@index');
+Route::post('testing','Tests\TestController@get');
 
 Auth::routes();
+
+Route::get('redirect/{driver}', 'Auth\LoginController@redirectToProvider')
+    ->name('login.provider')
+    ->where('driver', implode('|', config('auth.socialite.drivers')));
+
+Route::get('{driver}/callback', 'Auth\LoginController@handleProviderCallback')
+    ->name('login.callback')
+    ->where('driver', implode('|', config('auth.socialite.drivers')));
 
 Route::get('support', 'MailController@support');
 Route::post('support', 'MailController@support')->name('support');

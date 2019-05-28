@@ -5,8 +5,14 @@
   <div class="login-logo">
     <a href="/"><img src="{{ asset('backend/img/company-logo.png') }}"></a>
   </div>
+
+  @if (\Session::has('error'))
+    <div class="alert alert-danger">
+        {{ \Session::get('error') }}
+    </div>
+  @endif
   <div class="login-box-body">
-    <p class="login-box-msg">Login</p>
+    <p class="login-box-msg">LOGIN</p>
     <form method="POST" action="{{ route('login') }}">
         @csrf
       <div class="form-group has-feedback">
@@ -46,11 +52,17 @@
             {{ __('Forgot Your Password?') }}
         </a>
     @endif
+    <a class="btn btn-link" href="{{ route('support') }}">
+        {{ __('Click Here for Support') }}
+    </a>
     <br>
-      <a class="btn btn-link" href="{{ route('support') }}">
-          {{ __('Click Here for Support') }}
-      </a>
-
+    <br>
+    <a class="btn btn-block btn-social btn-google" href="{{ route('login.provider', 'google') }}">
+      <i class="fa fa-google"></i> Sign in with Google
+    </a>
+    <a class="btn btn-block btn-social btn-facebook" href="{{ route('login.provider', 'facebook') }}">
+      <i class="fa fa-facebook"></i> Sign in with Facebook
+    </a>
   </div>
 </div>
 

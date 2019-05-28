@@ -229,7 +229,7 @@
         </div>
         @endif
         <!-- quick email widget -->
-{{--         <div class="box box-info">
+          {{-- <div class="box box-info">
           <div class="box-header">
             <i class="fa fa-envelope"></i>
 

@@ -52,7 +52,7 @@ class HomeController extends Controller
                                 $query->where('name', '=', 'contractor')
                                       ->orWhere('name', '=', 'superAdmin');
                              })->get();
-          $leave_apps = LeaveRequest::get();
+          $leave_apps = LeaveRequest::with('user')->get();
       }
 
       if(Entrust::hasRole(['contractor','superAdmin'])){

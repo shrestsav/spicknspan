@@ -4,6 +4,8 @@
         <div class="pull-left image">
           @if(file_exists(public_path('files/users/'.Auth::user()->id.'/dp_user_'.Auth::user()->id.'.png')))
             <img src="{{ asset('files/users/'.Auth::user()->id.'/dp_user_'.Auth::user()->id.'.png') }}" class="img-circle" alt="User Image">
+          @elseif(Auth::user()->avatar)
+              <img src="{{ Auth::user()->avatar }}" class="img-circle" alt="User Image">
           @else
             <img src="{{ asset('backend/img/user_default.png') }}" class="img-circle" alt="User Image">
           @endif

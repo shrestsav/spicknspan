@@ -28,6 +28,8 @@
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               @if(file_exists(public_path('files/users/'.Auth::user()->id.'/dp_user_'.Auth::user()->id.'.png')))
                 <img src="{{ asset('files/users/'.Auth::user()->id.'/dp_user_'.Auth::user()->id.'.png') }}" class="user-image" alt="User Image">
+              @elseif(Auth::user()->avatar)
+                <img src="{{ Auth::user()->avatar }}" class="user-image" alt="User Image">
               @else
                 <img src="{{ asset('backend/img/user_default.png') }}" class="user-image" alt="User Image">
               @endif
@@ -38,6 +40,8 @@
               <li class="user-header">
                 @if(file_exists(public_path('files/users/'.Auth::user()->id.'/dp_user_'.Auth::user()->id.'.png')))
                   <img src="{{ asset('files/users/'.Auth::user()->id.'/dp_user_'.Auth::user()->id.'.png') }}" class="img-circle" alt="User Image">
+                @elseif(Auth::user()->avatar)
+                  <img src="{{ Auth::user()->avatar }}" class="img-circle" alt="User Image">
                 @else
                   <img src="{{ asset('backend/img/user_default.png') }}" class="img-circle" alt="User Image">
                 @endif

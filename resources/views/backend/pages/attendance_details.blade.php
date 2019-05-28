@@ -78,6 +78,8 @@
           <div class="widget-user-image">
             @if(file_exists(public_path('files/users/'.$employee_id.'/dp_user_'.$employee_id.'.png')))
               <img class="img-circle" src="{{ asset('files/users/'.$employee_id.'/dp_user_'.$employee_id.'.png') }}" alt="User Avatar">
+            @elseif(App\User::find($employee_id)->avatar)
+              <img src="{{App\User::find($employee_id)->avatar}}" class="img-circle" alt="User Image">
             @else
               <img class="img-circle" src="{{ asset('backend/img/user_default.png') }}" alt="User Avatar">
             @endif
