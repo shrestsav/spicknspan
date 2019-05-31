@@ -114,6 +114,7 @@
             <table id="site_attendance_table" class="table table-bordered table-striped">
               <thead>
               <tr>
+                <th>S.No</th>
                 <th>Name</th>
                 <th>Building Name</th>
                 <th>Building No</th>
@@ -125,12 +126,16 @@
                 <th>Date</th>
               </tr>
               </thead>
-              <tbody>    
+              <tbody>
+                @php 
+                  $count = 1;
+                @endphp    
               @foreach($site_attendances as $site_attendance)
                 @php 
                   $date = \Carbon\Carbon::parse($site_attendance->tz_login_date); 
                 @endphp
                 <tr>
+                  <td>{{$count}}</td>
                   <td>{{$site_attendance->name}}</td>
                   <td>{{$site_attendance->building_name}}</td>
                   <td>{{$site_attendance->building_no}}</td>
@@ -147,6 +152,9 @@
                   </td>
                   <td>{{$date->format('d M Y')}}</td>
                 </tr>
+                @php
+                  $count++;
+                @endphp
               @endforeach
               </tbody>
             </table>

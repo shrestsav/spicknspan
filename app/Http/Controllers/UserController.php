@@ -41,8 +41,7 @@ class UserController extends Controller
         elseif(\Route::current()->getName() == 'user_client.index'){
             $user_type = 'client';
         }
-        $users = User::select(
-                              'users.id',
+        $users = User::select('users.id',
                               'users.name',
                               'users.email',
                               'users.user_type',

@@ -23,7 +23,7 @@ class RosterController extends Controller
      */
     public function index(Request $request)
     {
-        if($request->all()){
+        if($request->year_month){
             $year_month = explode('-', $request->year_month);
             $year = $year_month[0];
             $month = $year_month[1];
@@ -35,23 +35,30 @@ class RosterController extends Controller
 
         $all_days = $this->dates_month($month,$year);
 
-        $employees = User::select('users.id',
-                                 'users.name',
-                                 'users.email',
-                                 'users.user_type')
-                            ->whereHas('roles', function ($query) {
+        $employees = User::whereHas('roles', function ($query) {
                                 $query->where('name', '=', 'employee')
                                       ->orWhere('name', '=', 'superAdmin');
                             });
-
                         
-        $clients = User::select( 'users.id',
-                                'users.name',
-                                'users.email',
-                                'users.user_type')
-                        ->whereHas('roles', function ($query) {
+        $clients = User::whereHas('roles', function ($query) {
                             $query->where('name', '=', 'client');
                         });
+
+        // This is used for pagination of roster as direct pagination on rosters query is not practical for this case, see the code and you'll get it
+        $customPaginate = Roster::where('full_date','=',$year.'-'.$month);
+
+        if($request->search_by_employee_id)
+            $customPaginate->where('employee_id','=',$request->search_by_employee_id);
+        if($request->search_by_client_id)
+            $customPaginate->where('client_id','=',$request->search_by_client_id);
+        if(Entrust::hasRole('contractor')){
+            $clients->where('users.added_by','=',Auth::id());
+            $employees->where('users.added_by','=',Auth::id());
+            $customPaginate->where('added_by','=',Auth::id());
+        }
+        $customPaginate = $customPaginate->orderBy('created_at','desc')->simplePaginate(5);
+        //Now grab roster ids & fetch rosters ids to get actual data
+        $rostIds = $customPaginate->pluck('id')->toArray();
 
         $rosters = Roster::select('rosters.id',
                                   'rosters.employee_id',
@@ -64,14 +71,12 @@ class RosterController extends Controller
                                   'rt.end_time',
                                   'rt.status')
                         ->join('roster_timetables as rt','rt.roster_id','=','rosters.id')
+                        ->whereIn('rosters.id',$rostIds)
                         ->with('client','employee')
-                        ->where('full_date','=',$year.'-'.$month);
-
-        if(Entrust::hasRole('contractor')){
-            $clients = $clients->where('users.added_by','=',Auth::id());
-            $employees = $employees ->where('users.added_by','=',Auth::id());
-            $rosters = $rosters ->where('added_by','=',Auth::id());
-        }
+                        ->orderBy('rosters.created_at','desc');
+                        
+        
+        
         $leaves = LeaveRequest::where('status',1)->get();
 
         $employees = $employees->get();
@@ -79,7 +84,13 @@ class RosterController extends Controller
         $rosters = $rosters->get();
         $rosters = $rosters->groupBy(['client_id','employee_id']);
 
-        return view('backend.pages.roster',compact('rosters','employees', 'clients','leaves','all_days','year','month'));
+
+
+
+
+
+
+        return view('backend.pages.roster',compact('rosters','employees', 'clients','leaves','all_days','year','month','customPaginate'));
     }
 
     /**

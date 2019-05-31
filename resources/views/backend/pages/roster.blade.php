@@ -33,6 +33,14 @@
     border: 0.5px solid #00a65a !important;
     cursor: pointer;
   }
+  .search_by_date{
+    display: inline-table;
+    width: 150px; 
+    top: 14px;
+  }
+  .pagination{
+    margin: 0px;
+  }
 </style>
 @endpush
 
@@ -40,151 +48,162 @@
 
 @php
   $total_days =  count($all_days);
-  // echo '<pre>'; print_r($all_days); echo '</pre>';
+  $week = [1,2,3,4,5];
+  $search_arr = [
+    'Employee Name' => [
+      'data'    => 'employees',
+      'name'    => 'search_by_employee_id'
+    ],
+    'Client Name' => [
+      'data'    => 'clients',
+      'name'    => 'search_by_client_id'
+    ],
+  ];
+
+  function weekOfMonth($date) {
+    //Get the first day of the month.
+    $firstOfMonth = strtotime(date("Y-m-01", $date));
+    //Apply above formula.
+    return intval(date("W", $date)) - intval(date("W", $firstOfMonth)) + 1;
+  } 
 @endphp
 
 <section class="content">
   <div class="row">
     <div class="col-md-12">
-      @if ($errors->any())
-        <div class="alert alert-danger">
-            @foreach ($errors->all() as $error)
-                {{ $error }}
-            @endforeach
-        </div>
+      @if(Request::all())
+        <a href="{{url('/roster')}}"><button class="btn btn-primary">Go Back</button></a>
       @endif
-      @if (\Session::has('message'))
-        <div class="alert alert-success custom_success_msg">
-            {{ \Session::get('message') }}
-        </div>
-      @endif
-      @if (\Session::has('error'))
-        <div class="alert alert-error custom_success_msg">
-            {{ \Session::get('error') }}
-        </div>
-      @endif
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          <div class="box-header">
+            {{-- <h3 class="box-title"></h3> --}}
 
-        <div class="box box-primary">
-          <div class="box-header with-border">
-            <form role="form" action="{{route('roster.index')}}" method="POST">
-              @csrf
-              <div class="box-header">
-                <h3 class="box-title"></h3>
-                <div class="col-md-10 text-center">
-                  <button id='b_week_1' class="btn btn-default week_selector" onclick="event.preventDefault();">Week 1</button>
-                  <button id='b_week_2' class="btn btn-default week_selector" onclick="event.preventDefault();">Week 2</button>
-                  <button id='b_week_3' class="btn btn-default week_selector" onclick="event.preventDefault();">Week 3</button>
-                  <button id='b_week_4' class="btn btn-default week_selector" onclick="event.preventDefault();">Week 4</button>
-                  <button id='b_week_5' class="btn btn-default week_selector" onclick="event.preventDefault();">Week 5</button>
-                </div>
-                <div class="col-md-2 pull-right">
-                    <label for="">MONTH : </label>
-                    <input name="year_month" type="text" id="year_month" class="txtTime" style="width:85px;" value="{{$year.'-'.$month}}" autocomplete="off" required>
-                    <button type="submit" class="btn btn-warning"><i class="fa fa-refresh"></i></button>
-                </div>
-              </div>
+            {{-- Filter Form --}}
+            <div class="search_form">
+              <form autocomplete="off" role="form" action="{{route('roster.index')}}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @foreach($search_arr as $part => $arr)
+                  <select class="select2 {{$arr['name']}}" name="{{$arr['name']}}">
+                    <option disabled selected value> {{$part}}</option>
+                    @foreach(${$arr['data']} as $data)
+                      <option value="{{$data->id}}" @if(Request::input($arr['name'])==$data->id) selected @endif>
+                        {{$data->name }}
+                      </option>
+                    @endforeach
+                  </select>
+                @endforeach
+                <select class="select2 week_selector">
+                  <option disabled selected value>Select Week</option>
+                  @foreach($week as $a)
+                    <option value="{{$a}}">Week {{$a}}</option>
+                  @endforeach
+                </select>
+                <div class="input-group date search_by_date">
+                  <div class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                  </div>
+                  <input name="year_month" type="text" id="year_month" class="form-control txtTime" style="width:85px;" value="{{$year.'-'.$month}}" autocomplete="off" required>
+                </div> 
+                <button type="submit" class="btn btn-primary">SHOW</button>
+                
+              </form>
 
-            </form>
+            </div>
 
             
-          </div>
-          <div class="box-body {{-- table-responsive  --}}no-padding">
-            <table id="rosterTable" class="table {{-- table-hover --}} table-bordered dataTable">
-              <thead class="thead-dark">
-                <tr role="row">
-                  <th><input type="checkbox" id="check_all"></th>
-                  <th class="employee_head" style="min-width: 120px;">EMPLOYEE</th>
-                  <th class="client_head" style="min-width: 120px;">CLIENT</th>
-                  @foreach($all_days as $day => $date)
-                    @php
-                      if($day>=1 && $day<=7)
-                       $week = 'week_1';
-                      if($day>=8 && $day<=14)
-                        $week = 'week_2'; 
-                      if($day>=15 && $day<=21)
-                        $week = 'week_3'; 
-                      if($day>=22 && $day<=28)
-                        $week = 'week_4'; 
-                      if($day>=29 && $day<=31)
-                        $week = 'week_5'; 
-                    @endphp
-                    <th class="{{$week}} {{$year.'-'.$month.'-'.$day}}">
-                      {{$date}}
-                    </th>
-                  @endforeach
-
-                </tr>
-              </thead>
-
-              <tbody class="roster-list">
-              @foreach($rosters as $client_id => $roster_by_clients)
-                @foreach($roster_by_clients as $emp_id => $emp_rosters)
-                <tr style="text-align: center;" role="row" class="" id="" data-roster-id="{{$emp_rosters[0]->id}}" data-row-type="old_row">
-                  <td>
-                      <input type="checkbox" class="sub_chk">
-                  </td>
-                  <td>
-                    {{$emp_rosters[0]->employee->name}}
-                  </td>
-                  <td>
-                    {{$emp_rosters[0]->client->name}}
-                  </td>
-                  @foreach($all_days as $day => $date)
-                    @php
-                      $start_time = '';
-                      $end_time = '';
-
-                      if($day>=1 && $day<=7)
-                        $week = 'week_1';
-                      elseif($day>=8 && $day<=14)
-                        $week = 'week_2';
-                      elseif($day>=15 && $day<=21)
-                        $week = 'week_3';
-                      elseif($day>=22 && $day<=28)
-                        $week = 'week_4';
-                      elseif($day>=29 && $day<=32)
-                        $week = 'week_5'; 
-
-                      foreach($emp_rosters as $roster){
-                        $thisDay = \Carbon\Carbon::parse($roster->date)->format('d');
-                        if($thisDay==$day){
-                          $start_time = $roster->start_time;
-                          $end_time = $roster->end_time;
-                        }
-                      }
-                      $status = 0;
-                      $leave_type = 0;
-                      $full_day = \Carbon\Carbon::parse($year.'-'.$month.'-'.$day);
-                      foreach($leaves as $leave){
-                        $from = \Carbon\Carbon::parse($leave->from);
-                        $to = \Carbon\Carbon::parse($leave->to);
-                        if($leave->user_id==$emp_id && $full_day->between($from, $to)){
-                          $status = 1;
-                          $leave_type = $leave->leave_type;
-                        }
-                      }
-                    @endphp
-                    <td class="{{$week}}">
-                      <input type="text" class="form-control timepicker txtTime time_from" value=" @if($status){{config('setting.leave_types')[$leave_type]}} @else{{$start_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif>
-                         
-                      <input type="text" class="form-control timepicker txtTime time_to" value="@if($status){{config('setting.leave_types')[$leave_type]}} @else{{$end_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif>
-                    </td>
-                  @endforeach
-                </tr>
-                @endforeach
-              @endforeach
-              </tbody>
-            </table>
-          </div>
-          <div class="box-footer clearfix">
-              <button type="button" class="btn btn-danger delete_all">Delete</button>
-              <button id="addrow" class="btn btn-success pull-right">Add Row</button>
-            </div>
+          </div> 
         </div>
+        <div class="box-body {{-- table-responsive  --}}no-padding">
+          <table id="rosterTable" class="table {{-- table-hover --}} table-bordered dataTable">
+            <thead class="thead-dark">
+              <tr role="row">
+                <th><input type="checkbox" id="check_all"></th>
+                <th class="employee_head" style="min-width: 120px;">EMPLOYEE</th>
+                <th class="client_head" style="min-width: 120px;">CLIENT</th>
+                @foreach($all_days as $day => $date)
+                  @php
+                    $d = strtotime($year.'-'.$month.'-'.$day);
+                    $week = 'week_'.weekOfMonth($d);
+                  @endphp
+                  <th class="{{$week}} {{$year.'-'.$month.'-'.$day}}">
+                    {{$date}}
+                  </th>
+                @endforeach
 
+              </tr>
+            </thead>
+
+            <tbody class="roster-list">
+            @foreach($rosters as $client_id => $roster_by_clients)
+              @foreach($roster_by_clients as $emp_id => $emp_rosters)
+              <tr style="text-align: center;" role="row" class="" id="" data-roster-id="{{$emp_rosters[0]->id}}" data-row-type="old_row">
+                <td>
+                    <input type="checkbox" class="sub_chk">
+                </td>
+                <td>
+                  {{$emp_rosters[0]->employee->name}}
+                </td>
+                <td>
+                  {{$emp_rosters[0]->client->name}}
+                </td>
+                @foreach($all_days as $day => $date)
+                  @php
+                    $start_time = '';
+                    $end_time = '';
+                    $d = strtotime($year.'-'.$month.'-'.$day);
+                    $week = 'week_'.weekOfMonth($d);
+
+                    foreach($emp_rosters as $roster){
+                      $thisDay = \Carbon\Carbon::parse($roster->date)->format('d');
+                      if($thisDay==$day){
+                        $start_time = $roster->start_time;
+                        $end_time = $roster->end_time;
+                      }
+                    }
+                    $status = 0;
+                    $leave_type = 0;
+                    $full_day = \Carbon\Carbon::parse($year.'-'.$month.'-'.$day);
+                    foreach($leaves as $leave){
+                      $from = \Carbon\Carbon::parse($leave->from);
+                      $to = \Carbon\Carbon::parse($leave->to);
+                      if($leave->user_id==$emp_id && $full_day->between($from, $to)){
+                        $status = 1;
+                        $leave_type = $leave->leave_type;
+                      }
+                    }
+                  @endphp
+                  <td class="{{$week}}">
+                    <input type="text" class="form-control timepicker txtTime time_from" value=" @if($status){{config('setting.leave_types')[$leave_type]}} @else{{$start_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif>
+                       
+                    <input type="text" class="form-control timepicker txtTime time_to" value="@if($status){{config('setting.leave_types')[$leave_type]}} @else{{$end_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif>
+                  </td>
+                @endforeach
+              </tr>
+              @endforeach
+            @endforeach
+            </tbody>
+          </table>
+          
+        </div>
+        <div class="box-footer clearfix">
+          <div class="col-md-4">
+            <button type="button" class="btn btn-danger delete_all">Delete</button>
+          </div>
+          <div class="col-md-4 text-center">
+            {{ $customPaginate->links() }}
+          </div>
+          <div class="col-md-4">
+            <button id="addrow" class="btn btn-success pull-right">Add Row</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
+
+
+
 
 @endsection
 
@@ -322,7 +341,7 @@
           curr_week = a;
           $('.week_'+a).show();
           $('.'+full_date).addClass('bg-danger');
-          $('#b_week_'+a).addClass('btn-success').css('color','white');
+          $('.week_selector').val(a).trigger('change');
           arr.forEach(function(b){
             if(a!=b){
               $('.week_'+b).hide();
@@ -333,7 +352,7 @@
     }
     else{
         $('.week_1').show();
-        $('#b_week_1').addClass('btn-success').css('color','white');
+        $('.week_selector').val(1).trigger('change');
         $('.week_2').hide();
         $('.week_3').hide();
         $('.week_4').hide();
@@ -341,16 +360,13 @@
       }
       
     // Week Switch
-    arr.forEach(function(a){
-      $('#b_week_'+a).on('click', function(e) {
-        $('.week_'+a).show();
-        $(this).addClass('btn-success').css('color','white');
-        arr.forEach(function(b){
-          if(a!=b){
-            $('#b_week_'+b).removeClass('btn-success').css('color','black');
-            $('.week_'+b).hide();
-          }
-        });
+    $('.week_selector').on('change', function(e) {
+      var a = $(this).val();
+      $('.week_'+a).show();
+      arr.forEach(function(b){
+        if(a!=b){
+          $('.week_'+b).hide();
+        }
       });
     });
 
@@ -369,25 +385,13 @@
         cols += '<select class="client_name form-control" required disabled>';
         cols += '<option value selected disabled>Select Client</option>';
         cols += '@foreach($clients as $user)<option value="{{$user->id}}">{{$user->name}}</option>@endforeach</select></td>';
+        cols += '@foreach($all_days as $day => $date)';
+        cols += '@php $d=strtotime($year."-".$month."-".$day); $week = "week_".weekOfMonth($d) @endphp';
 
-        for(i=1;i<=total_days;i++){
-          if(i>=1 && i<=7)
-            week = "week_1";
-          else if(i>=8 && i<=14)
-            week = "week_2";
-          else if(i>=15 && i<=21)
-            week = "week_3";
-          else if(i>=22 && i<=28)
-            week = "week_4";
-          else if(i>=29 && i<=31)
-            week = "week_5";
-
-          var this_date = sel_year_month + "-" + i;
-          cols += '<td class="'+week+'">';
-          cols += '<input type="text" class="form-control timepicker txtTime time_from"  data-date = "'+this_date+'">-';
-          cols += '<input type="text" class="form-control timepicker txtTime time_to"  data-date = "'+this_date+'">';
-          cols += '</td>';
-        }
+        cols += '<td class="{{$week}}">';
+        cols += '<input type="text" class="form-control timepicker txtTime time_from"  data-date = "{{$year.'-'.$month.'-'.$day}}">-';
+        cols += '<input type="text" class="form-control timepicker txtTime time_to"  data-date = "{{$year.'-'.$month.'-'.$day}}">';
+        cols += '</td>@endforeach';
         newRow.append(cols);
         $("tbody.roster-list").append(newRow);
         $('.timepicker').timepicker({ 'timeFormat': 'H:i' });
@@ -409,6 +413,7 @@
           $('.week_4').hide();
           $('.week_5').hide();
         }
+        $('.employee_name, .client_name').select2();
     });
 
     $('body').on('change','.employee_name',function(e){
@@ -464,7 +469,7 @@
         },
         success:function(data) {
           console.log(data);
-          
+          $('.ibtnDel').hide();
         },
         error: function(response){
           $.each(response.responseJSON, function(index, val){

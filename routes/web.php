@@ -90,10 +90,12 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/delete_user/{id}', 'UserController@destroy')->name('user.delete');
 
 		Route::get('/wages','WagesController@index')->name('wages.index');
-		Route::post('/wages','WagesController@store')->name('wages.store');
-		Route::get('/del_wages/{id}','WagesController@destroy')->name('wages.destroy');
-		Route::post('/edit_wages','WagesController@edit')->name('wages.edit');
-		Route::post('/update_wages','WagesController@update')->name('wages.update');
+		Route::post('/wages', 'WagesController@index')->name('wages.search');
+		Route::post('/storeWages','WagesController@store')->name('wages.store');
+		Route::get('/deleleWages/{id}','WagesController@destroy')->name('wages.destroy');
+		Route::post('/editWages','WagesController@edit')->name('wages.edit');
+		Route::post('/updateWages','WagesController@update')->name('wages.update');
+		
 
 		Route::get('/roster','RosterController@index')->name('roster.index');
 		Route::post('/roster','RosterController@index')->name('roster.index');

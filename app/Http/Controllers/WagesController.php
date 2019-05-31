@@ -17,7 +17,7 @@ class WagesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $wages = Wages::select('wages.id', 
                                'wages.employee_id', 
@@ -43,6 +43,10 @@ class WagesController extends Controller
             $employees->where('users.added_by','=',Auth::id());
             $clients->where('users.added_by','=',Auth::id());
         }
+        if($request->search_by_user_id)
+            $wages->where('wages.employee_id','=',$request->search_by_user_id);
+        if($request->search_by_client_id)
+            $wages->where('wages.client_id','=',$request->search_by_client_id);
 
         $employees = $employees->get();
         $wages = $wages->get();

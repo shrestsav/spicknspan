@@ -8,7 +8,7 @@
     <div class="col-md-12">
       <div class="box box-primary collapsed-box box-solid">
         <div class="box-header with-border">
-          <h3 class="box-title">Set Wage</h3>
+          <h3 class="box-title">Set Employee Wage</h3>
           <div class="pull-right box-tools">
             <button type="button" class="btn btn-info btn-sm" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
               <i class="fa fa-plus"></i></button>
@@ -59,9 +59,55 @@
       </div>
     </div>
     <div class="col-md-12">
+      @permission('import_export_excel')
+        <div class="pull-right">
+          <a href="{{ route('export_to_excel',Route::current()->getName()) }}" class="export_to_excel">
+            <button class="btn btn-success">Export to Excel</button>
+          </a>
+        </div>
+      @endpermission
+      @if(Request::all())
+        <a href="{{url('/wages')}}"><button class="btn btn-primary">Show All</button></a>
+      @endif
+    </div>
+    
+    <div class="col-md-12">
+
       <div class="box">
         <div class="box-header">
           <h3 class="box-title">Employee Wages List</h3>
+          {{-- Search Form --}}
+          <div class="search_form pull-right">
+            <form autocomplete="off" role="form" action="{{route('wages.search')}}" method="POST" enctype="multipart/form-data">
+              @csrf
+              @php 
+                $search_arr = [
+                  'Employee Name' => [
+                    'data'    => 'employees',
+                    'name'    => 'search_by_user_id'
+                  ],
+                  'Client Name' => [
+                    'data'    => 'clients',
+                    'name'    => 'search_by_client_id'
+                  ],
+                ]
+              @endphp
+
+              @foreach($search_arr as $part => $arr)
+                <select class="select2 {{$arr['name']}}" name="{{$arr['name']}}">
+                  <option disabled selected value> {{$part}}</option>
+                  @foreach(${$arr['data']} as $data)
+                    <option value="{{$data->id}}" @if(Request::input($arr['name'])==$data->id) selected @endif>
+                      {{$data->name }}
+                    </option>
+                  @endforeach
+                </select>
+              @endforeach
+
+              &nbsp; &nbsp; &nbsp;
+              <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+          </div>
         </div>
         <div class="box-body">
           <table id="employee_wages_table" class="table table-bordered table-striped">
@@ -79,7 +125,6 @@
                 <td>{{$wage->employee_name}}</td>
                 <td>{{$wage->client_name}}</td>
                 <td>{{$wage->hourly_rate}}$ / hr</td>
-                
                 <td>
                   <a href="javascript:;" class="edit_wage">
                     <span class="action_icons"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></span>
@@ -124,7 +169,7 @@
     dangerMode: true,
   }).then((willDelete) => {
       if (willDelete) {
-        window.location.href = SITE_URL + "del_wages/"+wage_id;
+        window.location.href = SITE_URL + "deleteWages/"+wage_id;
       } 
     });
   });
@@ -134,7 +179,7 @@
       var wage_id = $(this).parent().parent().data('wage_id');
       $.ajax({
           type: 'POST',
-          url: SITE_URL + 'edit_wages',
+          url: SITE_URL + 'editWages',
           data: {
               'wage_id': wage_id
           },

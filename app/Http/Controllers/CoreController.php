@@ -6,11 +6,13 @@ use App\Attendance;
 use App\User;
 use App\UserDetail;
 use App\SiteAttendance;
+use App\Wages;
 use Excel;
 use App\Exports\DataExport;
 use App\Imports\DataImport;
 use Illuminate\Http\Request;
 use Auth;
+use Entrust;
 
 
 class CoreController extends Controller
@@ -40,18 +42,17 @@ class CoreController extends Controller
 	    	if($page=='user_client.index'){
 	    		$user_type = 'client';
 	    	}
-	    	$data = User::select(
-								'users.name',
-								'users.user_type',
-								'users.email',
-								'user_details.gender',
-								'user_details.address',
-								'user_details.contact',
-								'user_details.date_of_birth',
-								'user_details.hourly_rate',
-								'user_details.annual_salary',
-								'user_details.description',
-								'user_details.employment_start_date')
+	    	$data = User::select('users.name',
+								 'users.user_type',
+								 'users.email',
+								 'user_details.gender',
+								 'user_details.address',
+								 'user_details.contact',
+								 'user_details.date_of_birth',
+								 'user_details.hourly_rate',
+								 'user_details.annual_salary',
+								 'user_details.description',
+								 'user_details.employment_start_date')
 						->join('user_details','user_details.user_id','=','users.id')
 						->whereHas('roles', function ($query) use ($user_type) {
                                 $query->where('name', '=', $user_type);
@@ -62,19 +63,32 @@ class CoreController extends Controller
     	elseif($page=='site.attendance'){
     		$user_type = 'Site Attendance Report';
     		$data = SiteAttendance::select('users.name',
-    												   'buildings.name as building_name',
-    												   'buildings.building_no',
-    												   'rooms.name as room_name',
-    												   'rooms.room_no',
-    												   'rooms.description',
-    												   'site_attendances.login',
-	                                                   'site_attendances.created_at as date',)
+										   'buildings.name as building_name',
+										   'buildings.building_no',
+										   'rooms.name as room_name',
+										   'rooms.room_no',
+										   'rooms.description',
+										   'site_attendances.login',
+                                           'site_attendances.created_at as date',)
                             ->join('rooms','rooms.id','=','site_attendances.room_id')
                             ->join('buildings','buildings.id','=','rooms.building_id')
                             ->join('users','users.id','=','site_attendances.user_id')
                             ->get();
             $head = ['NAME','BUILDING NAME','BUILDING No','DIVISION / AREA','ROOM No','DESCRIPTION','LOGIN TIME','DATE'];
     	}
+        elseif($page=='wages.index'){
+            $user_type = 'Employee Wages';
+            $data = Wages::select('employee.name as employee_name',
+                                  'client.name as client_name',
+                                  'wages.hourly_rate')
+                        ->join('users as employee','employee.id','wages.employee_id')
+                        ->join('users as client','client.id','wages.client_id');
+            if(Entrust::hasRole('contractor')){
+                $wages->where('wages.added_by','=',Auth::id());
+            }
+            $data = $data->get();
+            $head = ['Employee','Client','Hourly Rate ($)'];
+        }
     	return Excel::download(new DataExport($data,$head), $user_type.'s.xlsx');
     }
 
