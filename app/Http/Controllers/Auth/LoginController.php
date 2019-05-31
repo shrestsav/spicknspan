@@ -103,15 +103,19 @@ class LoginController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('login');
         }
-        $existingUser = User::where('email', $user->getEmail())->first();
+        //Switch between social drivers
+        if($driver=='google')
+            $social_id = 'g_id';
+        elseif($driver=='facebook')
+            $social_id = 'f_id';
+
+        $existingUser = User::where('email', $user->getEmail())->orWhere($social_id, $user->id)->first();
 
         if ($existingUser) {
-
             // update the avatar and provider that might have changed
             $existingUser->update([
+                $social_id => $user->id,
                 'avatar' => $user->avatar,
-                'provider' => $driver,
-                'provider_id' => $user->id,
                 'access_token' => $user->token
             ]);
 

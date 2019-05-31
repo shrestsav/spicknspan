@@ -91,21 +91,6 @@
            {{ $error }}
         @endforeach
       </div>
-
-      {{-- To display Errors from Laravel Session --}}
-      @if ($errors->any())
-        <div class="alert alert-danger custom_error_msg">   
-          @foreach ($errors->all() as $error)
-             {{ $error }}
-          @endforeach
-        </div>
-      @endif
-
-      @if (\Session::has('message'))
-        <div class="alert alert-success custom_success_msg">
-            {{ \Session::get('message') }}
-        </div>
-      @endif
   
       <form method='POST' action='' class='check_in_form' name="check_in_out_form">
         @csrf

@@ -42,20 +42,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
 <section class="content">
   <div class="row">
     <div class="col-md-12">
-      @if ($errors->any())
-          <div class="alert alert-danger">
-              @foreach ($errors->all() as $error)
-                  {{ $error }}<br>
-              @endforeach
-          </div>
-      @endif
-      @if (\Session::has('message'))
-        <div class="alert alert-success custom_success_msg">
-            {{ \Session::get('message') }}
-        </div>
-      @endif
-    </div>
-    <div class="col-md-12">
       <div class="box box-primary collapsed-box box-solid">
         <div class="box-header with-border">
           <h3 class="box-title">Add {{$title}}</h3>
@@ -159,13 +145,13 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Start Date" required>
                 <div class="help-block with-errors"></div>
               </div>
-              @if($user_type=='client')
+              {{-- @if($user_type=='client')
                 <div class="form-group">
                   <label class="checkbox mark_default">
                     <input type="checkbox" name="mark_default" value="1">Mark as default client ?
                   </label>
                 </div>
-              @endif
+              @endif --}}
               <div class="form-group">
                 <label for="password">Password *</label>
                 <input type="password" name="password" data-minlength="6" class="form-control" id="password" placeholder="Enter Password" required>

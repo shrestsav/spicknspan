@@ -91,8 +91,9 @@ Route::middleware(['auth'])->group(function () {
 
 		Route::get('/wages','WagesController@index')->name('wages.index');
 		Route::post('/wages','WagesController@store')->name('wages.store');
-		Route::post('/wages/{id}','WagesController@destroy')->name('wages.destroy');
-
+		Route::get('/del_wages/{id}','WagesController@destroy')->name('wages.destroy');
+		Route::post('/edit_wages','WagesController@edit')->name('wages.edit');
+		Route::post('/update_wages','WagesController@update')->name('wages.update');
 
 		Route::get('/roster','RosterController@index')->name('roster.index');
 		Route::post('/roster','RosterController@index')->name('roster.index');

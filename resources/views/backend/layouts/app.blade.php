@@ -183,9 +183,6 @@
          console.log(response);
       }
     });
-
-
-
   });
 
 </script>
@@ -208,6 +205,21 @@
 <script src="{{ asset('backend/js/moment-timezone-with-data-2012-2022.min.js') }}"></script>
 <script type="text/javascript">
   var timeZones = moment.tz.names();
+
+  @if($errors->any())
+    @foreach ($errors->all() as $error)
+      showNotify('danger','{{$error}}')
+    @endforeach
+  @endif
+
+  @if(\Session::has('error'))
+    showNotify('danger','{{\Session::get("error")}}')
+  @endif
+
+  @if(\Session::has('message'))
+    showNotify('success','{{\Session::get("message")}}')
+  @endif
+
 </script>
 <script src="{{ asset('backend/js/daterangepicker.js') }}"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>

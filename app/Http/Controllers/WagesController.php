@@ -19,43 +19,36 @@ class WagesController extends Controller
      */
     public function index()
     {
+        $wages = Wages::select('wages.id', 
+                               'wages.employee_id', 
+                               'wages.client_id', 
+                               'wages.hourly_rate',
+                               'employee.name as employee_name',
+                               'client.name as client_name')
+                        ->join('users as employee','employee.id','wages.employee_id')
+                        ->join('users as client','client.id','wages.client_id');
+      
+        $employees = User::select('users.id','users.name','users.email','users.user_type')
+                            ->whereHas('roles', function ($query) {
+                                $query->where('name', '=', 'employee');
+                            });
 
-    $userId   = Auth::id();
-    
-    $wages = Wages::select('id', 'employee_id', 'client_id', 'hourly_rate');
+        $clients = User::select('users.id','users.name','users.email','users.user_type')
+                        ->whereHas('roles', function ($query) {
+                            $query->where('name', '=', 'client');
+                        });
 
-    if(Entrust::hasRole('contractor')){
-        $wages =  $wages ->where('wages.added_by','=',$userId);
-    }
+        if(Entrust::hasRole('contractor')){
+            $wages->where('wages.added_by','=',Auth::id());
+            $employees->where('users.added_by','=',Auth::id());
+            $clients->where('users.added_by','=',Auth::id());
+        }
 
-    $wages = $wages->get();
+        $employees = $employees->get();
+        $wages = $wages->get();
+        $clients = $clients->get();
 
-    $employee = User::select(
-                            'users.id',
-                            'users.name',
-                            'users.email',
-                            'users.user_type')->where('users.user_type','=','employee');
-
-    if(Entrust::hasRole('contractor')){
-        $employee =  $employee ->where('users.added_by','=',$userId);
-    }
-
-    $employee = $employee->get();
-
-    $client = User::select(
-                            'users.id',
-                            'users.name',
-                            'users.email',
-                            'users.user_type')
-                    ->where('users.user_type','=','client');
-
-    if(Entrust::hasRole('contractor')){
-        $client =  $client ->where('users.added_by','=',$userId);
-    }
-
-    $client = $client->get();
-
-    return view('backend.pages.wages',compact('wages', 'employee', 'client'));
+        return view('backend.pages.wages',compact('wages','employees','clients'));
     }
 
     /**
@@ -76,15 +69,25 @@ class WagesController extends Controller
      */
     public function store(Request $request)
     {
-        $userId   = Auth::id();
-
-        Wages::create([
-            'employee_id'   => $request['employee_id'],
-            'client_id'     => $request['client_id'],
-            'hourly_rate'   => $request['hourly_rate'],
-            'added_by'      => $userId,
+        $validatedData = $request->validate([
+            'employee_id' => 'required',
+            'client_id' => 'required',
+            'hourly_rate' => 'required',
         ]);
+
+        // Check if already exists
+        $check = Wages::where('employee_id',$request->employee_id)
+                        ->where('client_id',$request->client_id)
+                        ->exists();
+
+        if($check){
+            return redirect()->back()->withErrors('Wages for selected employee on client already exists');
+        }
+
+        $request->merge(['added_by' => Auth::id()]);
+        Wages::create($request->all());
         return redirect()->back()->with('message', 'Added Successfully');
+        
     }
 
     /**
@@ -104,9 +107,31 @@ class WagesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Request $request)
     {
-        //
+        $wage_id = decrypt($request->wage_id);
+        $wages = Wages::select('wages.id', 
+                               'wages.employee_id', 
+                               'wages.client_id', 
+                               'wages.hourly_rate',
+                               'employee.name as employee_name',
+                               'client.name as client_name')
+                        ->join('users as employee','employee.id','wages.employee_id')
+                        ->join('users as client','client.id','wages.client_id')
+                        ->where('wages.id','=',$wage_id)
+                        ->first();
+
+        $view = view('backend.modals.render.wages_edit')
+                ->with(['wages' => $wages])
+                ->render();
+
+        $response = [
+           'status' => true,
+           'title' => $wages->employee_name,
+           'html' => $view
+        ];
+
+       return response()->json($response);
     }
 
     /**
@@ -116,9 +141,13 @@ class WagesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
+        $update = Wages::where('id',$request->wage_id)->update(['hourly_rate' => $request->hourly_rate]);
+        if($update)
+            return back()->with('message','Wages has been updated');
+        else
+            return back()->withErrors('Wage could not be updated');
     }
 
     /**
@@ -129,8 +158,7 @@ class WagesController extends Controller
      */
     public function destroy($id)
     {
-        $wages = Wages::find($id); 
-        $wages->delete(); //delete the id
+        $wages = Wages::find(decrypt($id))->delete(); 
         return redirect()->back()->with('message','Wages Deleted Successfully');
     }
 }

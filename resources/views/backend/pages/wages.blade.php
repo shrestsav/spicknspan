@@ -5,69 +5,64 @@
 <!-- Main content -->
 <section class="content">
   <div class="row">
-    <div class="col-md-6">
-      @if ($errors->any())
-          <div class="alert alert-danger">
-              @foreach ($errors->all() as $error)
-                  {{ $error }}
-              @endforeach
-          </div>
-      @endif
-      @if (\Session::has('message'))
-        <div class="alert alert-success custom_success_msg">
-            {{ \Session::get('message') }}
-        </div>
-      @endif
-      <div class="box box-primary">
+    <div class="col-md-12">
+      <div class="box box-primary collapsed-box box-solid">
         <div class="box-header with-border">
-          <h3 class="box-title">Employee Information</h3>
+          <h3 class="box-title">Set Wage</h3>
+          <div class="pull-right box-tools">
+            <button type="button" class="btn btn-info btn-sm" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
+              <i class="fa fa-plus"></i></button>
+            <button type="button" class="btn btn-info btn-sm" data-widget="remove" data-toggle="tooltip" title="" data-original-title="Remove">
+              <i class="fa fa-times"></i></button>
+          </div>
         </div>
-        <form role="form" action="{{route('wages.store')}}" method="POST">
-          @csrf
-          <div class="box-body pad">
-            <div class="form-group">
-              <label for="employee_id">Employee Name</label>
-              <select class="form-control" name="employee_id">
-
-                  @if ($employee->count())
-                          <option selected disabled>Select Employee</option>
-                      @foreach($employee as $user)
-                          <option value="{{$user->id}}">{{$user->name}}</option>
-                      @endForeach
-                  @endif
-
-              </select>
+        <div class="box-body pad">
+          <form role="form" action="{{route('wages.store')}}" method="POST">
+            @csrf
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Employee Name</label>
+                  <select class="form-control select2" name="employee_id" style="width: 100%;">
+                    <option selected disabled>Select Employee</option>
+                    @foreach($employees as $user)
+                        <option value="{{$user->id}}">{{$user->name}}</option>
+                    @endforeach
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Client Name</label>
+                  <select class="form-control select2" name="client_id" style="width: 100%;">
+                    <option selected disabled>Select Client</option>
+                    @foreach($clients as $user)
+                        <option value="{{$user->id}}">{{$user->name}}</option>
+                    @endforeach
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="hourly_rate">Base Hourly Rate ($)</label>
+                  <input type="number" name="hourly_rate" class="form-control" id="hourly_rate" placeholder="Select Hourly Rate">
+                </div>
+              </div>
+              <div class="col-md-12">
+                <div class="box-footer">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="client_id">Client Name</label>
-              <select class="form-control" name="client_id">
-
-                  @if ($client->count())
-                          <option selected disabled>Select Client</option>
-                      @foreach($client as $user)
-                          <option value="{{$user->id}}">{{$user->name}}</option>
-                      @endForeach
-                  @endif
-
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="hourly_rate">Base Hourly Rate ($)</label>
-              <input type="number" name="hourly_rate" class="form-control" id="hourly_rate" placeholder="Select Hourly Rate">
-            </div>
-          </div>
-          <div class="box-footer">
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-12">
       <div class="box">
         <div class="box-header">
           <h3 class="box-title">Employee Wages List</h3>
         </div>
-        <!-- /.box-header -->
         <div class="box-body">
           <table id="employee_wages_table" class="table table-bordered table-striped">
             <thead>
@@ -80,33 +75,36 @@
             </thead>
             <tbody>
             @foreach($wages as $wage)
-                    <tr>
-                      @foreach($employee as $user1)
-                          @if($wage->employee_id == $user1->id)
-                              <td>{{$user1->name}}</td>
-                          @endif
-                      @endforeach
-                      @foreach($client as $user2)
-                          @if($wage->client_id == $user2->id)
-                              <td>{{$user2->name}}</td>
-                          @endif
-                      @endforeach
-                      <td>{{$wage->hourly_rate}}</td>
-                      <form action="{{ url('/wages/').'/'.$wage->id}}" method="POST">
-                        {{ csrf_field() }}
-                        <input type="hidden" name="_method" value="POST">
-                        <td><button>Delete</button></td>
-                      </form>
-                    </tr>
+              <tr data-wage_id='{{encrypt($wage->id)}}'>
+                <td>{{$wage->employee_name}}</td>
+                <td>{{$wage->client_name}}</td>
+                <td>{{$wage->hourly_rate}}$ / hr</td>
+                
+                <td>
+                  <a href="javascript:;" class="edit_wage">
+                    <span class="action_icons"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></span>
+                  </a>
+                  <a href="javascript:;" class="delete_wage">
+                    <span class="action_icons"><i class="fa fa-trash" aria-hidden="true"></i></span>
+                  </a>
+                </td>
+
+              </tr>
             @endforeach
             </tbody>
           </table>
         </div>
-        <!-- /.box-body -->
       </div>
     </div>
   </div>
 </section>
+
+@include('backend.modals.modal', [
+            'modalId' => 'editWageModal',
+            'modalFile' => '__modal_body',
+            'modalTitle' => __('Edit Wage'),
+            'modalSize' => 'small_modal_dialog',
+        ])
 
 @endsection
 
@@ -114,7 +112,41 @@
 <script type="text/javascript">
   $(function () {
     $('#employee_wages_table').DataTable()
-  })
+  });
+
+  $('.delete_wage').on('click',function(){
+    var wage_id = $(this).parent().parent().data('wage_id');
+    swal({
+    title: "Are you sure?",
+    text: "Once deleted, you will not be able to recover this data!",
+    icon: "warning",
+    buttons: true,
+    dangerMode: true,
+  }).then((willDelete) => {
+      if (willDelete) {
+        window.location.href = SITE_URL + "del_wages/"+wage_id;
+      } 
+    });
+  });
+
+  $('.edit_wage').on('click',function(e){
+      e.preventDefault();
+      var wage_id = $(this).parent().parent().data('wage_id');
+      $.ajax({
+          type: 'POST',
+          url: SITE_URL + 'edit_wages',
+          data: {
+              'wage_id': wage_id
+          },
+          dataType: 'json'
+      }).done(function (response) {
+          console.log(response);
+          detailModel = $('#editWageModal');
+          detailModel.find('.modal-content .modal-title').html(response.title);
+          detailModel.find('.modal-body').html(response.html);
+          detailModel.modal('show');
+      });
+  });
 </script>
   
 @endpush

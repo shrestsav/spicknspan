@@ -32,9 +32,9 @@ class CreateUsersTable extends Migration
             $table->string('timezone')->default('Australia/Sydney');
 
             // Socialite Fields
+            $table->string('g_id')->nullable();
+            $table->string('f_id')->nullable();
             $table->string('avatar')->nullable();
-            $table->string('provider', 20)->nullable();
-            $table->string('provider_id')->nullable();
             $table->string('access_token')->nullable();
 
             $table->rememberToken();
