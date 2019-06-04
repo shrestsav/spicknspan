@@ -97,6 +97,11 @@
             </tbody>
           </table>
         </div>
+        <div class="box-footer clearfix">
+          <div class="col-md-4 col-md-offset-4 text-center">
+            {{ $buildings->links() }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -222,6 +227,11 @@
             </tbody>
           </table>
         </div>
+        <div class="box-footer clearfix">
+          <div class="col-md-4 col-md-offset-4 text-center">
+            {{ $rooms->links() }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -230,18 +240,6 @@
 @endsection
 
 @push('scripts')
-<script type="text/javascript">
-  // $(function () {
-  //   $('#building_list_table').DataTable({
-  //     "pageLength": 8,
-  //     "scrollX": true,
-  //   });
-  //   $('#room_list_table').DataTable({
-  //     "pageLength": 8,
-  //     "scrollX": true,
-  //   });
-  // })
-</script>
 <script type="text/javascript">
   
     //DELETE CHECKBOX COUNT STARTS

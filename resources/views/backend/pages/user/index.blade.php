@@ -121,12 +121,24 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
             </div>
             <div class="col-md-6">
-              <div class="form-group">
-                <label for="timezone">Timezone</label><br>
-                <select class="select2" id="timezone" name="timezone" required>
-                  {{-- Timezones will be filled by moment js --}}
-                </select>
-                <div class="help-block with-errors"></div>
+              <div class="col-md-12 no-padding">
+                <div class="form-group col-md-3">
+                  <label for="timezone">Timezone</label><br>
+                  <select class="select2" id="timezone" name="timezone" required>
+                    {{-- Timezones will be filled by moment js --}}
+                  </select>
+                  <div class="help-block with-errors"></div>
+                </div>
+                <div class="form-group col-md-3">
+                  <label for="currency">Currency</label><br>
+                  <select class="select2" id="currency" name="currency" required>
+                    <option selected disabled value>Select Currency</option>
+                    @foreach(config('setting.currencies') as $id => $curr)
+                    <option value="{{$id}}">{{$curr}}</option>
+                    @endforeach
+                  </select>
+                  <div class="help-block with-errors"></div>
+                </div>
               </div>
               <div class="form-group">
                 <label for="hourly_rate">Base Hourly Rate</label>
@@ -236,7 +248,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <td>{{$user->name}}</td>
                 <td>{{$user->email}}</td>
                 <td>{{$user->contact}}</td>
-                <td>{{$user->hourly_rate}}</td>
+                <td>{{$user->hourly_rate}} @if($user->currency){{config('setting.currencies')[$user->currency]}}@endif</td>
                 <td>{{$user->employment_start_date}}</td>
                 @php
                   $docs = json_decode($user->documents, true);

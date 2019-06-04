@@ -14,9 +14,12 @@ use Illuminate\Http\Request;
 use Auth;
 use Entrust;
 
+use Illuminate\Support\Facades\Validator;
+
 
 class CoreController extends Controller
 {
+    //Method for Importing Excel Files
     public function import_from_excel(Request $request){
     	$request->validate([
             'file' => 'required|mimes:xlsx'
@@ -26,6 +29,7 @@ class CoreController extends Controller
     	return back()->with('message','Successfully Imported');
     }
 
+    //Method for Exporting Excel Files
     public function export_to_excel($page){
     	
     	if($page=='user_employee.index' || $page=='user_contractor.index' || $page=='user_client.index'){
@@ -90,6 +94,11 @@ class CoreController extends Controller
             $head = ['Employee','Client','Hourly Rate ($)'];
         }
     	return Excel::download(new DataExport($data,$head), $user_type.'s.xlsx');
+    }
+
+    public function sysIndex(Request $request){
+        return 'Settings';
+        return view('backend.pages.sys_settings');
     }
 
 }

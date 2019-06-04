@@ -18,15 +18,12 @@ class SiteController extends Controller
      */
     public function index()
     {
-
-        $userId   = Auth::id();
-
-        $buildings = Building::all();
+        $buildings = Building::simplePaginate(config('setting.rows'));
         $questionTemplate = QuestionTemplate::all();
 
         if(Entrust::hasRole('contractor')){
-            $buildings = $buildings ->where('added_by','=',$userId);
-            $questionTemplate = $questionTemplate ->where('added_by','=',$userId);
+            $buildings = $buildings ->where('added_by','=',Auth::id());
+            $questionTemplate = $questionTemplate ->where('added_by','=',Auth::id());
         }
         
         $rooms = Room::select(
@@ -40,8 +37,8 @@ class SiteController extends Controller
                             'rooms.room_no')
                         ->join('buildings','rooms.building_id','=','buildings.id')
                         ->leftJoin('question_template','rooms.question_id','=','question_template.id')
-                        ->get();
-        // return $rooms;
+                        ->simplePaginate(config('setting.rows'));
+
         return view('backend.pages.sites',compact('buildings','rooms', 'questionTemplate'));
     }
 
@@ -63,8 +60,6 @@ class SiteController extends Controller
      */
     public function store(Request $request)
     {
-        $userId   = Auth::id();
-
         Building::create([
             'name'              => $request['name'],
             'building_no'       => $request['building_no'],
@@ -72,7 +67,7 @@ class SiteController extends Controller
             'description'       => $request['description'],
             'image'             => $request['image'],
             'gps_coordinates'   => $request['gps_coordinates'],
-            'added_by'          => $userId] );
+            'added_by'          => Auth::id()] );
         return redirect()->back()->with('message', 'Building Added Successfully');
 
     }
@@ -124,8 +119,6 @@ class SiteController extends Controller
 
     public function store_room(Request $request)
     {
-        $userId   = Auth::id();
-
         Room::create([
                     'building_id'  => $request['building_id'],
                     'name'         => $request['name'],
@@ -133,7 +126,7 @@ class SiteController extends Controller
                     'description'  => $request['description'],
                     'image'        => $request['image'],
                     'question_id'  => $request['question_id'],
-                    'added_by'     => $userId] );
+                    'added_by'     => Auth::id()] );
 
         return redirect(route('site.index') . '#area_division')->with('message', 'Room Added Successfully');
     }

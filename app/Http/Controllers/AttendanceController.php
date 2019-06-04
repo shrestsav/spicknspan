@@ -27,7 +27,7 @@ class AttendanceController extends Controller
      */
     public function index(Request $request)
     {
-        //Here, Condition is ,, if contractors or admin goes to check in out page then they will be displayed with their added clients whereas if employees goes in checkin out page then they will be displayed with their assigned clients only
+        //Here, Condition is , if contractors or admin goes to check in out page then they will be displayed with their added clients whereas if employees goes in checkin out page then they will be displayed with their assigned clients only
 
         $clients = User::whereHas('roles', function ($query) {
                                   $query->where('name', '=', 'client');
@@ -71,12 +71,12 @@ class AttendanceController extends Controller
     public function list(Request $request)
     {
         $attendances = Attendance::select('attendances.client_id',
-                                         'attendances.employee_id',
-                                         'attendances.check_in',
-                                         'attendances.check_out',
-                                         'client.name as client_name',
-                                         'employee.added_by as added_by',
-                                         'employee.name as employee_name')
+                                          'attendances.employee_id',
+                                          'attendances.check_in',
+                                          'attendances.check_out',
+                                          'client.name as client_name',
+                                          'employee.added_by as added_by',
+                                          'employee.name as employee_name')
                                   ->join('users as employee','attendances.employee_id','=','employee.id')
                                   ->join('users as client','attendances.client_id','=','client.id')
                                   ->orderBy('attendances.check_in','desc');

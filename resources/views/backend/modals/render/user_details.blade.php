@@ -2,19 +2,19 @@
     @php 
 
         $to_display = [
-                        'name',
-                        'email',
-                        'user_type',
-                        'timezone',
-                        'address',
-                        'gender',
-                        'contact',
-                        'hourly_rate',
-                        'annual_salary',
-                        'description',
-                        'date_of_birth',
-                        'employment_start_date',
-                      ];
+            'name',
+            'email',
+            'user_type',
+            'timezone',
+            'address',
+            'gender',
+            'contact',
+            'hourly_rate',
+            'annual_salary',
+            'description',
+            'date_of_birth',
+            'employment_start_date',
+          ];
                     
         $documents = json_decode($user_details->documents, true);
     
@@ -24,7 +24,10 @@
         <div class="col-md-4">
             <div class="form-group">
               <label for="user_name">{{str_replace('_',' ',ucfirst($value))}}</label>
-              <input type="text" class="form-control" id="user_name" value="{{$user_details->$value}}" readonly>
+              <input type="text" class="form-control" id="user_name" value="{{$user_details->$value}} 
+              @if($user_details->currency && $user_details->$value && ($value=='hourly_rate' || $value=='annual_salary')) 
+              {{config('setting.currencies')[$user_details->currency]}} 
+              @endif" readonly>
             </div>
         </div>
     @endforeach

@@ -12,4 +12,17 @@ return [
         6 => 'UNPAID LEAVE',
         6 => 'UNPAID SICK LEAVE',
     ],
+    'currencies' => [
+        1 => 'AUD',
+        2 => 'USD',
+        3 => 'NPR',
+        4 => 'INR',
+    ],
+    'status' => [
+        0 => 'Pending',
+        1 => 'Approved',
+        2 => 'Denied',
+    ],
+    'rows' => 30,
+
 ];

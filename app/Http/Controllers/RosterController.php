@@ -56,7 +56,7 @@ class RosterController extends Controller
             $employees->where('users.added_by','=',Auth::id());
             $customPaginate->where('added_by','=',Auth::id());
         }
-        $customPaginate = $customPaginate->orderBy('created_at','desc')->simplePaginate(5);
+        $customPaginate = $customPaginate->orderBy('created_at','desc')->simplePaginate(config('setting.rows'));
         //Now grab roster ids & fetch rosters ids to get actual data
         $rostIds = $customPaginate->pluck('id')->toArray();
 

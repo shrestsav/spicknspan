@@ -23,6 +23,7 @@ class CreateUserDetailsTable extends Migration
             $table->string('photo')->nullable();
             $table->integer('hourly_rate')->default('0')->nullable();
             $table->integer('annual_salary')->default('0')->nullable();
+            $table->smallInteger('currency')->nullable();
             $table->text('description')->nullable();
             $table->date('employment_start_date')->nullable();
             $table->longText('documents')->nullable();

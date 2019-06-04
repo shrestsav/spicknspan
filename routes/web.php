@@ -50,8 +50,16 @@ Route::middleware(['auth'])->group(function () {
 	Route::get('/print_incident_report/{id}', 'IncidentReportController@print_incident_report')->name('incident.print');
 
 	Route::get('/leaveApplication','LeaveRequestController@leaveRequests')->name('leaveRequest.index');
+	Route::post('/leaveApplication','LeaveRequestController@leaveRequests')->name('leaveRequest.search');
 	Route::post('/createLeaveApplication','LeaveRequestController@createLeaveRequests')->name('leaveRequest.store');
 
+	Route::get('/archivedLeaveApplication','LeaveRequestController@archivedleaveRequests')->name('archivedleaveRequest.index');
+	Route::post('/archivedLeaveApplication','LeaveRequestController@archivedleaveRequests')->name('archivedleaveRequest.search');
+	Route::delete('/archiveLeaveApplication','LeaveRequestController@archiveLeaveRequests')->name('leaveRequest.archive');
+	Route::post('/undoArchiveLeaveApplication','LeaveRequestController@undoArchiveLeaveApplication')->name('leaveRequest.undoArchive');
+
+
+	
 	//this goes to admin route
 	Route::post('/updateLeaveRequestStatus','LeaveRequestController@updateStatus')->name('leave_request.status');
 	Route::post('/ajaxUserLeaveRecord','LeaveRequestController@ajaxUserLeaveRecord')->name('leaveRequest.record');
@@ -76,8 +84,12 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/company', 'UserController@index')->name('user_company.index');
 		Route::get('/employees', 'UserController@index')->name('user_employee.index');
 
+		//SuperAdmin specific roles
 		Route::middleware(['role:superAdmin'])->group(function () {
 			Route::get('/contractors', 'UserController@index')->name('user_contractor.index');
+
+			//Add or remove currency NOTE:: this is not in use
+			Route::get('/systemSettings', 'CoreController@sysIndex')->name('system.index');
 		});
 
 		Route::get('/clients', 'UserController@index')->name('user_client.index');

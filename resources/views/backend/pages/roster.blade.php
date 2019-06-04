@@ -476,7 +476,7 @@
             console.log(index+":"+val);
             showNotify('danger',val); 
           });
-          my.val('');
+          my.val('').trigger('change');
         }
       });
     })

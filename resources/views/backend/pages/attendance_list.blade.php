@@ -3,6 +3,8 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('backend/excel-plugins/tableexport.css') }}">
 <style type="text/css">
+
+/*Datatable css*/
     .form-group.date_filter {
         display: inline-flex;
     }
@@ -15,17 +17,6 @@
     }
     label.label_emp, .label_cli {
         padding-right: 6px;
-    }
-    .search_form{
-        display: inline-block;
-    }
-    .filter_label{
-      padding: 20px;
-    }
-    .search_by_date{
-      display: inline-table;
-      width: 240px; 
-      top: 14px;
     }
     #employee_attendance_length{
       float: left;

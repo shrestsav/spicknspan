@@ -11,12 +11,12 @@ use Entrust;
 class LeaveRequestController extends Controller
 {
 
-    public function leaveRequests()
+    public function leaveRequests(Request $request)
     {
         $leave_requests = LeaveRequest::select('users.name',
                                                 'users.added_by',
                                                 'leave_requests.id',
-                                                'leave_requests.user_id',
+                                                'leave_requests.user_id as employee_id',
                                                 'leave_requests.leave_type',
                                                 'leave_requests.from',
                                                 'leave_requests.to',
@@ -30,10 +30,70 @@ class LeaveRequestController extends Controller
         }
         if(!Entrust::hasRole(['contractor','superAdmin'])){
           $leave_requests->where('user_id','=',Auth::id());
-        }                  
-        $leave_requests = $leave_requests->get();
+        }         
+
+        if($request->search_by_employee_id){
+            $leave_requests->where('user_id','=',$request->search_by_employee_id);
+        }
+        if($request->search_by_lt){
+            $leave_requests->where('leave_type','=',$request->search_by_lt);
+        }
+        if($request->search_by_status){
+            $leave_requests->where('status','=',$request->search_by_status);
+        }
+        if($request->search_date_from_to){
+          $search_date_from_to = explode("-", $request->search_date_from_to);
+          $from = date('Y-m-d',strtotime($search_date_from_to[0]));
+          $to = date('Y-m-d',strtotime($search_date_from_to[1]));
+          $leave_requests->where('from','<=',$from);
+          $leave_requests->where('to','>=',$to);
+        }
+        $leave_requests = $leave_requests->paginate(config('setting.rows'));
         return view('backend.pages.leave_app_form',compact('leave_requests'));
     }
+
+    public function archivedleaveRequests(Request $request)
+    {
+        $leave_requests = LeaveRequest::onlyTrashed()
+                                        ->select('users.name',
+                                                'users.added_by',
+                                                'leave_requests.id',
+                                                'leave_requests.user_id as employee_id',
+                                                'leave_requests.leave_type',
+                                                'leave_requests.from',
+                                                'leave_requests.to',
+                                                'leave_requests.description',
+                                                'leave_requests.status',
+                                                'leave_requests.created_at')
+                                        ->join('users','users.id','leave_requests.user_id');
+                                        
+        if(Entrust::hasRole('contractor')){
+          $leave_requests->where('users.added_by',Auth::id());
+        }
+        if(!Entrust::hasRole(['contractor','superAdmin'])){
+          $leave_requests->where('user_id','=',Auth::id());
+        }         
+
+        if($request->search_by_employee_id){
+            $leave_requests->where('user_id','=',$request->search_by_employee_id);
+        }
+        if($request->search_by_lt){
+            $leave_requests->where('leave_type','=',$request->search_by_lt);
+        }
+        if($request->search_by_status){
+            $leave_requests->where('status','=',$request->search_by_status);
+        }
+        if($request->search_date_from_to){
+          $search_date_from_to = explode("-", $request->search_date_from_to);
+          $from = date('Y-m-d',strtotime($search_date_from_to[0]));
+          $to = date('Y-m-d',strtotime($search_date_from_to[1]));
+          $leave_requests->where('from','<=',$from);
+          $leave_requests->where('to','>=',$to);
+        }
+        $leave_requests = $leave_requests->paginate(config('setting.rows'));
+        return view('backend.pages.leave_app_form',compact('leave_requests'));
+    }
+
     public function createLeaveRequests(Request $request)
     {
         $from_to = explode('-', $request->from_to);
@@ -42,6 +102,20 @@ class LeaveRequestController extends Controller
         $request->merge(['from'=>$from,'to'=>$to,'user_id' => Auth::id()]);
         LeaveRequest::create($request->all());
         return back()->with('message','Leave Application Submitted Successfully');
+    }
+    public function archiveLeaveRequests(Request $request)
+    {
+        foreach ($request->sel_Rows as $rows) {
+            LeaveRequest::where('id',$rows)->delete();
+        }
+        return json_encode('Archived Successfully');
+    }
+    public function undoArchiveLeaveApplication(Request $request)
+    {
+        foreach ($request->sel_Rows as $rows) {
+            LeaveRequest::onlyTrashed()->where('id',$rows)->restore();
+        }
+        return json_encode('Restored Successfully');
     }
     public function updateStatus(Request $request)
     {

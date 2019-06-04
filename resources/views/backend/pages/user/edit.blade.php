@@ -22,18 +22,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
 <section class="content">
   <div class="row">
     <div class="col-md-12">
-      @if ($errors->any())
-          <div class="alert alert-danger">
-              @foreach ($errors->all() as $error)
-                  {{ $error }}
-              @endforeach
-          </div>
-      @endif
-      @if (\Session::has('message'))
-        <div class="alert alert-success custom_success_msg">
-            {{ \Session::get('message') }}
-        </div>
-      @endif
       <div class="box box-primary">
         <div class="box-header with-border">
           <h3 class="box-title">Employee Information</h3>
@@ -95,6 +83,26 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </div>
             </div>
             <div class="col-md-6">
+              <div class="col-md-12 no-padding">
+                <div class="form-group col-md-4">
+                  <label for="timezone">Timezone</label><br>
+                  <select class="select2" id="timezone" name="timezone" required>
+                    {{-- Timezones will be filled by moment js --}}
+                  </select>
+                  <div class="help-block with-errors"></div>
+                </div>
+                <div class="form-group col-md-4">
+                  <label for="currency">Currency</label><br>
+                  <select class="select2" id="currency" name="currency" required>
+                    <option selected disabled value>Select Currency</option>
+                    @foreach(config('setting.currencies') as $id => $curr)
+                    <option value="{{$id}}" @if($user->currency==$id) selected @endif>{{$curr}}</option>
+                    @endforeach
+                  </select>
+                  <div class="help-block with-errors"></div>
+                </div>
+              </div>
+
               <div class="form-group">
                 <label for="annual_salary">Annual Salary</label>
                 <input type="number" name="annual_salary" class="form-control" id="annual_salary" placeholder="Enter Annual Salary" value="{{$user->annual_salary}}">
@@ -107,13 +115,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
                 <label for="employment_start_date">Employment Start Date</label>
                 <input type="date" name="employment_start_date" class="form-control" id="employment_start_date" placeholder="Enter Enployment Start Date" value="{{$user->employment_start_date}}" required>
               </div>
-              <div class="form-group">
-                <label for="timezone">Timezone</label><br>
-                <select class="select2" id="timezone" name="timezone" required>
-                  {{-- Timezones will be filled by moment js --}}
-                </select>
-                <div class="help-block with-errors"></div>
-              </div>
+              
               <div class="form-group">
                 <input type="hidden" name="left_user_doc_array" id="left_user_doc_array" value="">
                 <input type="hidden" name="del_user_doc_array" id="del_user_doc_array" value="">
