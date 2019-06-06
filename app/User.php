@@ -66,4 +66,11 @@ class User extends Authenticatable
     {
         return $this->belongsTo(User::class,'added_by','id');
     }
+
+    public function clients()
+    {
+        $client_ids = json_decode($this->client_ids);
+        $clients =  User::whereIn('id',$client_ids)->get();
+        return $clients;
+    }
 }

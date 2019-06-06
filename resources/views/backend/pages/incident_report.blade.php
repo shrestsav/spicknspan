@@ -293,6 +293,7 @@
           <table id="users_table" class="table table-bordered table-striped">
             <thead>
             <tr>
+              <th>S.No</th>
               <th>Reported by</th>
               <th>Incident Location</th>
               <th>Incident Date</th>
@@ -300,8 +301,12 @@
             </tr>
             </thead>
             <tbody>
+            @php
+              $count=1;
+            @endphp
             @foreach($incident_reports as $report)
               <tr>
+                <td>{{$count}}</td>
                 <td>{{$report->user->name}}</td>
                 <td>{{$report->location}}</td>
                 <td>{{$report->date}}</td>
@@ -314,6 +319,9 @@
                   </a>
                 </td>
               </tr>
+            @php
+              $count++;
+            @endphp
             @endforeach
             </tbody>
           </table>

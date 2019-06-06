@@ -30,11 +30,12 @@
         </li>
         <li class="@if ($title === 'Leave Application') active @endif"><a href="{{route('leaveRequest.index')}}"><i class="fa fa-suitcase"></i> <span>Leave Application</span></a>
         </li>
-
+        <li class="@if ($title === 'Roster') active @endif"><a href="{{route('roster.index')}}"><i class="fa fa-clock-o"></i> <span>Roster</span></a>
+        </li>
       {{-- Allow these menus for admin only --}}
 
       @role(['superAdmin','contractor'])
-        <li class="header">SETTINGS</li>
+        <li class="header">TOOLS</li>
         <li class="treeview @if ($title === 'Employees' || $title === 'Contractors' || $title === 'Clients' || $title === 'Company') active @endif">
           <a href="#">
             <i class="fa fa-user-plus"></i> <span>Manage</span>
@@ -67,8 +68,6 @@
           </a>
           <ul class="treeview-menu">
             <li class="@if ($title === 'Wages') active @endif"><a href="{{route('wages.index')}}"><i class="fa fa-circle-o"></i> <span>Wages</span></a>
-            </li>
-            <li class="@if ($title === 'Roster') active @endif"><a href="{{route('roster.index')}}"><i class="fa fa-circle-o"></i> <span>Roster</span></a>
             </li>
             <li class="@if ($title === 'Roster Variation') active @endif"><a href="{{route('roster_variation.index')}}"><i class="fa fa-circle-o"></i> <span>Roster Variation</span></a>
             </li>

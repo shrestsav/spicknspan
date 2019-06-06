@@ -9,6 +9,8 @@ use App\User;
 use Entrust;
 use Auth;
 use App\LeaveRequest;
+use App\Roster;
+use App\RosterTimetable;
 
 class HomeController extends Controller
 {
@@ -29,13 +31,21 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {   
-      // return url()->current(); 
-      // return request()->getHttpHost();
+      $today = Date('Y-m-d');
       $supportMails = [];
       $superUsers = [];
       $assignedTasks = [];
       $leave_apps = [];
-      
+      $rosters = Roster::where('employee_id',Auth::id())
+                       ->with(['timetable' => function ($query) use ($today) {
+                            $query->whereDate('date','>=',$today);
+                        }])
+                        ->get();
+      $ros_count = 0;
+      foreach($rosters as $ros){
+        $ros_count += count($ros->timetable);
+      }
+
       if(Entrust::hasRole('superAdmin')){
           $supportMails = SupportMail::select('support_mails.id',
                                               'support_mails.email',
@@ -61,7 +71,7 @@ class HomeController extends Controller
         $assignedTasks = SupportMail::where('assigned_to',Auth::id())->where('status',0)->get();
       }
 
-      return view('backend.pages.dashboard',compact('supportMails','superUsers','assignedTasks','leave_apps'));
+      return view('backend.pages.dashboard',compact('supportMails','superUsers','assignedTasks','leave_apps','ros_count'));
     }
 
     public function assignSupportTask(Request $request)

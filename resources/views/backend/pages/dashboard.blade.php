@@ -4,27 +4,20 @@
 
   <section class="content" style="padding-top: 50px;">
     <div class="row">
-      <div class="col-md-12">
-        @if ($errors->any())
-          <div class="alert alert-danger">
-              @foreach ($errors->all() as $error)
-                  {{ $error }}<br>
-              @endforeach
-            </div>
-        @endif
-        @if (\Session::has('message'))
-          <div class="alert alert-success custom_success_msg">
-              {{ \Session::get('message') }}
+      @if($ros_count)
+      <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-green">
+          <div class="inner">
+            <h3>{{$ros_count}}</h3>
+            <p>Rosters set for you</p>
           </div>
-        @endif
-        <div class="box">
-          <div class="box-header" style="text-align: center;">
-            <h3 class="box-title" >Welcome You are Logged In</h3>
+          <div class="icon">
+            <i class="fa fa-clock-o"></i>
           </div>
-          <div class="box-body  no-padding">
-          </div>
+          <a href="{{url('/roster')}}" class="small-box-footer">Take me <i class="fa fa-arrow-circle-right"></i></a>
         </div>
       </div>
+      @endif
       @role('superAdmin')
         @if(count($supportMails))
           <div class="col-md-8">

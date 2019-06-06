@@ -5,27 +5,27 @@
 <style type="text/css">
 
 /*Datatable css*/
-    .form-group.date_filter {
-        display: inline-flex;
-    }
-    .row .col-sm-3 {
-        padding-top: 8px;
-    }
-    label.label_date {
-        padding-right: 10px;
-        padding-top: 6px;
-    }
-    label.label_emp, .label_cli {
-        padding-right: 6px;
-    }
-    #employee_attendance_length{
-      float: left;
-    }
-    #employee_attendance_info{
-      text-align: center;
-      float: left;
-      width: 50%;
-    }
+  .form-group.date_filter {
+      display: inline-flex;
+  }
+  .row .col-sm-3 {
+      padding-top: 8px;
+  }
+  label.label_date {
+      padding-right: 10px;
+      padding-top: 6px;
+  }
+  label.label_emp, .label_cli {
+      padding-right: 6px;
+  }
+  #employee_attendance_length{
+    float: left;
+  }
+  #employee_attendance_info{
+    text-align: center;
+    float: left;
+    width: 50%;
+  }
 </style>
 @endpush
 
@@ -44,7 +44,6 @@
             <div class="search_form">
               <form autocomplete="off" role="form" action="{{route('attendance.search')}}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <label class="filter_label">Filter</label>
                   <select class="select2" name="search_by_employee_id" id="sel_emp">
                     <option disabled selected value>Employee Name</option>
                     @foreach($users as $user_id => $user_name)

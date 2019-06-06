@@ -41,6 +41,10 @@
   .pagination{
     margin: 0px;
   }
+  .form-control[readonly]{
+    background-color: #f7f7f7ad;
+    opacity: 1;
+}
 </style>
 @endpush
 
@@ -59,6 +63,9 @@
       'name'    => 'search_by_client_id'
     ],
   ];
+
+  $today = strtotime(Date('Y-m-d'));
+  $todayWeek = weekOfMonth($today);
 
   function weekOfMonth($date) {
     //Get the first day of the month.
@@ -93,25 +100,26 @@
                     @endforeach
                   </select>
                 @endforeach
-                <select class="select2 week_selector">
-                  <option disabled selected value>Select Week</option>
-                  @foreach($week as $a)
-                    <option value="{{$a}}">Week {{$a}}</option>
-                  @endforeach
-                </select>
                 <div class="input-group date search_by_date">
                   <div class="input-group-addon">
                     <i class="fa fa-calendar"></i>
                   </div>
                   <input name="year_month" type="text" id="year_month" class="form-control txtTime" style="width:85px;" value="{{$year.'-'.$month}}" autocomplete="off" required>
                 </div> 
-                <button type="submit" class="btn btn-primary">SHOW</button>
-                
+                <button type="submit" class="btn btn-primary">SEARCH</button>
               </form>
-
             </div>
-
-            
+            @role('superAdmin','contractor')
+            <button type="button" class="btn btn-danger edit_rosters pull-right">EDIT</button>
+            @endrole
+            <div class="pull-right">
+              <select class="select2 week_selector">
+                <option disabled selected value>Select Week</option>
+                @foreach($week as $a)
+                  <option value="{{$a}}">Week {{$a}}</option>
+                @endforeach
+              </select>
+            </div>
           </div> 
         </div>
         <div class="box-body {{-- table-responsive  --}}no-padding">
@@ -174,9 +182,9 @@
                     }
                   @endphp
                   <td class="{{$week}}">
-                    <input type="text" class="form-control timepicker txtTime time_from" value=" @if($status){{config('setting.leave_types')[$leave_type]}} @else{{$start_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif>
+                    <input type="text" class="form-control timepicker txtTime time_from" value=" @if($status){{config('setting.leave_types')[$leave_type]}} @else{{$start_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif readonly>
                        
-                    <input type="text" class="form-control timepicker txtTime time_to" value="@if($status){{config('setting.leave_types')[$leave_type]}} @else{{$end_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif>
+                    <input type="text" class="form-control timepicker txtTime time_to" value="@if($status){{config('setting.leave_types')[$leave_type]}} @else{{$end_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif readonly>
                   </td>
                 @endforeach
               </tr>
@@ -186,17 +194,19 @@
           </table>
           
         </div>
+        @role('superAdmin','contractor')
         <div class="box-footer clearfix">
           <div class="col-md-4">
-            <button type="button" class="btn btn-danger delete_all">Delete</button>
+            <button type="button" class="btn btn-danger delete_all" disabled>Delete</button>
           </div>
           <div class="col-md-4 text-center">
             {{ $customPaginate->links() }}
           </div>
           <div class="col-md-4">
-            <button id="addrow" class="btn btn-success pull-right">Add Row</button>
+            <button id="addrow" class="btn btn-success pull-right" disabled>Add Row</button>
           </div>
         </div>
+        @endrole
       </div>
     </div>
   </div>
@@ -326,27 +336,22 @@
 
   $(function () {
     var arr = [1,2,3,4,5];
-    var full_date = moment().format('YYYY-MM-DD');
+    var full_date = moment().format('YYYY-MM-D');
     var year_month = moment().format('YYYY-MM');
     var sel_year_month = '{{$year."-".$month}}';
     var today = moment().format('D');
     var total_days = Number('{{$total_days}}');
     var leave_types = JSON.parse('{!! json_encode(config("setting.leave_types")) !!}');
-    var curr_week;
+    var curr_week = '{{$todayWeek}}';
 
     // Select Current Week
     if(year_month==sel_year_month){
-      arr.forEach(function(a){
-        if((today/7)>(a-1) && (today/7)<=a){
-          curr_week = a;
-          $('.week_'+a).show();
-          $('.'+full_date).addClass('bg-danger');
-          $('.week_selector').val(a).trigger('change');
-          arr.forEach(function(b){
-            if(a!=b){
-              $('.week_'+b).hide();
-            }
-          });
+      $('.week_'+curr_week).show();
+      $('.'+full_date).addClass('bg-danger');
+      $('.week_selector').val(curr_week).trigger('change');
+      arr.forEach(function(b){
+        if(curr_week!=b){
+          $('.week_'+b).hide();
         }
       });
     }
@@ -389,7 +394,7 @@
         cols += '@php $d=strtotime($year."-".$month."-".$day); $week = "week_".weekOfMonth($d) @endphp';
 
         cols += '<td class="{{$week}}">';
-        cols += '<input type="text" class="form-control timepicker txtTime time_from"  data-date = "{{$year.'-'.$month.'-'.$day}}">-';
+        cols += '<input type="text" class="form-control timepicker txtTime time_from"  data-date = "{{$year.'-'.$month.'-'.$day}}">';
         cols += '<input type="text" class="form-control timepicker txtTime time_to"  data-date = "{{$year.'-'.$month.'-'.$day}}">';
         cols += '</td>@endforeach';
         newRow.append(cols);
@@ -512,27 +517,37 @@
           buttons: true,
           dangerMode: true,
         })
-          .then((willDelete) => {
-            if (willDelete) {
-              $.ajax({
-                type:'delete',
-                url: SITE_URL+'deleteRoster',
-                dataType: 'json',
-                data:{                
-                  sel_Rows: sel_Rows,                
-                },
-                success:function(data) {
-                  location.reload();
-                },
-                error: function(response){
-                
-                }
-              });
-            } 
-          }); 
+        .then((willDelete) => {
+          if (willDelete) {
+            $.ajax({
+              type:'delete',
+              url: SITE_URL+'deleteRoster',
+              dataType: 'json',
+              data:{                
+                sel_Rows: sel_Rows,                
+              },
+              success:function(data) {
+                location.reload();
+              },
+              error: function(response){
+              
+              }
+            });
+          } 
+        }); 
       }  
     });
 
+    $('body').on('click','.edit_rosters',function(e){
+      $('.time_from, .time_to').prop('readonly',false);
+      $('.delete_all, #addrow').prop('disabled',false);
+      $(this).html('DONE').removeClass('btn-danger edit_rosters').addClass('btn-success done_rosters');
+    });
+    $('body').on('click','.done_rosters',function(e){
+      $('.time_from, .time_to').prop('readonly',true);
+      $('.delete_all, #addrow').prop('disabled',true);
+      $(this).html('EDIT').removeClass('btn-success done_rosters').addClass('btn-danger edit_rosters');
+    });
   });
 </script>
 
@@ -562,6 +577,7 @@
       }
       checkAll.iCheck('update');
   });
+
 
     //For default checkboxes
     // $('#check_all').on('click', function(e){

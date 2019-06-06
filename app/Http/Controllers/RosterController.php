@@ -56,6 +56,10 @@ class RosterController extends Controller
             $employees->where('users.added_by','=',Auth::id());
             $customPaginate->where('added_by','=',Auth::id());
         }
+        if(Entrust::hasRole('employee')){
+            $employees->where('id','=',Auth::id());
+            $customPaginate->where('employee_id','=',Auth::id());
+        }
         $customPaginate = $customPaginate->orderBy('created_at','desc')->simplePaginate(config('setting.rows'));
         //Now grab roster ids & fetch rosters ids to get actual data
         $rostIds = $customPaginate->pluck('id')->toArray();
@@ -74,8 +78,6 @@ class RosterController extends Controller
                         ->whereIn('rosters.id',$rostIds)
                         ->with('client','employee')
                         ->orderBy('rosters.created_at','desc');
-                        
-        
         
         $leaves = LeaveRequest::where('status',1)->get();
 
@@ -84,11 +86,9 @@ class RosterController extends Controller
         $rosters = $rosters->get();
         $rosters = $rosters->groupBy(['client_id','employee_id']);
 
-
-
-
-
-
+        if(Entrust::hasRole('employee')){
+            $clients = Auth::user()->clients(); 
+        }
 
         return view('backend.pages.roster',compact('rosters','employees', 'clients','leaves','all_days','year','month','customPaginate'));
     }

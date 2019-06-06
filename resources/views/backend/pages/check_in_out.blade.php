@@ -82,67 +82,69 @@
 @permission('check_in_out')
 @section('content')
  
-    <!-- Main content -->
-    <section class="content" style="padding-top: 50px;">
+  <!-- Main content -->
+  <section class="content" style="padding-top: 50px;">
 
-      {{-- To display Errors from Javascript --}}
-      <div class="alert alert-danger access_error_msg" style="display: none;">   
-        @foreach ($errors->all() as $error)
-           {{ $error }}
-        @endforeach
-      </div>
-  
-      <form method='POST' action='' class='check_in_form' name="check_in_out_form">
-        @csrf
-        <div class="row">
-          <div class="col-md-12">
-            <div class="box box-success">
-              <div class="box-body check_in_out_body">
-                <input type="hidden" name="latitude" id="latitude">
-                <input type="hidden" name="longitude" id="longitude">
-                <input type="hidden" name="image" id="user_image" required>
-                <div class="col-md-4 check_in_out_video">  
-                  <div id="container"  name='cont' class="container-fluid no-padding ">
-                    <video autoplay="true" id="videoElement" name='vid' width="320" height="240"></video>
-                    <canvas id="canvas" width="320" height="240"></canvas>
-                    <div id="captured_photo"></div>
+    {{-- To display Errors from Javascript --}}
+    <div class="alert alert-danger access_error_msg" style="display: none;">   
+      @foreach ($errors->all() as $error)
+         {{ $error }}
+      @endforeach
+    </div>
+
+    <form method='POST' action='' class='check_in_form' name="check_in_out_form">
+      @csrf
+      <div class="row">
+        <div class="col-md-12">
+          <div class="box box-success box-solid">
+            <div class="box-header with-border">
+            </div>
+            <div class="box-body check_in_out_body">
+              <input type="hidden" name="latitude" id="latitude">
+              <input type="hidden" name="longitude" id="longitude">
+              <input type="hidden" name="image" id="user_image" required>
+              <div class="col-md-4 check_in_out_video">  
+                <div id="container"  name='cont' class="container-fluid no-padding ">
+                  <video autoplay="true" id="videoElement" name='vid' width="320" height="240"></video>
+                  <canvas id="canvas" width="320" height="240"></canvas>
+                  <div id="captured_photo"></div>
+                </div>
+              </div>
+              <div class="col-md-8 check_in_out_video_opp">  
+                <div class="col-md-12">
+                  <div class="text">
+                    <strong>Please Select Client</strong>
                   </div>
                 </div>
-                <div class="col-md-8 check_in_out_video_opp">  
-                  <div class="col-md-12">
-                    <div class="text">
-                      <strong>Please Select Client</strong>
-                    </div>
-                  </div>
-                  <div class="col-md-12">
-                    <select class="select2 check_in_out_client" name="client_id" id="mark_default" required>
-                        <option disabled selected value>Choose Client</option>
-                      @foreach($clients as $client)
-                        <option value="{{$client->id}}" <?php if ($client->id == 1) echo "selected='selected'";?>>{{$client->name}}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                  <div class="col-md-12 check_in_btn_container" style="display: none;">
-                    <button  type="button" class="btn check_in_btn" id="check_in_btn" type="submit" onclick="checkin();">
-                      IN 
-                    </button>
-                  </div>
-                  <div class="col-md-12 check_out_btn_container" style="display: none;">
-                    <button  type="button" class="btn check_out_btn" id="check_out_btn" onclick="checkout();">
-                      OUT
-                    </button>
-                  </div>
-                  <div class="col-md-12">
-                    <div class="last_check_in_out"></div>
-                  </div>
+                <div class="col-md-12">
+                  <select class="select2 check_in_out_client" name="client_id" id="mark_default" required>
+                      <option disabled selected value>Choose Client</option>
+                    @foreach($clients as $client)
+                      <option value="{{$client->id}}" <?php if ($client->id == 1) echo "selected='selected'";?>>{{$client->name}}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="col-md-12 check_in_btn_container" style="display: none;">
+                  <button  type="button" class="btn check_in_btn" id="check_in_btn" type="submit" onclick="checkin();">
+                    IN 
+                  </button>
+                </div>
+                <div class="col-md-12 check_out_btn_container" style="display: none;">
+                  <button  type="button" class="btn check_out_btn" id="check_out_btn" onclick="checkout();">
+                    OUT
+                  </button>
+                </div>
+                <div class="col-md-12">
+                  <div class="last_check_in_out"></div>
                 </div>
               </div>
             </div>
           </div>
-          <canvas id="CANVAS" name="CANVAS" height="240" width="320">Your browser does not support Canvas.</canvas>
         </div>
-      </form>
-    </section>
+        <canvas id="CANVAS" name="CANVAS" height="240" width="320">Your browser does not support Canvas.</canvas>
+      </div>
+    </form>
+  </section>
 
 @endsection
 

@@ -17,4 +17,14 @@ class Roster extends Model
     {
         return $this->belongsTo(User::class,'client_id','id');
     }
+
+    public function timetable()
+    {
+        return $this->hasMany(RosterTimetable::class);
+    }
+
+    // public function timeTableCount()
+    // {
+    //     return $this->hasMany(RosterTimetable::class)->count();
+    // }
 }

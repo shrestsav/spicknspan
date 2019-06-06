@@ -80,6 +80,9 @@ Route::middleware(['auth'])->group(function () {
 	Route::get('/edit-password', 'UserController@password_edit')->name('password.edit');
 	Route::post('/update-password/{id}', 'UserController@password_update')->name('password.update');
 	
+	Route::get('/roster','RosterController@index')->name('roster.index');
+	Route::post('/roster','RosterController@index')->name('roster.index');
+
 	//Allow these routes for admin and contractor only
 	Route::middleware(['role:superAdmin|contractor'])->group(function () {
 		Route::get('/company', 'UserController@index')->name('user_company.index');
@@ -109,9 +112,6 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('/editWages','WagesController@edit')->name('wages.edit');
 		Route::post('/updateWages','WagesController@update')->name('wages.update');
 		
-
-		Route::get('/roster','RosterController@index')->name('roster.index');
-		Route::post('/roster','RosterController@index')->name('roster.index');
 		Route::delete('/deleteRoster','RosterController@destroy')->name('roster.destroy');
 		Route::post('/ajax_update_roster','RosterController@ajax_update_roster')->name('roster.update');
 		Route::post('/ajax_store_roster','RosterController@ajax_store_roster')->name('roster.store');
