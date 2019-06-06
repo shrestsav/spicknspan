@@ -48,6 +48,7 @@ Route::middleware(['auth'])->group(function () {
 	Route::post('/incident_report', 'IncidentReportController@incident_report')->name('incident.store');
 	Route::post('/ajax_incident_report_details', 'IncidentReportController@ajax_incident_report_details')->name('incident.view');
 	Route::get('/print_incident_report/{id}', 'IncidentReportController@print_incident_report')->name('incident.print');
+	Route::post('/updateIncidentStatus', 'IncidentReportController@updateIncidentStatus')->name('incident.update');
 
 	Route::get('/leaveApplication','LeaveRequestController@leaveRequests')->name('leaveRequest.index');
 	Route::post('/leaveApplication','LeaveRequestController@leaveRequests')->name('leaveRequest.search');

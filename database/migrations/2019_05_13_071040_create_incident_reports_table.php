@@ -19,7 +19,7 @@ class CreateIncidentReportsTable extends Migration
             $table->longText('type')->nullable();
             $table->string('person_involved')->nullable();
             $table->string('occupation')->nullable();
-            $table->integer('employer_id')->unsigned()->nullable();
+            $table->string('employer')->nullable();
             $table->string('contact')->nullable();
             $table->string('location')->nullable();
             $table->dateTime('date')->nullable();
@@ -31,6 +31,12 @@ class CreateIncidentReportsTable extends Migration
             $table->text('desc_why')->nullable();
             $table->text('desc_immediate_actions')->nullable();
             $table->text('desc_relevant_controls')->nullable();
+            $table->longText('witness_details')->nullable();
+            $table->smallInteger('ext_auth_notify')->nullable()->comment('0: No, 1:Yes');
+            $table->string('ext_auth')->nullable();
+            $table->smallInteger('investigation_required')->nullable()->comment('0: No, 1:Yes');
+            $table->smallInteger('investigation_type')->nullable()->comment('1: Minor, 2:Major');
+            $table->longText('photos')->nullable();
             $table->timestamps();
         });
     }

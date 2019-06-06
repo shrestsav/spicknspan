@@ -190,7 +190,7 @@ class AttendanceController extends Controller
                 $image = Image::make($request->get('image'));
                 $path = public_path('files'.DS.'employee_login'.DS.Auth::user()->id);
                 if (!file_exists($path)) {
-                    \File::makeDirectory($path, 755, true);
+                    \File::makeDirectory($path, 0755, true);
                 }
                 $image->save($path.DS.$filename);
             }
@@ -244,7 +244,7 @@ class AttendanceController extends Controller
             $image = Image::make($request->get('image'));
             $path = public_path('files'.DS.'employee_login'.DS.Auth::user()->id);
             if (!file_exists($path)) {
-                \File::makeDirectory($path, 755, true);
+                \File::makeDirectory($path, 0755, true);
             }
             $image->save($path.DS.$filename);                
 

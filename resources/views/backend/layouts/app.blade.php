@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Spick & Span</title>
+  <title>{{env('APP_NAME', 'System')}}</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -203,6 +203,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.23/moment-timezone.min.js"></script>
 <script src="{{ asset('backend/js/moment-timezone-with-data-2012-2022.min.js') }}"></script>
+<script src="{{ asset('backend/js/daterangepicker.js') }}"></script>
 <script type="text/javascript">
   var timeZones = moment.tz.names();
 
@@ -220,8 +221,18 @@
     showNotify('success','{{\Session::get("message")}}')
   @endif
 
+//Initialize Date pickers
+  $('.datepicker_with_time').daterangepicker({
+    singleDatePicker: true,
+    startDate: moment().startOf('hour'),
+    timePicker:true,
+    timePicker24Hour:true,
+    locale: {
+      format: 'YYYY/M/DD hh:mm A'
+    }
+  });
 </script>
-<script src="{{ asset('backend/js/daterangepicker.js') }}"></script>
+
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
 
 @stack('scripts')

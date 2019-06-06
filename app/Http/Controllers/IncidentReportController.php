@@ -8,6 +8,7 @@ use App\User;
 use Intervention\Image\Facades\Image;
 use Auth;
 use Entrust;
+use Dompdf\Dompdf;
 
 class IncidentReportController extends Controller
 {
@@ -16,13 +17,14 @@ class IncidentReportController extends Controller
     public function incident_report(Request $request)
     {
         if($request->all()){
-            $incident_types_array = ['work_related_illness','plant_equipment_damage','environment','electrocution','near_miss','injury'];
-            $medical_treatments_array = ['mt_none','mt_first_aid','mt_doctor','mt_hospital'];
-            $attended_authorities_array = ['aa_police','aa_ambulance','aa_fire','aa_workplace_h_s','aa_epa','aa_media'];
-
             $incident_types = [];
             $medical_treatments = [];
             $attended_authorities = [];
+            $witness_details = [];
+
+            $incident_types_array = ['work_related_illness','plant_equipment_damage','environment','electrocution','near_miss','injury'];
+            $medical_treatments_array = ['mt_none','mt_first_aid','mt_doctor','mt_hospital'];
+            $attended_authorities_array = ['aa_police','aa_ambulance','aa_fire','aa_workplace_h_s','aa_epa','aa_media'];
 
             $convert_to_json = ['incident_types','medical_treatments','attended_authorities'];
             foreach($convert_to_json as $part){
@@ -33,15 +35,43 @@ class IncidentReportController extends Controller
                 }
             }
 
+            $witness_details = [
+                [
+                    'name' => $request->name_of_witness_1,
+                    'employer' => $request->n_o_w_employer_1,
+                    'contact' => $request->n_o_w_contact_1,
+                ],
+                [
+                    'name' => $request->name_of_witness_2,
+                    'employer' => $request->name_of_witness_2,
+                    'contact' => $request->name_of_witness_2,
+                ],
+            ];
+
             $request->merge([
                 'user_id' => Auth::id(),
-                'type'    => json_encode($incident_types),
-                'medical_treatment'  => json_encode($medical_treatments),
-                'attended_authorities'    => json_encode($attended_authorities)
+                'type' => json_encode($incident_types),
+                'medical_treatment' => json_encode($medical_treatments),
+                'attended_authorities' => json_encode($attended_authorities),
+                'witness_details' => json_encode($witness_details),
             ]);
 
             $IncidentReport = IncidentReport::create($request->all());
+
             if($IncidentReport){
+                $db_arr = [];
+                if ($request->hasFile('photos')) {
+                  $photos = $request->file('photos');
+                  $count = 1;
+                  foreach($photos as $photo){
+                    $documentName = $count.'_proof_'.$photo->getClientOriginalName();
+                    $uploadDirectory = public_path('files'.DS.'incidents'.DS.$IncidentReport->id);
+                    $photo->move($uploadDirectory, $documentName);
+                    $db_arr[] = $documentName;
+                    $count++;
+                  }  
+                }
+                IncidentReport::where('id',$IncidentReport->id)->update(['photos' => json_encode($db_arr)]);
                 // $report_img = $this->generate_incident_report_form($IncidentReport->id);
                 // $path=public_path('/files/test.jpg');
                 // $report_img->save($path,100);
@@ -49,7 +79,7 @@ class IncidentReportController extends Controller
                 return back()->with('message','Incident Report Generated Successfully');
             }
         }
-        $incident_reports = IncidentReport::where('user_id','1');
+        $incident_reports = IncidentReport::with('user');
 
         if(Entrust::hasRole('contractor')){
         	$incident_reports->whereHas('user', function ($query){
@@ -67,33 +97,25 @@ class IncidentReportController extends Controller
         return view('backend.pages.incident_report',compact('employer','incident_reports'));
     }
 
+    public function updateIncidentStatus(Request $request)
+    {   
+        $update = IncidentReport::where('id',$request->incident_id)
+                                ->update([
+                                    'ext_auth_notify' => $request->ext_auth_notify,
+                                    'ext_auth' => $request->ext_auth,
+                                    'investigation_required' => $request->investigation_required,
+                                    'investigation_type' => $request->investigation_type,
+                                ]);
+        if($update)
+            return json_encode('Success');
+
+    }
+
     public function ajax_incident_report_details(Request $request)
     {
-        $incident_details = IncidentReport::select(
-                              'incident_reports.id',
-                              'incident_reports.user_id',
-                              'incident_reports.type',
-                              'incident_reports.person_involved',
-                              'incident_reports.occupation',
-                              'incident_reports.employer_id',
-                              'incident_reports.contact',
-                              'incident_reports.location',
-                              'incident_reports.date',
-                              'incident_reports.medical_treatment',
-                              'incident_reports.cease_work',
-                              'incident_reports.attended_authorities',
-                              'incident_reports.desc_what',
-                              'incident_reports.desc_how',
-                              'incident_reports.desc_why',
-                              'incident_reports.desc_relevant_controls',
-                              'incident_reports.desc_immediate_actions',
-                              'incident_reports.created_at',
-                              'reporter.name as reporter',
-                              'employer.name as employer',)
-                        ->join('users as reporter','incident_reports.user_id','=','reporter.id')
-                        ->leftJoin('users as employer','incident_reports.employer_id','=','employer.id')
-                        ->where('incident_reports.id','=',$request->incident_id)
-                        ->first();
+        $incident_details = IncidentReport::with('user')
+                                          ->where('id','=',$request->incident_id)
+                                          ->first();
                   
         $view = view('backend.modals.render.incident_details')->with([
            'incident_details' => $incident_details ])->render();
@@ -110,8 +132,27 @@ class IncidentReportController extends Controller
     public function print_incident_report($id)
     {
     	$report_img = $this->generate_incident_report_form($id);
+        $photos = json_decode(IncidentReport::find($id)->photos);
+        
     	$path=public_path('/files/test.jpg');
         $report_img->save($path,50);
+
+        // instantiate and use the dompdf class
+        $dompdf = new Dompdf();
+
+        $html = '<style>@page { margin: 0; }</style>';
+        $html .= '<img src="files/test.jpg" width="100%">';
+        if($photos){
+            $html .= '<div style="padding: 15px; text-align:center;"><b>INCIDENT PHOTOGRAPHS</b></div>';
+            foreach ($photos as $photo) {
+               $html .= '<img src="files/incidents/'.$id.'/'.$photo.'" width="100%"><br><br>';
+            }
+        }
+
+        $dompdf->load_html($html);
+        $dompdf->setPaper('A4', 'potrait');
+        $dompdf->render();
+        $dompdf->stream('incidentReport_'.$id.'.pdf');
 
         return response($report_img)->header('Content-type','image/png');
 
@@ -119,12 +160,12 @@ class IncidentReportController extends Controller
 
     public function generate_incident_report_form($id)
     {
-        $IncidentReport = IncidentReport::find($id);
-        
+        $IncidentReport = IncidentReport::with('user.employer','user.detail')->where('id',$id)->first();
         if($IncidentReport){
             $incident_types = json_decode($IncidentReport->type);
             $medical_treatments = json_decode($IncidentReport->medical_treatment);
             $attended_authorities = json_decode($IncidentReport->attended_authorities);
+            $witness_details = json_decode($IncidentReport->witness_details, true);
             $report = Image::make(public_path('/backend/incident_report/incident_report.jpg'));
             $sym_font_style=function($font) {
                 $font->file(public_path('/backend/incident_report/times.ttf'));
@@ -157,7 +198,7 @@ class IncidentReportController extends Controller
             
             $report->text($IncidentReport->person_involved, 129,462,$font_style);
             $report->text($IncidentReport->occupation, 482,462,$font_style);
-            $report->text($IncidentReport->employer_name, 834,462,$font_style);
+            $report->text($IncidentReport->employer, 834,462,$font_style);
             $report->text($IncidentReport->contact, 1186,462,$font_style);
             $report->text($IncidentReport->location, 366,536,$font_style);
             $report->text($inci_date, 833,536,$font_style);
@@ -230,12 +271,44 @@ class IncidentReportController extends Controller
             }
 
             $desc_relevant_controls_string =  $this->strings_seperate($IncidentReport->desc_relevant_controls,'920');
-            $y = 1506;
+            $y = 1505;
             foreach($desc_relevant_controls_string as $i => $string){
                 $report->text($string, 142,$y,$font_style);
-                $y+=32;
+                $y+=30;
                 unset($this->result[$i]);
             }
+
+            $y = 1705;
+            foreach ($witness_details as $wd) {
+                $report->text($wd['name'], 133,$y,$font_style);
+                $report->text($wd['employer'], 651,$y,$font_style);
+                $report->text($wd['contact'], 1111,$y,$font_style);
+                $y+=45;
+            }
+
+            $report->text($IncidentReport->user->name, 285,1805,$font_style);
+            $report->text($IncidentReport->user->employer->name, 650,1805,$font_style);
+            $report->text($IncidentReport->user->detail->contact, 987,1805,$font_style);
+
+            $reported_at = \Carbon\Carbon::parse($IncidentReport->created_at)->format('M-d-Y H:i');
+            $report->text($reported_at, 1380,1805,$font_style);
+
+            if($IncidentReport->ext_auth_notify=='1')
+                $report->text('■', 610,1993,$sym_font_style);
+            if($IncidentReport->ext_auth_notify=='0')
+                $report->text('■', 744,1994,$sym_font_style);
+            
+            $report->text($IncidentReport->ext_auth, 522,2060,$font_style);
+
+            if($IncidentReport->investigation_required=='1')
+                $report->text('■', 1323,1985,$sym_font_style);
+            if($IncidentReport->investigation_required=='0')
+                $report->text('■', 1454,1984,$sym_font_style);
+
+            if($IncidentReport->investigation_type=='1')
+                $report->text('■', 1326,2048,$sym_font_style);
+            if($IncidentReport->investigation_type=='2')
+                $report->text('■', 1454,2048,$sym_font_style);
 
             // $path=public_path('/files/test.jpg');
             // $report->save($path,100);

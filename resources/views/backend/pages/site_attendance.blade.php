@@ -46,9 +46,7 @@
           <div class="search_form">
             <form autocomplete="off" role="form" action="{{route('site.attendance.search')}}" method="POST" enctype="multipart/form-data">
               @csrf
-
-              <label class="filter_label">Filter</label>
-
+              {{-- <label class="filter_label">Filter</label> --}}
               @php 
                 $search_arr = [
                   'User Name' => [

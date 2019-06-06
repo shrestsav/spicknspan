@@ -21,20 +21,6 @@
 <section class="content">
   <div class="row">
     <div class="col-md-12">
-      @if ($errors->any())
-          <div class="alert alert-danger">
-              @foreach ($errors->all() as $error)
-                  {{ $error }}<br>
-              @endforeach
-          </div>
-      @endif
-      @if (\Session::has('message'))
-        <div class="alert alert-success custom_success_msg">
-            {{ \Session::get('message') }}
-        </div>
-      @endif
-    </div>
-    <div class="col-md-12">
       <div class="box box-primary collapsed-box box-solid">
         <div class="box-header with-border">
           <h3 class="box-title">Create Incident Report</h3>
@@ -98,18 +84,10 @@
                       </div>
                     </td>
                     <td>
-                      @php 
-                        foreach($employer as $id => $name){
-                          $employer_id = $id;
-                          $employer_name = $name;
-                        }
-                      @endphp
                       <div class="form-group">
-                        <select name="employer_id" class="form-control">
-                          <option value="{{$employer_id}}" selected>{{$employer_name}}</option>
-                        </select>
+                        <input type="text" name="employer" class="form-control" required>
+                        <div class="help-block with-errors"></div>
                       </div>
-                      <input type="hidden" name="employer_name" value="{{$employer_name}}">
                     </td>
                     <td>
                       <div class="form-group">
@@ -263,7 +241,35 @@
                     <div class="help-block with-errors blah"></div>
                   </div>
                 @endforeach
-
+              </div>
+              <div class="form-group col-md-12">
+                <table class="table">
+                  <thead class="thead-dark">
+                    <tr>
+                      <th>Name of Witness</th>
+                      <th>Employer</th>
+                      <th>Contact Number</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @php
+                      $witness_details = ['name_of_witness','n_o_w_employer','n_o_w_contact'];
+                    @endphp
+                    @for($i=1;$i<=2;$i++)
+                      <tr>
+                        @foreach($witness_details as $wd)
+                          <td>
+                            <input type="text" name="{{$wd}}_{{$i}}" class="form-control">
+                          </td>
+                        @endforeach
+                      </tr>
+                    @endfor
+                  </tbody>
+                </table>
+              </div>
+              <div class="form-group col-md-12">
+                <label for="photos">Incident Proofs <small>(Photographs)</small></label><br>
+                <input type="file" name="photos[]" class="jfilestyle" multiple>
               </div>
             </div>
               
@@ -277,7 +283,7 @@
         
       </div>
     </div>
-
+    @if(count($incident_reports))
     <div class="col-md-12">
       <div class="box">
         <div class="box-header">
@@ -314,6 +320,7 @@
         </div>
       </div>
     </div>
+    @endif
   </div>
 </section>
 
@@ -363,4 +370,38 @@
 
   </script>
 
+<script type="text/javascript">
+  // $('body').on('change','input:radio[name="ext_auth_notify"]',function(e){
+  //   if ($(this).is(':checked') && $(this).val() == 1) {
+  //     $('.ext_auth').show();
+  //   }
+  //   else{
+  //     $('.ext_auth').hide();
+  //   }
+  // });
+
+  // $('body').on('change','input:radio[name="investigation_required"]',function(e){
+  //   if ($(this).is(':checked') && $(this).val() == 1) {
+  //     $('.investigation_type').show();
+  //   }
+  //   else{
+  //     $('.investigation_type').hide();
+  //   }
+  // });
+
+  $('body').on('click','.update_incident_status',function(e){
+    var datastring = $("#update_incident_status").serialize();
+    $.ajax({
+        type: 'POST',
+        url: SITE_URL + 'updateIncidentStatus',
+        data: datastring,
+        dataType: 'json'
+    }).done(function (response) {
+        console.log(response);
+        showNotify('success','Updated');
+    });
+  })
+
+
+</script>
 @endpush

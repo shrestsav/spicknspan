@@ -125,3 +125,7 @@ text-align: left;
 .filter_label{
   padding: 20px;
 }
+
+.table-borderless td, .table-borderless th {
+    border: none;
+}

@@ -61,4 +61,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(IncidentReport::class);
     }
+
+    public function employer()
+    {
+        return $this->belongsTo(User::class,'added_by','id');
+    }
 }
