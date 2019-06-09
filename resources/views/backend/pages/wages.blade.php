@@ -6,7 +6,7 @@
 <section class="content">
   <div class="row">
     <div class="col-md-12">
-      <div class="box box-primary collapsed-box box-solid">
+      <div class="box box-primary {{-- collapsed-box  --}}box-solid">
         <div class="box-header with-border">
           <h3 class="box-title">Set Employee Wage</h3>
           <div class="pull-right box-tools">
@@ -61,9 +61,11 @@
     <div class="col-md-12">
       @permission('import_export_excel')
         <div class="pull-right">
-          <a href="{{ route('export_to_excel',Route::current()->getName()) }}" class="export_to_excel">
-            <button class="btn btn-success">Export to Excel</button>
-          </a>
+          <form role="form" action="{{route('export.excel')}}" method="POST">
+            @csrf
+            <input type="hidden" name="type" value="wages">
+            <button type="submit" class="btn btn-success">Export to Excel</button>
+          </form>
         </div>
       @endpermission
       @if(Request::all())
@@ -116,23 +118,38 @@
               <th>Employee</th>
               <th>Client</th>
               <th>Hourly Rate ($)</th>
-              <th>Action</th>
+              {{-- <th>Action</th> --}}
             </tr>
             </thead>
             <tbody>
             @foreach($wages as $wage)
-              <tr data-wage_id='{{encrypt($wage->id)}}'>
+              <div class="dropdown-contextmenu" id="contextmenu_{{$wage->id}}" data-wage_id='{{encrypt($wage->id)}}'>
+                <a style="position: relative;"><i class="fa fa-user"></i>{{$wage->employee_name}}</a>
+                <hr style="margin-top: 0px; margin-bottom: 0px;">
+                <a href="javascript:;" class="btn btn-link edit_wage" title="Edit Wage">
+                  <i class="fa fa-pencil-square-o" aria-hidden="true"></i>Edit Wage
+                </a>
+                <a href="javascript:;" class="btn btn-link delete_wage" title="Delete Wage">
+                  <i class="fa fa-trash" aria-hidden="true"></i>Delete Wage
+                </a>
+                <form role="form" action="{{route('export.excel')}}" method="POST">
+                  @csrf
+                  <input type="hidden" name="type" value="wages">
+                  <a type="submit" class="btn btn-link"><i class="fa fa-file-excel-o" aria-hidden="true"></i>Export to Excel</a>
+                </form>
+              </div>
+              <tr data-wage_id='{{encrypt($wage->id)}}' class="contextmenurow" dataid="{{$wage->id}}">
                 <td>{{$wage->employee_name}}</td>
                 <td>{{$wage->client_name}}</td>
                 <td>{{$wage->hourly_rate}}$ / hr</td>
-                <td>
+{{--                 <td>
                   <a href="javascript:;" class="edit_wage">
                     <span class="action_icons"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></span>
                   </a>
                   <a href="javascript:;" class="delete_wage">
                     <span class="action_icons"><i class="fa fa-trash" aria-hidden="true"></i></span>
                   </a>
-                </td>
+                </td> --}}
 
               </tr>
             @endforeach
@@ -160,7 +177,7 @@
   });
 
   $('.delete_wage').on('click',function(){
-    var wage_id = $(this).parent().parent().data('wage_id');
+    var wage_id = $(this).parent().data('wage_id');
     swal({
     title: "Are you sure?",
     text: "Once deleted, you will not be able to recover this data!",
@@ -176,7 +193,7 @@
 
   $('.edit_wage').on('click',function(e){
       e.preventDefault();
-      var wage_id = $(this).parent().parent().data('wage_id');
+      var wage_id = $(this).parent().data('wage_id');
       $.ajax({
           type: 'POST',
           url: SITE_URL + 'editWages',

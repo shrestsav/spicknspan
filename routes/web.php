@@ -134,7 +134,7 @@ Route::middleware(['auth'])->group(function () {
 
 	});	
 	Route::middleware(['permission:import_export_excel'])->group(function () {
-		Route::get('/export_excel/{id}', 'CoreController@export_to_excel')->name('export_to_excel');
+		Route::post('/exportExcel', 'CoreController@export_to_excel')->name('export.excel');
 		Route::post('/import_excel', 'CoreController@import_from_excel')->name('import_from_excel');
 	});
 

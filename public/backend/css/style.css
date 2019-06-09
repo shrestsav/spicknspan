@@ -129,3 +129,38 @@ text-align: left;
 .table-borderless td, .table-borderless th {
     border: none;
 }
+
+/*Context Menu CSS*/
+.dropdown-content, .dropdown-contextmenu {
+    display: none;
+    top: 20px;
+    margin-left: 40px;
+    position: absolute;
+    padding: 10px 1px;
+    background-color: #f9f9f9;
+    min-width: 150px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a, .dropdown-contextmenu a {
+    padding: 10px 20px !important;
+    text-align: left;
+    color: black;
+    text-decoration: none;
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin: 0px;
+}
+
+.dropdown-content a i, .dropdown-contextmenu a i {
+    margin-right: 10px;
+}
+
+.dropdown-content a:hover, .dropdown-content a:active:hover, .dropdown-contextmenu a:hover, .dropdown-contextmenu a:active:hover  {
+    background-color: #eeeeee !important;
+    color: black;
+    text-decoration: none;
+}

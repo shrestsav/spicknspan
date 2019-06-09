@@ -186,6 +186,31 @@
   });
 
 </script>
+
+{{-- Context Menu JS --}}
+<script type="text/javascript">
+  window.addEventListener("contextmenu", e => {
+    e.preventDefault();
+  });
+
+  $('.contextmenurow').on('contextmenu',function(e){
+      let id=$(this).attr('dataid');
+      var position = $(this).position();
+      var cardHeight = $(".card").height();
+      var dialogHeight = $("#contextmenu_"+id).outerHeight();
+      var total = position.top + dialogHeight + 100;
+      $('.dropdown-contextmenu').hide();
+      $('#contextmenu_'+id).show();
+      $('#contextmenu_'+id).offset({left:e.pageX,top:e.pageY});
+      if(total>=cardHeight){
+        $('#contextmenu_'+id).offset({top:e.pageY-dialogHeight});
+      }
+  });
+
+  $(document).on('click',function(){
+      $('.dropdown-contextmenu').hide();
+  });
+</script>
 <!-- Bootstrap 3.3.7 -->
 <script src="{{ asset('backend/js/bootstrap.min.js') }}"></script>
 <!-- AdminLTE App -->

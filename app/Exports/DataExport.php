@@ -35,7 +35,7 @@ class DataExport implements FromCollection, WithHeadings, ShouldAutoSize, WithEv
     {
         return [
             AfterSheet::class    => function(AfterSheet $event) {
-                $cellRange = 'A1:W1'; // All headers
+                $cellRange = 'A1:AH1'; // All headers
                 $event->sheet->getDelegate()->getStyle($cellRange)->getFont()->setSize(14);
             },
         ];

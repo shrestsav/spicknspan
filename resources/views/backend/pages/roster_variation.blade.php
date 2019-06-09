@@ -13,20 +13,6 @@
 <section class="content">
   <div class="row">
     <div class="col-md-12">
-      @if ($errors->any())
-          <div class="alert alert-danger">
-              @foreach ($errors->all() as $error)
-                  {{ $error }}
-              @endforeach
-          </div>
-      @endif
-      @if (\Session::has('message'))
-        <div class="alert alert-success custom_success_msg">
-            {{ \Session::get('message') }}
-        </div>
-      @endif
-    </div>
-    <div class="col-md-12">
       <div class="box box-info">
         <div class="box-header">
           <h3 class="box-title">Variations Approval</h3>
@@ -35,6 +21,7 @@
         <table class="table">
           <thead>
             <tr>
+              <th>S.No</th>
               <th>Date</th>
               <th>Client Name</th>
               <th>Employee Name</th>
@@ -45,6 +32,9 @@
             </tr>
           </thead>
           <tbody>
+            @php
+              $count = 1;
+            @endphp
             @foreach($roster_variations as $r_variation)
               @if($r_variation->status==null)
                 @php
@@ -53,8 +43,8 @@
                     $attended_period = gmdate('H:i', $r_variation->attended_period);
                   }
                 @endphp
-
                 <tr>
+                  <td>{{$count}}</td>
                   <td>{{$r_variation->date}}</td>
                   <td>{{$r_variation->client_name}}</td>
                   <td>{{$r_variation->employee_name}}</td>
@@ -81,6 +71,9 @@
                   
                   </td>
                 </tr>
+                @php
+                  $count++;
+                @endphp
               @endif
             @endforeach
          

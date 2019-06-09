@@ -78,9 +78,24 @@
 <section class="content">
   <div class="row">
     <div class="col-md-12">
+      @permission('import_export_excel')
+        <div class="pull-right">
+          <form role="form" action="{{route('export.excel')}}" method="POST">
+            @csrf
+            <input type="hidden" name="type" value="roster">
+            <input type="hidden" name="year_month" value="{{$year.'-'.$month}}">
+            <input type="hidden" name="employee_id" value="{{Request::input('search_by_employee_id')}}">
+            <input type="hidden" name="client_id" value="{{Request::input('search_by_client_id')}}">
+            <button type="submit" class="btn btn-success">Export to Excel</button>
+          </form>
+        </div>
+      @endpermission
+
       @if(Request::all())
         <a href="{{url('/roster')}}"><button class="btn btn-primary">Go Back</button></a>
       @endif
+    </div>
+    <div class="col-md-12">
       <div class="box box-primary">
         <div class="box-header with-border">
           <div class="box-header">

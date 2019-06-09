@@ -26,12 +26,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
   label.checkbox.mark_default {
     padding-left: 20px;
   }
-  .export_to_excel{
-    position: absolute;
-    top: 7px;
-    right: 227px;
-    z-index: 1000;
-  }
 </style>
 
 @endpush
@@ -225,39 +219,68 @@ elseif(Route::current()->getName() == 'user_client.index'){
       </div>
     </div>
     <div class="col-md-12">
+      @permission('import_export_excel')
+        <div class="pull-right">
+          <form role="form" action="{{route('export.excel')}}" method="POST">
+            @csrf
+            <input type="hidden" name="type" value="{{$user_type}}">
+            <button type="submit" class="btn btn-success">Export to Excel</button>
+          </form>
+        </div>
+      @endpermission
+    </div>
+    <div class="col-md-12">
       <div class="box"> 
-        <a href="{{ route('export_to_excel',Route::current()->getName()) }}" class="export_to_excel">
-          <button class="btn btn-success">Export to Excel</button>
-        </a>
         <div class="box-body table-responsive">
-          <table id="users_table" class="table table-bordered table-striped">
+          <table id="users_table" class="table table-bordered table-hover table-striped">
             <thead>
             <tr>
+              <th>S.No</th>
               <th>Name</th>
               <th>Email</th>
               <th>Contact No</th>
               <th>Hourly Rate</th>
               <th>Start Date</th>
               <th>Documents</th>
-              <th>Action</th>
+              {{-- <th>Action</th> --}}
             </tr>
             </thead>
             <tbody>
+            @php
+              $c = 1;
+            @endphp
             @foreach($users as $user)
-              <tr>
+             <div class="dropdown-contextmenu" id="contextmenu_{{$user->id}}">
+              <a style="position: relative;"><i class="fa fa-user"></i> {{$user->name}}</a>
+              <hr style="margin-top: 0px; margin-bottom: 0px;">
+              <a href="#" class="btn btn-link view_user_details" data-user-id="{{$user->id}}" title="View All Details">
+                <i class="fa fa-eye" aria-hidden="true"></i>View Details
+              </a>
+              <a href="{{route('user.edit',$user->id)}}" class="btn btn-link" title="Edit Details">
+                <i class="fa fa-pencil-square-o" aria-hidden="true"></i>Edit Details
+              </a>
+              @if(Route::current()->getName() == 'user_employee.index')
+              <a href="javascript:;" class="btn btn-link delete_user" data-user_id='{{$user->id}}' title="Delete Employee">
+                <i class="fa fa-trash" aria-hidden="true"></i>Delete
+              </a>
+              @endif
+            </div>
+              <tr class="contextmenurow" dataid="{{$user->id}}">
+                <td>{{$c}}</td>
                 <td>{{$user->name}}</td>
                 <td>{{$user->email}}</td>
                 <td>{{$user->contact}}</td>
                 <td>{{$user->hourly_rate}} @if($user->currency){{config('setting.currencies')[$user->currency]}}@endif</td>
                 <td>{{$user->employment_start_date}}</td>
                 @php
+                  $c++;
                   $docs = json_decode($user->documents, true);
                   $count = 'No Docs';
                   if($docs)
                     $count = count($docs);
                 @endphp
                 <td>{{$count}}</td>
-                <td>
+{{--                 <td>
                   <a href="#" class="view_user_details" data-user-id="{{$user->id}}">
                     <span class="action_icons"><i class="fa fa-eye" aria-hidden="true"></i></span>
                   </a>
@@ -269,7 +292,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
                     <span class="action_icons"><i class="fa fa-trash" aria-hidden="true"></i></span>
                   </a>
                   @endif
-                </td>
+                </td> --}}
               </tr>
             @endforeach
             </tbody>

@@ -23,19 +23,18 @@
 <section class="content">
   <div class="row">
     <div class="col-md-12">
-
       @if(Request::all())
         <a href="{{url('/siteAttendance')}}"><button class="btn btn-primary">Show All</button></a>
       @endif
-
       @permission('import_export_excel')
         <div class="pull-right">
-          <a href="{{ route('export_to_excel',Route::current()->getName()) }}" class="export_to_excel">
-            <button class="btn btn-success">Export to Excel</button>
-          </a>
+          <form role="form" action="{{route('export.excel')}}" method="POST">
+            @csrf
+            <input type="hidden" name="type" value="site_attendance">
+            <button type="submit" class="btn btn-success">Export to Excel</button>
+          </form>
         </div>
       @endpermission
-
     </div>
     <div class="col-md-12">
       <div class="box">
