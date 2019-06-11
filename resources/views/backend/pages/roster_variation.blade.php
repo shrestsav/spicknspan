@@ -59,14 +59,14 @@
                   </td>
                   <td>
                     @if($r_variation->variation)
-                      <form action="{{ url('/roster-variation/accept/').'/'.$r_variation->id.'/'.$r_variation->date}}" method="POST" style="display: inline-block;">
-                        {{ csrf_field() }}
-                        <button type="submit" class="btn btn-success">Approve</button>
-                      </form>
-                      <form action="{{ url('/roster-variation/decline/').'/'.$r_variation->id.'/'.$r_variation->date}}" method="POST" style="display: inline-block;">
-                        {{ csrf_field() }}
-                        <button type="submit"class="btn btn-warning">Decline</button>
-                      </form>
+                      {{-- <form action="{{ url('/roster-variation/accept/').'/'.$r_variation->id.'/'.$r_variation->date}}" method="POST" style="display: inline-block;"> --}}
+                        {{-- {{ csrf_field() }} --}}
+                        <button type="button" class="btn btn-success approve_variation" data-timetable-id="{{$r_variation->timetable_id}}">Approve</button>
+                      {{-- </form> --}}
+                      {{-- <form action="{{ url('/roster-variation/decline/').'/'.$r_variation->id.'/'.$r_variation->date}}" method="POST" style="display: inline-block;"> --}}
+                        {{-- {{ csrf_field() }} --}}
+                        <button type="button"class="btn btn-warning decline_variation" data-timetable-id="{{$r_variation->timetable_id}}">Decline</button>
+                      {{-- </form> --}}
                     @endif
                   
                   </td>
@@ -96,6 +96,8 @@
               <th>Attended Period</th>
               <th>Variation</th>
               <th>Status</th>
+              <th>Approved By</th>
+              <th>Remarks</th>
             </tr>
             <tr class="search">
                 <td>Date</td>
@@ -105,6 +107,8 @@
                 <td>Attended Period</td>
                 <td>Variation</td>
                 <td>Status</td>
+                <td>Approved By</td>
+                <td>Remarks</td>
             </tr>
           </thead>
           <tbody>
@@ -137,6 +141,8 @@
                       Declined
                     @endif
                   </td>
+                  <td>{{$r_variation->approved_by_name}}</td>
+                  <td>{{$r_variation->remarks}}</td>
                 </tr>
               @endif
             @endforeach
@@ -200,7 +206,66 @@
             }
         } );
     } );
-} );
+
+});
+</script>
+
+<script type="text/javascript">
+
+  $('.approve_variation').on('click',function(e){
+    e.preventDefault();
+    var timetable_id = $(this).data('timetable-id');
+    variationStatus('approveVariation',timetable_id);
+  });
+
+  $('.decline_variation').on('click',function(e){
+    e.preventDefault();
+    var timetable_id = $(this).data('timetable-id');
+    variationStatus('declineVariation',timetable_id);
+  });
+
+  function variationStatus(route,id){
+    swal("Remarks", {
+      content: "input",
+      button: {
+        text: "OK",
+        closeModal: false,
+      },
+    })
+    .then((value) => {
+      if (!value) throw null;
+      $.ajax({
+        type: 'POST',
+        url: SITE_URL + route,
+        data: {
+          timetable_id: id,
+          remarks: value,
+        },
+        dataType: 'json',
+        success:function(data) {
+          console.log(data);
+          showNotify('success',data);
+          location.reload();
+        },
+        error: function(response){
+          $.each(response.responseJSON, function(index, val){
+            console.log(index+":"+val);
+            showNotify('danger',val); 
+          });
+        }
+      });
+
+    }).catch(err => {
+      if (err) {
+        swal("Oh noes!", "The AJAX request failed!", "error");
+      } else {
+        swal.stopLoading();
+        swal.close();
+      }
+    });
+
+    
+  }
 </script>
   
 @endpush

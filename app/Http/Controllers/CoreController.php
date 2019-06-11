@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Attendance;
 use App\User;
 use App\UserDetail;
+use App\UserSetting;
 use App\SiteAttendance;
 use App\Roster;
 use App\Wages;
@@ -135,6 +136,22 @@ class CoreController extends Controller
     return view('backend.pages.sys_settings');
   }
 
+  public function ajax_set_sidebar(Request $request)
+  {
+    // Check if already exists
+    if(count(UserSetting::where('user_id',$request->id)->get())){
+        UserSetting::where('user_id',$request->id)->update(['theme_sidebar'=>$request->theme_sidebar]);
+    }
+    else{
+        $theme_sidebar = new UserSetting;
+        $theme_sidebar->user_id = $request->id;
+        $theme_sidebar->theme_sidebar = $request->theme_sidebar;
+        $theme_sidebar->save();
+    }
+    // Update Session
+    session(['theme_sidebar' => $request->theme_sidebar]);
+    return 'Updated Successfully';
+  }
 
   /**
    * Returns all days of perticular month

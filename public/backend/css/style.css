@@ -100,6 +100,17 @@ text-align: left;
   width: 40%;
 }
 
+.tiny_modal_dialog{
+  width: 25%;
+}
+.modal-header{
+  font: 102px ;
+  padding: 5px 15px;
+  text-align: center;
+  background: #00a65a;
+  color: #fff;
+}
+
 .fa-window-close:hover,.document_container input:hover, .room_check:hover, .print_qr:hover{
   cursor: pointer;
   color: red;
@@ -163,4 +174,9 @@ text-align: left;
     background-color: #eeeeee !important;
     color: black;
     text-decoration: none;
+}
+
+/*Table CSS*/
+table:hover{
+  cursor: pointer;
 }

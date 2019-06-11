@@ -136,7 +136,7 @@
 
   $.widget.bridge('uibutton', $.ui.button);
 
-// SET AJAX CSRF TOKEN
+  // SET AJAX CSRF TOKEN
   $.ajaxSetup({
     headers: {
       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -180,7 +180,6 @@
          theme_sidebar: sidebar_state
       },
       success: function(response){
-         console.log(response);
       }
     });
   });
@@ -189,9 +188,11 @@
 
 {{-- Context Menu JS --}}
 <script type="text/javascript">
-  window.addEventListener("contextmenu", e => {
-    e.preventDefault();
-  });
+  @if(env('CONTEXT_MENU',false))
+    window.addEventListener("contextmenu", e => {
+      e.preventDefault();
+    });
+  @endif
 
   $('.contextmenurow').on('contextmenu',function(e){
       let id=$(this).attr('dataid');

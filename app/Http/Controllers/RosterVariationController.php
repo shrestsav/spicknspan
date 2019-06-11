@@ -22,10 +22,14 @@ class RosterVariationController extends Controller
         //ShreStsaV
         $r_date = [];
         $roster_variations = Roster::select('rosters.id',
+                                            'rt.id as timetable_id',
                                             'rt.status',
+                                            'rt.approved_by',
+                                            'rt.remarks',
                                             'rt.date',
                                             'rt.start_time',
                                             'rt.end_time',
+                                            'approved_by.name as approved_by_name',
                                             'rosters.employee_id',
                                             'rosters.client_id',
                                             'client.name as client_name',
@@ -33,6 +37,7 @@ class RosterVariationController extends Controller
                                     ->join('roster_timetables as rt','rt.roster_id','=','rosters.id')
                                     ->join('users as employee','rosters.employee_id','=','employee.id')
                                     ->join('users as client','rosters.client_id','=','client.id')
+                                    ->leftJoin('users as approved_by','rt.approved_by','=','approved_by.id')
                                     ->where('rt.start_time','!=',null)
                                     ->where('rt.end_time','!=',null)
                                     ->get();
@@ -157,20 +162,30 @@ class RosterVariationController extends Controller
         //
     }
 
-    public function statusAccept(Request $request, $id, $date)
+    public function approveVariation(Request $request)
     {
-        $approve = RosterTimetable::where('roster_id',$id)->whereDate('date',$date)->update(['status' => 1, 'approved_by' => Auth::id()]);
+        $approve = RosterTimetable::where('id',$request->timetable_id)
+                                  ->update([
+                                    'status' => 1, 
+                                    'approved_by' => Auth::id(),
+                                    'remarks' => $request->remarks,
+                                  ]);
         if($approve)
-            return redirect()->back()->with('message', 'Variation Approved');
+            return json_encode('Variation Approved');
 
         return redirect()->back()->with('error', 'Failed');
     }
 
-    public function statusDecline(Request $request, $id, $date)
+    public function declineVariation(Request $request)
     {
-        $decline = RosterTimetable::where('roster_id',$id)->whereDate('date',$date)->update(['status'=>2, 'approved_by' => Auth::id()]);
+        $decline = RosterTimetable::where('id',$request->timetable_id)
+                                  ->update([
+                                        'status'=>2, 
+                                        'approved_by' => Auth::id(),
+                                        'remarks' => $request->remarks,
+                                    ]);
         if($decline)
-            return redirect()->back()->with('message', 'Variation Decline');
+            return json_encode('Variation Declined');
 
         return redirect()->back()->with('error', 'Failed');
     }

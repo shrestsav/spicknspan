@@ -160,12 +160,28 @@
             <tbody class="roster-list">
             @foreach($rosters as $client_id => $roster_by_clients)
               @foreach($roster_by_clients as $emp_id => $emp_rosters)
-              <tr style="text-align: center;" role="row" class="" id="" data-roster-id="{{$emp_rosters[0]->id}}" data-row-type="old_row">
+              
+              @php 
+                $r_id = $emp_rosters[0]->id;
+                $emp_name = $emp_rosters[0]->employee->name;
+                $emp_mail = $emp_rosters[0]->employee->email;
+              @endphp
+              <div class="dropdown-contextmenu" id="contextmenu_{{$r_id}}">
+                <a style="position: relative;"><i class="fa fa-user"></i> {{$emp_name}}</a>
+                <hr style="margin-top: 0px; margin-bottom: 0px;">
+                <a href="javascript:;" class="btn btn-link email_employee" data-employee-mail="{{$emp_mail}}" data-employee-name="{{$emp_name}}" title="Notify Employee of Roster Update">
+                  <i class="fa fa-envelope" aria-hidden="true"></i>Notify Employee
+                </a>
+                {{--<a href="{{route('user.edit',$user->id)}}" class="btn btn-link" title="Edit Details">
+                  <i class="fa fa-pencil-square-o" aria-hidden="true"></i>Edit Details
+                </a> --}}
+              </div>
+              <tr class="contextmenurow" dataid="{{$r_id}}" style="text-align: center;" role="row" class="" id="" data-roster-id="{{$r_id}}" data-row-type="old_row">
                 <td>
-                    <input type="checkbox" class="sub_chk">
+                  <input type="checkbox" class="sub_chk">
                 </td>
                 <td>
-                  {{$emp_rosters[0]->employee->name}}
+                  {{$emp_name}}
                 </td>
                 <td>
                   {{$emp_rosters[0]->client->name}}
@@ -184,6 +200,7 @@
                         $end_time = $roster->end_time;
                       }
                     }
+
                     $status = 0;
                     $leave_type = 0;
                     $full_day = \Carbon\Carbon::parse($year.'-'.$month.'-'.$day);
@@ -227,6 +244,12 @@
   </div>
 </section>
 
+@include('backend.modals.modal', [
+            'modalId' => 'notifyEmailModal',
+            'modalFile' => '__modal_body',
+            'modalTitle' => __('Notify Email'),
+            'modalSize' => 'tiny_modal_dialog',
+        ])
 
 
 
@@ -256,7 +279,7 @@
     }
     return days;
   }
-// console.log(getMonths('Mar',2011))
+  // console.log(getMonths('Mar',2011))
 
   $('body').on('change','.time_from',function(e){
     e.preventDefault();
@@ -349,7 +372,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-confirmation/1.0.5/bootstrap-confirmation.min.js"></script>
 <script type="text/javascript">
 
-  $(function () {
     var arr = [1,2,3,4,5];
     var full_date = moment().format('YYYY-MM-D');
     var year_month = moment().format('YYYY-MM');
@@ -377,7 +399,7 @@
         $('.week_3').hide();
         $('.week_4').hide();
         $('.week_5').hide();
-      }
+    }
       
     // Week Switch
     $('.week_selector').on('change', function(e) {
@@ -558,12 +580,60 @@
       $('.delete_all, #addrow').prop('disabled',false);
       $(this).html('DONE').removeClass('btn-danger edit_rosters').addClass('btn-success done_rosters');
     });
+
     $('body').on('click','.done_rosters',function(e){
       $('.time_from, .time_to').prop('readonly',true);
       $('.delete_all, #addrow').prop('disabled',true);
       $(this).html('EDIT').removeClass('btn-success done_rosters').addClass('btn-danger edit_rosters');
     });
-  });
+
+    $('body').on('click','.email_employee',function(e){
+      e.preventDefault();
+      var emp_mail = $(this).data('employee-mail');
+      var emp_name = $(this).data('employee-name');
+      var html = '<div class="row"><div class="col-md-12 notify_email_container">';
+      html += '<input class="form-control notify_email" type="email" name="notify_email" value="'+emp_mail+'"></div>';
+      html += '<br><br>';
+      html += '<div class="col-md-12 text-center"><button type="button" class="btn btn-info roster_notify">Notify</button></div>';
+      html += '</div>';
+
+      detailModel = $('#notifyEmailModal');
+      detailModel.find('.modal-content .modal-title').html(emp_name);
+      detailModel.find('.modal-body').html(html);
+      detailModel.modal('show');
+    });
+
+    $('body').on('click','.roster_notify',function(e){
+      e.preventDefault();
+      var cont = $(this).parent().siblings('.notify_email_container').children('.notify_email');
+      var email = cont.val();
+      var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+      if(email.match(mailformat)){
+        $.ajax({
+          type: 'POST',
+          url: SITE_URL + 'rosterNotify',
+          data: {
+            'email': email,
+            'year_month': sel_year_month
+          },
+          dataType: 'json',
+          success:function(data) {
+            console.log(data);
+            showNotify('success',data);
+          },
+          error: function(response){
+            $.each(response.responseJSON, function(index, val){
+              console.log(index+":"+val);
+              showNotify('danger',val); 
+            });
+          }
+        });
+      }
+      else{
+        alert("You have entered an invalid email address!");
+        cont.focus();
+      }
+    });
 </script>
 
 <script type="text/javascript">

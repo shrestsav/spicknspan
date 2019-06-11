@@ -36,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('assignSupportTask','HomeController@assignSupportTask')->name('assignSupportTask');
 	});
 	Route::get('/', 'HomeController@index')->name('dashboard');
+	Route::post('set_sidebar','CoreController@ajax_set_sidebar');
 	Route::get('/check_in_out', 'AttendanceController@index')->name('attendance.index');
 	Route::get('/attendance', 'AttendanceController@list')->name('attendance.list');
 	Route::post('/attendance', 'AttendanceController@list')->name('attendance.search');
@@ -96,6 +97,8 @@ Route::middleware(['auth'])->group(function () {
 			Route::get('/systemSettings', 'CoreController@sysIndex')->name('system.index');
 		});
 
+		Route::post('/rosterNotify', 'RosterController@rosterNotify')->name('roster.notify');
+
 		Route::get('/clients', 'UserController@index')->name('user_client.index');
 		Route::post('/add_user', 'UserController@store')->name('user.store');
 		Route::get('/edit_user/{id}', 'UserController@edit')->name('user.edit');
@@ -118,8 +121,8 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('/ajaxCheckIfRosterExists','RosterController@ajaxCheckIfRosterExists')->name('roster.check');
 
 		Route::get('/roster-variation','RosterVariationController@index')->name('roster_variation.index');
-		Route::post('/roster-variation/accept/{id}/{date}','RosterVariationController@statusAccept')->name('roster_variation.approve_status');
-		Route::post('/roster-variation/decline/{id}/{date}','RosterVariationController@statusDecline')->name('roster_variation.decline_status');
+		Route::post('approveVariation','RosterVariationController@approveVariation')->name('variation.approve');
+		Route::post('declineVariation','RosterVariationController@declineVariation')->name('variation.decline');
 
 		Route::get('/site','SiteController@index')->name('site.index');
 		Route::post('/site','SiteController@store')->name('site.store');

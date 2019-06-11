@@ -6,7 +6,7 @@
                      <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h2 class="modal-title">{{ $modalTitle }}</h2>
+                    <h3 class="modal-title">{{ $modalTitle }}</h3>
                    
                 </div>
                 @include('backend.modals.includes.' . $modalFile)

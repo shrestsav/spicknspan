@@ -4,7 +4,10 @@
         <img src="{{ asset('backend/img/company-logo.png') }}" width="200px;">
       </div>
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><span class="logo-mini_green">T</span><b>&</b><span class="logo-mini_blue">C</span></span>
+      <span class="logo-mini">
+        <img src="{{ asset('backend/img/company-logo-small.png') }}" height="40px">
+        {{-- <span class="logo-mini_green">T</span><b>&</b><span class="logo-mini_blue">C</span> --}}
+      </span>
       <!-- logo for regular state and mobile devices -->
       {{-- <span class="logo-lg">SPICK <b>N</b> SPAN</span> --}}
     </a>

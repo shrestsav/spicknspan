@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\sendMail;
 
 class RosterController extends Controller
 {
@@ -23,6 +25,7 @@ class RosterController extends Controller
      */
     public function index(Request $request)
     {
+        // I think Roster maa Eager loading garyo bhaney load kam parla
         if($request->year_month){
             $year_month = explode('-', $request->year_month);
             $year = $year_month[0];
@@ -325,6 +328,33 @@ class RosterController extends Controller
             return response()->json(['error'=>'Roster Already Exists for selected User and Client for this month, Try editing existing Record Instead'],401);
         else
             return response()->json(['success'=>'Safe to Proceed']);
+    }
+
+    public function rosterNotify(Request $request)
+    {
+        $rule = [
+            'email' => 'required|email',
+        ];
+        $msg = [
+            'email.required' => 'Email Missing',
+            'email.email' => 'Email Format Error',
+        ];
+
+        $validate = Validator::make($request->all(), $rule, $msg);
+        
+        if($validate->fails()){
+            return response($validate->errors(),401);
+        }
+
+        $mailData = [
+            'email_type' => 'rosterNotify',
+            'username'   => $request['email'],
+            'subject'    => 'Roster Update Notification',
+            'message'    => 'Your Roster has been updated for the month of '.$request["year_month"].' by your employer, Please check your updated roster from your dashboard.',
+        ];
+
+        Mail::send(new sendMail($mailData));  
+        return json_encode('Employee has been Notified');
     }
 
 }

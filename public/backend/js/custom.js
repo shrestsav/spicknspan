@@ -1,5 +1,10 @@
 $(document).ready(function() {
-    
+    // $('.modal').on('show.bs.modal', function (e) {
+      // $('.modal .modal-dialog').addClass('modal-dialog  zoomIn  animated faster');
+    // })
+    // $('.modal').on('hide.bs.modal', function (e) {
+    //   $('.modal .modal-dialog').addClass('modal-dialog  zoomOut  animated');
+    // })
     // Profile Picture JS
     var readURL = function(input) {
         if (input.files && input.files[0]) {

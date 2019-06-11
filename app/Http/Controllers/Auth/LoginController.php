@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Auth;
 use Socialite;
 use App\User;
+use App\UserSetting;
 
 class LoginController extends Controller
 {
@@ -49,9 +50,18 @@ class LoginController extends Controller
 
         if ($this->attemptLogin($request)) {
 
-            //Set timezone as session
+            //Set timezone and usersetting in session
+            $userSetting = UserSetting::where('user_id',Auth::user()->id)->first();
+            if($userSetting)
+                $theme_sidebar = $userSetting->theme_sidebar;
+            else
+                $theme_sidebar = '';
+            
             $timezone = Auth::user()->timezone;
-            session(['timezone' => $timezone]);
+            session([
+                'timezone' => $timezone, 
+                'theme_sidebar' => $theme_sidebar
+            ]);
 
             return $this->sendLoginResponse($request);
         }

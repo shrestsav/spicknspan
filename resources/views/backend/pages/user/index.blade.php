@@ -265,35 +265,35 @@ elseif(Route::current()->getName() == 'user_client.index'){
               </a>
               @endif
             </div>
-              <tr class="contextmenurow" dataid="{{$user->id}}">
-                <td>{{$c}}</td>
-                <td>{{$user->name}}</td>
-                <td>{{$user->email}}</td>
-                <td>{{$user->contact}}</td>
-                <td>{{$user->hourly_rate}} @if($user->currency){{config('setting.currencies')[$user->currency]}}@endif</td>
-                <td>{{$user->employment_start_date}}</td>
-                @php
-                  $c++;
-                  $docs = json_decode($user->documents, true);
-                  $count = 'No Docs';
-                  if($docs)
-                    $count = count($docs);
-                @endphp
-                <td>{{$count}}</td>
-{{--                 <td>
-                  <a href="#" class="view_user_details" data-user-id="{{$user->id}}">
-                    <span class="action_icons"><i class="fa fa-eye" aria-hidden="true"></i></span>
-                  </a>
-                  <a href="{{route('user.edit',$user->id)}}">
-                    <span class="action_icons"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></span>
-                  </a>
-                  @if(Route::current()->getName() == 'user_employee.index')
-                  <a href="javascript:;" class="delete_user" data-user_id='{{$user->id}}'>
-                    <span class="action_icons"><i class="fa fa-trash" aria-hidden="true"></i></span>
-                  </a>
-                  @endif
-                </td> --}}
-              </tr>
+            <tr class="contextmenurow" dataid="{{$user->id}}">
+              <td>{{$c}}</td>
+              <td>{{$user->name}}</td>
+              <td>{{$user->email}}</td>
+              <td>{{$user->contact}}</td>
+              <td>{{$user->hourly_rate}} @if($user->currency){{config('setting.currencies')[$user->currency]}}@endif</td>
+              <td>{{$user->employment_start_date}}</td>
+              @php
+                $c++;
+                $docs = json_decode($user->documents, true);
+                $count = 'No Docs';
+                if($docs)
+                  $count = count($docs);
+              @endphp
+              <td>{{$count}}</td>
+              {{--<td>
+                <a href="#" class="view_user_details" data-user-id="{{$user->id}}">
+                  <span class="action_icons"><i class="fa fa-eye" aria-hidden="true"></i></span>
+                </a>
+                <a href="{{route('user.edit',$user->id)}}">
+                  <span class="action_icons"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></span>
+                </a>
+                @if(Route::current()->getName() == 'user_employee.index')
+                <a href="javascript:;" class="delete_user" data-user_id='{{$user->id}}'>
+                  <span class="action_icons"><i class="fa fa-trash" aria-hidden="true"></i></span>
+                </a>
+                @endif
+              </td> --}}
+            </tr>
             @endforeach
             </tbody>
           </table>
