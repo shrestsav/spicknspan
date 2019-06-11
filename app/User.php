@@ -7,6 +7,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Zizaco\Entrust\Traits\EntrustUserTrait;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Entrust;
+use Auth;
 
 class User extends Authenticatable
 {
@@ -72,5 +74,40 @@ class User extends Authenticatable
         $client_ids = json_decode($this->client_ids);
         $clients =  User::whereIn('id',$client_ids)->get();
         return $clients;
+    }
+
+    public function employeeList()
+    {
+        $employees = $this->whereHas('roles', function ($query) {
+                                $query->where('name', '=', 'employee')
+                                      ->orWhere('name', '=', 'superAdmin')
+                                      ->orWhere('name', '=', 'contractor');
+                            });
+
+        if(Entrust::hasRole(['employee'])){
+          $employees->where('id','=',Auth::id());
+        }
+        elseif(Entrust::hasRole(['contractor'])){
+          $employees->where('added_by','=',Auth::id());
+        }
+        return $employees->get();
+    }
+
+    public function clientList()
+    {
+        $clients = $this->whereHas('roles', function ($query) {
+                          $query->where('name', '=', 'client');
+                       });
+
+        if(Entrust::hasRole(['contractor'])){
+            $clients->where('added_by','=',Auth::id());
+        }
+        elseif(Entrust::hasRole(['employee'])){
+            $client_ids  = json_decode(Auth::user()->client_ids);
+            if($client_ids)
+                $clients->whereIn('id',$client_ids);
+        }
+
+        return $clients->get();
     }
 }

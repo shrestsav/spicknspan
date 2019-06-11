@@ -21,6 +21,15 @@ use Carbon\Carbon;
 class AttendanceController extends Controller
 {
     /**
+     * @var User
+     */
+    private $user;
+
+    public function __construct(User $user){
+        $this->user = $user;
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -29,21 +38,7 @@ class AttendanceController extends Controller
     {
         //Here, Condition is , if contractors or admin goes to check in out page then they will be displayed with their added clients whereas if employees goes in checkin out page then they will be displayed with their assigned clients only
 
-        $clients = User::whereHas('roles', function ($query) {
-                                  $query->where('name', '=', 'client');
-                               });
-
-        if(Entrust::hasRole(['contractor'])){
-          //Retrieve all clients added by Contractors
-          $clients->where('added_by','=',Auth::id());
-        }
-        elseif(Entrust::hasRole(['employee'])){
-          $client_ids  = json_decode(Auth::user()->client_ids);
-          if($client_ids)
-            $clients->whereIn('id',$client_ids);
-        }
-        
-        $clients = $clients->get();
+        $clients = $this->user->clientList();
 
         $now_converted = \Carbon\Carbon::now()->timezone(Auth::user()->timezone)->format('Y-m-d');
         $atten_three_days = Attendance::where('employee_id',Auth::id())

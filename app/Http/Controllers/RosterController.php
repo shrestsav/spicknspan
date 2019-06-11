@@ -19,6 +19,15 @@ use App\Mail\sendMail;
 class RosterController extends Controller
 {
     /**
+     * @var User
+     */
+    private $user;
+
+    public function __construct(User $user){
+        $this->user = $user;
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -38,15 +47,6 @@ class RosterController extends Controller
 
         $all_days = $this->dates_month($month,$year);
 
-        $employees = User::whereHas('roles', function ($query) {
-                                $query->where('name', '=', 'employee')
-                                      ->orWhere('name', '=', 'superAdmin');
-                            });
-                        
-        $clients = User::whereHas('roles', function ($query) {
-                            $query->where('name', '=', 'client');
-                        });
-
         // This is used for pagination of roster as direct pagination on rosters query is not practical for this case, see the code and you'll get it
         $customPaginate = Roster::where('full_date','=',$year.'-'.$month);
 
@@ -55,12 +55,9 @@ class RosterController extends Controller
         if($request->search_by_client_id)
             $customPaginate->where('client_id','=',$request->search_by_client_id);
         if(Entrust::hasRole('contractor')){
-            $clients->where('users.added_by','=',Auth::id());
-            $employees->where('users.added_by','=',Auth::id());
             $customPaginate->where('added_by','=',Auth::id());
         }
         if(Entrust::hasRole('employee')){
-            $employees->where('id','=',Auth::id());
             $customPaginate->where('employee_id','=',Auth::id());
         }
         $customPaginate = $customPaginate->orderBy('created_at','desc')->simplePaginate(config('setting.rows'));
@@ -84,14 +81,10 @@ class RosterController extends Controller
         
         $leaves = LeaveRequest::where('status',1)->get();
 
-        $employees = $employees->get();
-        $clients = $clients->get();
+        $employees = $this->user->employeeList();
+        $clients = $this->user->clientList();
         $rosters = $rosters->get();
         $rosters = $rosters->groupBy(['client_id','employee_id']);
-
-        if(Entrust::hasRole('employee')){
-            $clients = Auth::user()->clients(); 
-        }
 
         return view('backend.pages.roster',compact('rosters','employees', 'clients','leaves','all_days','year','month','customPaginate'));
     }
@@ -121,90 +114,7 @@ class RosterController extends Controller
      */
     public function store(Request $request)
     {
-        //Not in use
-        $j = 0;
-        $x = 0;
-        $full_dates = '';
-
-        $arr_employee_id   = $request['employee_id'];
-        $arr_client_id     = $request['client_id'];
-        $full_date         = $request['full_date_add'];
-
-        $month_part        = explode('-', $full_date);
-        $month             = $month_part[1];
-
-        if(($month == '01') || ($month == '03') || ($month == '05') || ($month == '07') || ($month == '08') || ($month == '10') || ($month == '12')){
-            $k = 31;
-        }
-        elseif(($month == '04') || ($month == '06') || ($month == '09') || ($month == '11')){
-            $k = 30;
-        }
-        elseif($month == '02'){
-            $k = 28;
-        }
-
-        if(empty($arr_employee_id)){
-            return redirect()->back()->with('error', 'No any rows to add/update.');
-        }
-
-        foreach ($arr_employee_id as $emp_id) {
-            //check if the same data is added already
-            $check  = DB::table('rosters')
-                            ->where('rosters.employee_id', '=', $emp_id)
-                            ->where('rosters.client_id', '=', $arr_client_id[$j])
-                            ->where('rosters.full_date', '=', $full_date)
-                            ->get();
-            $check  = json_decode($check, true);
-
-            //add the data if it is new
-            if(empty($check)){
-                echo 'new record';
-
-                Roster::create(['employee_id'=> $emp_id,'client_id'=>$arr_client_id[$j],'full_date'=>$full_date,'added_by'=>Auth::id()]);
-                $last_id = DB::getPdo()->lastInsertId();
-
-                for ($i = 1; $i <= $k; $i++) {
-                    $start_time    = $request['start_time_'.$i];
-                    $end_time      = $request['end_time_'.$i];
-                    
-                    $full_dates  = \Carbon\Carbon::parse($full_date.'-'.$i);
-                    $full_dates  = $full_dates->toDateString();
-
-                    $roster_arr = [
-                        'roster_id'    => $last_id,
-                        'full_date'     => $full_dates,
-                        'start_time'    => $request['start_time_'.$i],
-                        'end_time'      => $request['end_time_'.$i]
-                    ];
-                    RosterTimetable::create( $roster_arr);
-                }
-            }
-            else{
-                //edit the current data
-                $old_roster_id = $request['old_roster_id'];
-                $roster_id     = $old_roster_id[$x];
-                echo 'old record';
-
-                for ($i = 1; $i <= $k; $i++) {
-
-                    $start_time    = $request['start_time_'.($j)][$i-'1'];
-                    $end_time      = $request['end_time_'.($j)][$i-'1'];
-
-
-                    $full_dates  = \Carbon\Carbon::parse($full_date.'-'.$i);
-                    $full_dates  = $full_dates->toDateString();
-
-
-                    
-                    RosterTimetable::where('roster_id', '=', $roster_id)
-                        ->whereDate('full_date', '=', $full_dates)
-                        ->update(['start_time' => $start_time, 'end_time' => $end_time]);
-
-                }
-            } 
-            $x++; $j++;
-        }
-        return redirect()->back()->with('message', 'Roster Added Successfully');
+        
     }
 
     public function destroy(Request $request)

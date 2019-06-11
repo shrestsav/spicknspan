@@ -135,11 +135,16 @@ Route::middleware(['auth'])->group(function () {
 		Route::post("/questionTemplate/add","QuestionTemplateController@addMorePost");
 		Route::get('/questionTemplate/{id}','QuestionTemplateController@destroy')->name('question.destroy');
 
+
+
 	});	
 	Route::middleware(['permission:import_export_excel'])->group(function () {
 		Route::post('/exportExcel', 'CoreController@export_to_excel')->name('export.excel');
 		Route::post('/import_excel', 'CoreController@import_from_excel')->name('import_from_excel');
 	});
+
+	Route::get('wagesReport','ReportController@wagesReport')->name('wagesReport.index');
+	Route::post('wagesReport','ReportController@wagesReport')->name('wagesReport.filter');
 
 });
 
