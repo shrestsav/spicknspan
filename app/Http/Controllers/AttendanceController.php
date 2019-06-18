@@ -109,23 +109,7 @@ class AttendanceController extends Controller
           $collection = $collection->where('local_check_in.date','>=',$search_date_from)->where('local_check_in.date','<=',$search_date_to);
         }
 
-        $grouped_attendances = $collection->groupBy(['local_check_in.date','employee_id'])->toArray();
-        
-        // $attendance_lists = Attendance::select(
-        //                       DB::raw("SEC_TO_TIME(SUM(TIME_TO_SEC(CAST(TIMEDIFF(`check_out`,`check_in`) AS TIME)))) AS total_time"),
-        //                       DB::raw("min(check_in) as check_in"),
-        //                       DB::raw("max(check_out) as check_out"),
-        //                       DB::raw("CAST(check_in AS date) AS date"),
-        //                       'attendances.client_id',
-        //                       'attendances.employee_id',
-        //                       'client.name as client_name',
-        //                       'employee.name as employee_name'
-        //                           )
-        //                     ->join('users as employee','attendances.employee_id','=','employee.id')
-        //                     ->join('users as client','attendances.client_id','=','client.id')
-        //                     ->groupBy('client_name','employee_name','date','client_id','employee_id')
-        //                     ->orderBy('check_out','desc');
-                            
+        $grouped_attendances = $collection->groupBy(['local_check_in.date','employee_id'])->toArray();       
 
         return view('backend.pages.attendance_list',compact('clients', 'users','grouped_attendances'));
     }

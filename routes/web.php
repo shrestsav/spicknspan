@@ -143,8 +143,12 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('/import_excel', 'CoreController@import_from_excel')->name('import_from_excel');
 	});
 
-	Route::get('wagesReport','ReportController@wagesReport')->name('wagesReport.index');
-	Route::post('wagesReport','ReportController@wagesReport')->name('wagesReport.filter');
+	Route::get('reports/','ReportController@index')->name('report.index');
+	Route::post('wagesFilterItems','ReportController@wagesFilterItems')->name('wagesReport.filter');
+	Route::post('wagesReport','ReportController@wagesReport')->name('wagesReport.render');
+	// Route::get('/reports/{name}',function(){
+	// 	return redirect('/reports');
+	// })->where('name','[A-Za-z]+');
 
 });
 

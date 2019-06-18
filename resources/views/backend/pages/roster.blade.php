@@ -12,6 +12,9 @@
     margin:0px 8px;
     padding: 10px 20px;
   }
+  td:hover{
+    border:1px solid #9a9a9a !important;
+  }
   th{
     text-align: center;
   }
@@ -24,13 +27,17 @@
     cursor: pointer;
   }
   td.week_1,td.week_2,td.week_3,td.week_4,td.week_5{
-    padding: 0px !important;
+    padding: 10px 20px !important;
   }
   .week_1 input,.week_2 input,.week_3 input,.week_4 input,.week_5 input{
     border: 0px !important;
+    margin: 4px;
   }
-  .week_1 input:hover,.week_2 input:hover,.week_3 input:hover,.week_4 input:hover,.week_5 input:hover{
-    border: 0.5px solid #00a65a !important;
+  .editable_roster .week_1 input:hover,.editable_roster .week_2 input:hover,.editable_roster .week_3 input:hover,.editable_roster .week_4 input:hover,.editable_roster .week_5 input:hover{
+    border: 0.5px dashed  #00a65a !important;
+    cursor: pointer;
+  }
+  input:hover{
     cursor: pointer;
   }
   .search_by_date{
@@ -41,10 +48,10 @@
   .pagination{
     margin: 0px;
   }
-  .form-control[readonly]{
+  .form-control[readonly],.readonly_roster{
     background-color: #f7f7f7ad;
     opacity: 1;
-}
+  }
 </style>
 @endpush
 
@@ -157,7 +164,7 @@
               </tr>
             </thead>
 
-            <tbody class="roster-list">
+            <tbody class="roster-list readonly_roster">
             @foreach($rosters as $client_id => $roster_by_clients)
               @foreach($roster_by_clients as $emp_id => $emp_rosters)
               
@@ -578,12 +585,14 @@
     $('body').on('click','.edit_rosters',function(e){
       $('.time_from, .time_to').prop('readonly',false);
       $('.delete_all, #addrow').prop('disabled',false);
+      $('tbody').removeClass('readonly_roster').addClass('editable_roster');
       $(this).html('DONE').removeClass('btn-danger edit_rosters').addClass('btn-success done_rosters');
     });
 
     $('body').on('click','.done_rosters',function(e){
       $('.time_from, .time_to').prop('readonly',true);
       $('.delete_all, #addrow').prop('disabled',true);
+      $('tbody').addClass('readonly_roster').removeClass('editable_roster');;
       $(this).html('EDIT').removeClass('btn-success done_rosters').addClass('btn-danger edit_rosters');
     });
 
@@ -678,4 +687,32 @@
     // });
 </script>
   
+  {{-- Copy Paste Events --}}
+  <script type="text/javascript">
+    var timetable = {
+      'from' : '',
+      'to'   : ''
+    };
+ 
+    $('body').on('click','.editable_roster td',function(e){
+      $('td').css('border','unset')
+      $(this).css('border','1px solid #9a9a9a');
+    })
+    // $(".editable_roster td").bind("copy", function(e){
+    $('table').on('copy','.editable_roster td',function(e){
+      var copy_from = $(this).children('.time_from').val();
+      var copy_to = $(this).children('.time_to').val();
+      timetable['from'] = copy_from;
+      timetable['to'] = copy_to;
+      showNotify('success','Copied to Clipboard');  
+    });
+
+    // $(".editable_roster td").bind("paste", function(e){
+    $('table').on('paste','.editable_roster td',function(e){
+      $(this).children('.time_from').val(timetable['from']).trigger("change");;
+      $(this).children('.time_to').val(timetable['to']).trigger("change");;
+    });
+
+
+  </script>
 @endpush

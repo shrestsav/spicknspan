@@ -75,18 +75,7 @@
             </li>
           </ul>
         </li>
-
-        <li class="treeview">
-          <a href="#">
-            <i class="fa fa-coffee"></i> <span>Reports</span>
-            <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-          </a>
-          <ul class="treeview-menu">
-            <li class="@if ($title === 'Wages Report') active @endif"><a href="{{route('wagesReport.index')}}"><i class="fa fa-money"></i> <span>Wages Report</span></a>
-            </li>
-          </ul>
+        <li class="@if ($title === 'Wages Report') active @endif"><a href="{{route('report.index')}}"><i class="fa fa-industry"></i> <span>Reports</span></a>
         </li>
       @endrole
         

@@ -13,6 +13,16 @@ use Illuminate\Support\Facades\Validator;
 class WagesController extends Controller
 {
     /**
+     * @var User
+     */
+
+    private $user;
+
+    public function __construct(User $user){
+        $this->user = $user;
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -40,18 +50,16 @@ class WagesController extends Controller
 
         if(Entrust::hasRole('contractor')){
             $wages->where('wages.added_by','=',Auth::id());
-            $employees->where('users.added_by','=',Auth::id());
-            $clients->where('users.added_by','=',Auth::id());
         }
         if($request->search_by_user_id)
             $wages->where('wages.employee_id','=',$request->search_by_user_id);
         if($request->search_by_client_id)
             $wages->where('wages.client_id','=',$request->search_by_client_id);
 
-        $employees = $employees->get();
         $wages = $wages->get();
-        $clients = $clients->get();
-
+        $employees = $this->user->employeeList();
+        $clients = $this->user->clientList();
+        
         return view('backend.pages.wages',compact('wages','employees','clients'));
     }
 
