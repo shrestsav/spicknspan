@@ -22,7 +22,7 @@ class SiteController extends Controller
         $questionTemplate = QuestionTemplate::all();
 
         if(Entrust::hasRole('contractor')){
-            $buildings = $buildings ->where('added_by','=',Auth::id());
+            $buildings = $buildings->where('added_by','=',Auth::id());
             $questionTemplate = $questionTemplate ->where('added_by','=',Auth::id());
         }
         

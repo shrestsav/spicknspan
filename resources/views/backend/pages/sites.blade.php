@@ -60,6 +60,17 @@
     </div>
     @if(count($buildings))
     <div class="col-md-12">
+      @permission('import_export_excel')
+        <div class="pull-right">
+          <form role="form" action="{{route('export.excel')}}" method="POST">
+            @csrf
+            <input type="hidden" name="type" value="buildings">
+            <button type="submit" class="btn btn-success">Export to Excel</button>
+          </form>
+        </div>
+      @endpermission
+    </div>
+    <div class="col-md-12">
       <div class="box">
         <div class="box-header">
           <h3 class="box-title">Buildings</h3>
@@ -162,6 +173,17 @@
       </div>
     </div>
     @if(count($rooms))
+    <div class="col-md-12">
+      @permission('import_export_excel')
+        <div class="pull-right">
+          <form role="form" action="{{route('export.excel')}}" method="POST">
+            @csrf
+            <input type="hidden" name="type" value="rooms">
+            <button type="submit" class="btn btn-success">Export to Excel</button>
+          </form>
+        </div>
+      @endpermission
+    </div>
     <div class="col-md-12">
       <div class="box">
         <div class="box-header">

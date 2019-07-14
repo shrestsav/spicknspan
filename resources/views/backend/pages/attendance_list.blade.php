@@ -37,6 +37,11 @@
         @if(Request::all())
           <a href="{{url('/attendance')}}"><button class="btn btn-primary">Show All</button></a>
         @endif
+        @permission('import_export_excel')
+          <div class="pull-right">
+            <button type="submit" class="btn btn-success export_btn">Export to Excel</button>
+          </div>
+        @endpermission
       </div>
       <div class="col-xs-12">
         <div class="box">
@@ -71,51 +76,7 @@
               </form>
             </div>
           </div>
-
-          {{--<div class="box-body table-responsive no-padding">
-            <table class="table table-hover table-striped" id="employee_attendance">
-              <tr>
-                <th>Date</th>
-                <th>Employee Name</th>
-                <th>Client Name</th>
-                <th>Total Time</th>
-                <th>Timing</th>
-                <th>View Details</th>
-              </tr>
-              @if(count($attendance_lists))
-                @foreach($attendance_lists as $attendance_list)
-                  @php  
-                    $check_in = \Carbon\Carbon::parse($attendance_list->check_in)->timezone(Session::get('timezone')); 
-                    $check_out = \Carbon\Carbon::parse($attendance_list->check_out)->timezone(Session::get('timezone')); 
-                      // $hours = $check_out->diffInHours($check_in);
-                  @endphp
-                  <tr>
-                    <td>{{$attendance_list->date}}</td>                   
-                    <td>{{$attendance_list->employee_name}}</td>
-                    <td>{{$attendance_list->client_name}}</td>
-                    <td>{{$attendance_list->total_time}}</td>
-                    <td>{{$check_in->format('g:i A')}} - 
-                      @if($attendance_list->check_out!=null || $attendance_list->check_out!='')
-                        {{$check_out->format('g:i A')}}
-                      @else 
-                        NOT LOGGED OUT 
-                      @endif
-                    </td>
-                    <td>
-                      <a class="view_att_details btn btn-success" href="{{ url('attendance/details').'/'.$attendance_list->client_id.'/'.$attendance_list->employee_id.'/'.$attendance_list->date}}">Details
-                      </a>
-                    </td>
-                  </tr>
-                @endforeach
-              @else
-                <tr>
-                  <td colspan="6" align="center"><strong>No results available.</strong></td>
-                </tr>
-              @endif
-            </table>
-          </div> --}}
           <div class="box-body table-responsive no-padding">
-
             <table class="table table-bordered table-striped table-hover datatable" id="employee_attendance">
               <thead>
                 <tr>
@@ -199,10 +160,15 @@
     $('#search_date_from_to').daterangepicker();
   });
 
-$("table").tableExport({
-        formats: ["xlsx"],
-    });
+  $("table").tableExport({
+    formats: ["xlsx"],
+  });
+  
+  $('.export_btn').on('click',function(e){
+    e.preventDefault();
+    $("button.xlsx").trigger('click')
+  })
 
-
+  $('button.xlsx').hide();
   </script>
 @endpush

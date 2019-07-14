@@ -46,6 +46,12 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof \Illuminate\Session\TokenMismatchException)
+        {
+            return redirect()->route('login')->with('TokenMismatchException','You have been inactive for too long, Login again');
+            // return 'page was expired';
+        }   
+
         return parent::render($request, $exception);
     }
 }

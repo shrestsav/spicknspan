@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>{{env('APP_NAME', 'System')}}</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.7 -->
@@ -45,7 +46,7 @@
 </body>
 <script src="{{ asset('backend/js/jquery.min.js') }}"></script>
 <script src="{{ asset('backend/js/bootstrap.min.js') }}"></script>
-<script src="{{ asset('backend/js/icheck.min.js') }}"></script>
+<script src="{{ asset('backend/iCheck/icheck.min.js') }}"></script>
 <script>
   $(function () {
     $('input').iCheck({
@@ -54,6 +55,23 @@
       increaseArea: '20%' /* optional */
     });
   });
+</script>
+<script type="text/javascript">
+  var csrfToken = $('[name="csrf_token"]').attr('content');
+  function PlaySound() {
+    var audio = new Audio("{{asset('files/beep.wav')}}");
+    audio.play();
+  }
+  function refreshToken(){
+    $.get('refresh-csrf').done(function(data){
+      // PlaySound();
+      console.log('User Inactive for 10 Minutes');
+      csrfToken = data; // the new token
+    });
+  }
+
+  setInterval(refreshToken, 1000*60*10); // 10 Minutes 
+
 </script>
 </html>
 

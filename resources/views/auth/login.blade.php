@@ -11,6 +11,11 @@
         {{ \Session::get('error') }}
     </div>
   @endif
+  @if(\Session::has('TokenMismatchException'))
+      <div class="alert alert-block alert-danger">
+          {{ \Session::get('TokenMismatchException') }}
+      </div>
+  @endif
   <div class="login-box-body">
     <p class="login-box-msg">LOGIN</p>
     <form method="POST" action="{{ route('login') }}">
@@ -37,7 +42,7 @@
         <div class="col-xs-8">
           <div class="checkbox icheck">
             <label>
-              <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}> {{ __('Remember Me') }}
+              <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}> &nbsp;&nbsp;{{ __('Remember Me') }}
             </label>
           </div>
         </div>

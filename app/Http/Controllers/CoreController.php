@@ -9,6 +9,8 @@ use App\UserSetting;
 use App\SiteAttendance;
 use App\Roster;
 use App\Wages;
+use App\Building;
+use App\Room;
 use Excel;
 use App\Exports\DataExport;
 use App\Imports\DataImport;
@@ -78,10 +80,34 @@ class CoreController extends Controller
                           ->join('users as employee','employee.id','wages.employee_id')
                           ->join('users as client','client.id','wages.client_id');
       if(Entrust::hasRole('contractor')){
-        $wages->where('wages.added_by','=',Auth::id());
+        $data->where('wages.added_by','=',Auth::id());
       }
       $data = $data->get();
       $head = ['Employee','Client','Hourly Rate ($)'];
+    }
+    elseif($type=='buildings'){
+      $data = Building::select('name',
+                               'building_no',
+                               'address',
+                               'description',
+                               'gps_coordinates');
+      if(Entrust::hasRole('contractor')){
+        $data->where('added_by','=',Auth::id());
+      }
+      $data = $data->get();
+      $head = ['Building Name','Building No','Address','Description','GPS Coordinates'];
+    }
+    elseif($type=='rooms'){
+      $data = Room::select('rooms.name',
+                           'rooms.room_no',
+                           'rooms.description',
+                           'buildings.building_no')
+                    ->join('buildings','rooms.building_id','=','buildings.id');
+      if(Entrust::hasRole('contractor')){
+        $data->where('added_by','=',Auth::id());
+      }
+      $data = $data->get();
+      $head = ['Room Name','Room No','Description','Building No'];
     }
     elseif($type=='roster'){
       $data = Roster::select('id','full_date','client_id','employee_id')

@@ -73,25 +73,25 @@
                   <tr>
                     <td>
                       <div class="form-group">
-                        <input type="text" name="person_involved" class="form-control" required>
+                        <input type="text" name="person_involved" class="form-control" placeholder="Name of Person Involved" required>
                         <div class="help-block with-errors"></div>
                       </div>
                     </td>
                     <td>
                       <div class="form-group">
-                        <input type="text" name="occupation" class="form-control" required>
+                        <input type="text" name="occupation" class="form-control" placeholder="Occupation" required>
                         <div class="help-block with-errors"></div>
                       </div>
                     </td>
                     <td>
                       <div class="form-group">
-                        <input type="text" name="employer" class="form-control" required>
+                        <input type="text" name="employer" class="form-control" placeholder="Employer" required>
                         <div class="help-block with-errors"></div>
                       </div>
                     </td>
                     <td>
                       <div class="form-group">
-                        <input type="text" name="contact" class="form-control">
+                        <input type="text" pattern="\d*" name="contact" class="form-control" maxlength="10" placeholder="Numbers only">
                         <div class="help-block with-errors"></div>
                       </div>
                     </td>
@@ -246,6 +246,7 @@
                 <table class="table">
                   <thead class="thead-dark">
                     <tr>
+                      <th>S.No</th>
                       <th>Name of Witness</th>
                       <th>Employer</th>
                       <th>Contact Number</th>
@@ -257,6 +258,7 @@
                     @endphp
                     @for($i=1;$i<=2;$i++)
                       <tr>
+                        <td>{{$i}}</td>
                         @foreach($witness_details as $wd)
                           <td>
                             <input type="text" name="{{$wd}}_{{$i}}" class="form-control">

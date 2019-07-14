@@ -130,6 +130,19 @@
 <script src="{{ asset('backend/js/select2.full.min.js') }}"></script>
 <script src="{{ asset('backend/js/sweetalert.min.js') }}"></script>
 <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script type="text/javascript">
+  var csrfToken = $('[name="csrf_token"]').attr('content');
+
+  function refreshToken(){
+    $.get('refresh-csrf').done(function(data){
+      console.log('User Inactive for 10 Minutes');
+      csrfToken = data; // the new token
+    });
+  }
+
+  setInterval(refreshToken, 1000*60*10); // 10 Minutes 
+
+</script>
 <script>
   var SITE_URL =  '{{ url("/") . "/" }}';
 

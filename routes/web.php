@@ -12,11 +12,13 @@
 */
 
 //This route is for testing purpose only, please delete this in deployed application or leave it as it is
-
+Route::get('refresh-csrf', function(){
+    return csrf_token();
+});
 Route::get('testing','Tests\TestController@index');
 Route::post('testing','Tests\TestController@get');
 
-Auth::routes();
+
 
 Route::get('redirect/{driver}', 'Auth\LoginController@redirectToProvider')
     ->name('login.provider')
@@ -152,3 +154,4 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+Auth::routes();

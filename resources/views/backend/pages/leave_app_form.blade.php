@@ -98,6 +98,13 @@ if(Route::current()->getName() == 'archivedleaveRequest.index' || Route::current
       @if(Request::all())
         <a href="@if($page){{url('/leaveApplication')}} @else {{url('/archivedLeaveApplication')}} @endif"><button class="btn btn-primary">Go Back</button></a>
       @endif
+      @permission('import_export_excel')
+        <div class="pull-right">
+          <button type="submit" class="btn btn-success export_btn">Export to Excel</button>
+        </div>
+      @endpermission
+    </div>
+    <div class="col-xs-12">
       <div class="box">
         <div class="box-header">
           {{-- Search Form --}}
@@ -292,6 +299,13 @@ if(Route::current()->getName() == 'archivedleaveRequest.index' || Route::current
     $("table").tableExport({
       formats: ["xlsx"],
     });
+
+    $('.export_btn').on('click',function(e){
+      e.preventDefault();
+      $("button.xlsx").trigger('click')
+    })
+
+    $('button.xlsx').hide();
     $('#from_to, #search_date_from_to').daterangepicker();
 </script>
 <script type="text/javascript">
@@ -302,7 +316,7 @@ if(Route::current()->getName() == 'archivedleaveRequest.index' || Route::current
     $(".check_me:checked").each(function() {  
         sel_Rows.push($(this).parent().parent().parent().data('lr-id'));
     });  
-    console.log(sel_Rows);
+
     if(sel_Rows.length <= 0)  
     {  
       swal({
@@ -428,7 +442,6 @@ if(Route::current()->getName() == 'archivedleaveRequest.index' || Route::current
         $('.archive_selected').hide();
         $('.undo_archive_selected').hide();
       }
-      
   });
 
 </script>
