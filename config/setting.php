@@ -23,6 +23,6 @@ return [
         1 => 'Approved',
         2 => 'Denied',
     ],
-    'rows' => 30,
+    'rows' => 5,
 
 ];

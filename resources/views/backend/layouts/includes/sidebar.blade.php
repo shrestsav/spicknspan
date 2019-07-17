@@ -26,9 +26,9 @@
         </li>
         <li class="@if ($title === 'Site Attendance') active @endif"><a href="{{route('site.attendance')}}"><i class="fa fa-dashboard"></i> <span>Site Attendance</span></a>
         </li>
-        <li class="@if ($title === 'Incident Report') active @endif"><a href="{{route('incident.create')}}"><i class="fa fa-fire"></i> <span>Incident Report</span></a>
+        <li class="@if ($title === 'Pending Incident Reports' || $title === 'Approved Incident Reports') active @endif"><a href="{{route('incident.pending')}}"><i class="fa fa-fire"></i> <span>Incident Report</span></a>
         </li>
-        <li class="@if ($title === 'Leave Application') active @endif"><a href="{{route('leaveRequest.index')}}"><i class="fa fa-suitcase"></i> <span>Leave Application</span></a>
+        <li class="@if ($title === 'Pending Leave Applications' || $title === 'Approved Leave Applications' || $title === 'Denied Leave Applications' || $title === 'Archived Leave Applications') active @endif"><a href="{{route('leaveRequest.pending')}}"><i class="fa fa-suitcase"></i> <span>Leave Application</span></a>
         </li>
         <li class="@if ($title === 'Roster') active @endif"><a href="{{route('roster.index')}}"><i class="fa fa-clock-o"></i> <span>Roster</span></a>
         </li>

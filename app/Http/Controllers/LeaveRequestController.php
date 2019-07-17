@@ -7,12 +7,34 @@ use Carbon\Carbon;
 use App\LeaveRequest;
 use Illuminate\Http\Request;
 use Entrust;
+use Route;
 
 class LeaveRequestController extends Controller
 {
-
     public function leaveRequests(Request $request)
     {
+        $page = '';
+        if($request->all()){
+            $page = $request->page;
+            if($page!=3)
+                $status = [$page,$page];
+            else
+                $status = [0,2];
+        }
+
+        if(Route::current()->getName() == 'leaveRequest.pending'){
+            $status = [0,0];
+        }
+        elseif(Route::current()->getName() == 'leaveRequest.approved'){
+            $status = [1,1];
+        } 
+        elseif(Route::current()->getName() == 'leaveRequest.denied'){
+            $status = [2,2];
+        } 
+        elseif(Route::current()->getName() == 'leaveRequest.archived'){
+            $status = [0,2];
+        }
+        
         $leave_requests = LeaveRequest::select('users.name',
                                                 'users.added_by',
                                                 'leave_requests.id',
@@ -23,8 +45,13 @@ class LeaveRequestController extends Controller
                                                 'leave_requests.description',
                                                 'leave_requests.status',
                                                 'leave_requests.created_at',)
-                                        ->join('users','users.id','leave_requests.user_id');
-                                        
+                                        ->join('users','users.id','leave_requests.user_id')
+                                        ->whereBetween('leave_requests.status',$status);
+        
+        if(Route::current()->getName() == 'leaveRequest.archived'){
+            $leave_requests->onlyTrashed();
+        }
+
         if(Entrust::hasRole('contractor')){
           $leave_requests->where('users.added_by',Auth::id());
         }
@@ -38,9 +65,6 @@ class LeaveRequestController extends Controller
         if($request->search_by_lt){
             $leave_requests->where('leave_type','=',$request->search_by_lt);
         }
-        if($request->search_by_status){
-            $leave_requests->where('status','=',$request->search_by_status);
-        }
         if($request->search_date_from_to){
           $search_date_from_to = explode("-", $request->search_date_from_to);
           $from = date('Y-m-d',strtotime($search_date_from_to[0]));
@@ -49,49 +73,8 @@ class LeaveRequestController extends Controller
           $leave_requests->where('to','>=',$to);
         }
         $leave_requests = $leave_requests->paginate(config('setting.rows'));
-        return view('backend.pages.leave_app_form',compact('leave_requests'));
-    }
-
-    public function archivedleaveRequests(Request $request)
-    {
-        $leave_requests = LeaveRequest::onlyTrashed()
-                                        ->select('users.name',
-                                                'users.added_by',
-                                                'leave_requests.id',
-                                                'leave_requests.user_id as employee_id',
-                                                'leave_requests.leave_type',
-                                                'leave_requests.from',
-                                                'leave_requests.to',
-                                                'leave_requests.description',
-                                                'leave_requests.status',
-                                                'leave_requests.created_at')
-                                        ->join('users','users.id','leave_requests.user_id');
-                                        
-        if(Entrust::hasRole('contractor')){
-          $leave_requests->where('users.added_by',Auth::id());
-        }
-        if(!Entrust::hasRole(['contractor','superAdmin'])){
-          $leave_requests->where('user_id','=',Auth::id());
-        }         
-
-        if($request->search_by_employee_id){
-            $leave_requests->where('user_id','=',$request->search_by_employee_id);
-        }
-        if($request->search_by_lt){
-            $leave_requests->where('leave_type','=',$request->search_by_lt);
-        }
-        if($request->search_by_status){
-            $leave_requests->where('status','=',$request->search_by_status);
-        }
-        if($request->search_date_from_to){
-          $search_date_from_to = explode("-", $request->search_date_from_to);
-          $from = date('Y-m-d',strtotime($search_date_from_to[0]));
-          $to = date('Y-m-d',strtotime($search_date_from_to[1]));
-          $leave_requests->where('from','<=',$from);
-          $leave_requests->where('to','>=',$to);
-        }
-        $leave_requests = $leave_requests->paginate(config('setting.rows'));
-        return view('backend.pages.leave_app_form',compact('leave_requests'));
+        // return $request->search_by_employee_id;
+        return view('backend.pages.leave_app_form',compact('leave_requests','page'));
     }
 
     public function createLeaveRequests(Request $request)
@@ -103,6 +86,7 @@ class LeaveRequestController extends Controller
         LeaveRequest::create($request->all());
         return back()->with('message','Leave Application Submitted Successfully');
     }
+    
     public function archiveLeaveRequests(Request $request)
     {
         foreach ($request->sel_Rows as $rows) {

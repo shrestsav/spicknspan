@@ -9,6 +9,7 @@ use Intervention\Image\Facades\Image;
 use Auth;
 use Entrust;
 use Dompdf\Dompdf;
+use Route;
 
 class IncidentReportController extends Controller
 {
@@ -16,70 +17,28 @@ class IncidentReportController extends Controller
 
     public function incident_report(Request $request)
     {
+        $page = '';
         if($request->all()){
-            $incident_types = [];
-            $medical_treatments = [];
-            $attended_authorities = [];
-            $witness_details = [];
-
-            $incident_types_array = ['work_related_illness','plant_equipment_damage','environment','electrocution','near_miss','injury'];
-            $medical_treatments_array = ['mt_none','mt_first_aid','mt_doctor','mt_hospital'];
-            $attended_authorities_array = ['aa_police','aa_ambulance','aa_fire','aa_workplace_h_s','aa_epa','aa_media'];
-
-            $convert_to_json = ['incident_types','medical_treatments','attended_authorities'];
-            foreach($convert_to_json as $part){
-                foreach(${$part.'_array'} as $it){
-                    if($request->{$it}){
-                        ${$part}[]=$it;
-                    }
-                }
-            }
-
-            $witness_details = [
-                [
-                    'name' => $request->name_of_witness_1,
-                    'employer' => $request->n_o_w_employer_1,
-                    'contact' => $request->n_o_w_contact_1,
-                ],
-                [
-                    'name' => $request->name_of_witness_2,
-                    'employer' => $request->name_of_witness_2,
-                    'contact' => $request->name_of_witness_2,
-                ],
-            ];
-
-            $request->merge([
-                'user_id' => Auth::id(),
-                'type' => json_encode($incident_types),
-                'medical_treatment' => json_encode($medical_treatments),
-                'attended_authorities' => json_encode($attended_authorities),
-                'witness_details' => json_encode($witness_details),
-            ]);
-
-            $IncidentReport = IncidentReport::create($request->all());
-
-            if($IncidentReport){
-                $db_arr = [];
-                if ($request->hasFile('photos')) {
-                  $photos = $request->file('photos');
-                  $count = 1;
-                  foreach($photos as $photo){
-                    $documentName = $count.'_proof_'.$photo->getClientOriginalName();
-                    $uploadDirectory = public_path('files'.DS.'incidents'.DS.$IncidentReport->id);
-                    $photo->move($uploadDirectory, $documentName);
-                    $db_arr[] = $documentName;
-                    $count++;
-                  }  
-                }
-                IncidentReport::where('id',$IncidentReport->id)->update(['photos' => json_encode($db_arr)]);
-                // $report_img = $this->generate_incident_report_form($IncidentReport->id);
-                // $path=public_path('/files/test.jpg');
-                // $report_img->save($path,100);
-
-                return back()->with('message','Incident Report Generated Successfully');
-            }
+            $status = $request->page;
+            $page = $request->page;
         }
-        $incident_reports = IncidentReport::with('user');
+        if(Route::current()->getName() == 'incident.pending'){
+            $status = 0;
+        }
+        elseif(Route::current()->getName() == 'incident.approved'){
+            $status = 1;
+        } 
+
+        $incident_reports = IncidentReport::select('incident_reports.id',
+                                         'incident_reports.user_id',
+                                         'incident_reports.employer',
+                                         'incident_reports.location',
+                                         'incident_reports.date',
+                                         'users.name'
+                                        )
+                                ->join('users','users.id','incident_reports.user_id')
+                                ->where('status', $status);
+        $search =  $incident_reports->get();                   
 
         if(Entrust::hasRole('contractor')){
         	$incident_reports->whereHas('user', function ($query){
@@ -90,21 +49,103 @@ class IncidentReportController extends Controller
         if(!Entrust::hasRole(['contractor','superAdmin'])){
           	$incident_reports->where('user_id',Auth::id());
         }
+        if($request->search_by_user_id){
+            $incident_reports->where('user_id','=',$request->search_by_user_id);
+        }
+        if($request->search_by_employer){
+            $incident_reports->where('employer','=',$request->search_by_employer);
+        }
+        if($request->search_by_location){
+            $incident_reports->where('location','=',$request->search_by_location);
+        }
+        if($request->search_date_from_to){
+          $search_date_from_to = explode("-", $request->search_date_from_to);
+          $from = date('Y-m-d',strtotime($search_date_from_to[0]));
+          $to = date('Y-m-d',strtotime($search_date_from_to[1]));
+          $incident_reports->where('date','>=',$from)->where('date','<=',$to);
+        }
+
         $incident_reports = $incident_reports->get();
-
-
         $employer = User::where('id',Auth::user()->added_by)->pluck('name','id')->toArray();
-        return view('backend.pages.incident_report',compact('employer','incident_reports'));
+        return view('backend.pages.incident_report',compact('employer','incident_reports','search','page'));
+    }
+
+    public function store(Request $request)
+    {
+        $incident_types = [];
+        $medical_treatments = [];
+        $attended_authorities = [];
+        $witness_details = [];
+
+        $incident_types_array = ['work_related_illness','plant_equipment_damage','environment','electrocution','near_miss','injury'];
+        $medical_treatments_array = ['mt_none','mt_first_aid','mt_doctor','mt_hospital'];
+        $attended_authorities_array = ['aa_police','aa_ambulance','aa_fire','aa_workplace_h_s','aa_epa','aa_media'];
+
+        $convert_to_json = ['incident_types','medical_treatments','attended_authorities'];
+        foreach($convert_to_json as $part){
+            foreach(${$part.'_array'} as $it){
+                if($request->{$it}){
+                    ${$part}[]=$it;
+                }
+            }
+        }
+
+        $witness_details = [
+            [
+                'name' => $request->name_of_witness_1,
+                'employer' => $request->n_o_w_employer_1,
+                'contact' => $request->n_o_w_contact_1,
+            ],
+            [
+                'name' => $request->name_of_witness_2,
+                'employer' => $request->name_of_witness_2,
+                'contact' => $request->name_of_witness_2,
+            ],
+        ];
+
+        $request->merge([
+            'user_id' => Auth::id(),
+            'type' => json_encode($incident_types),
+            'medical_treatment' => json_encode($medical_treatments),
+            'attended_authorities' => json_encode($attended_authorities),
+            'witness_details' => json_encode($witness_details),
+        ]);
+
+        $IncidentReport = IncidentReport::create($request->all());
+
+        if($IncidentReport){
+            $db_arr = [];
+            if ($request->hasFile('photos')) {
+              $photos = $request->file('photos');
+              $count = 1;
+              foreach($photos as $photo){
+                $documentName = $count.'_proof_'.$photo->getClientOriginalName();
+                $uploadDirectory = public_path('files'.DS.'incidents'.DS.$IncidentReport->id);
+                $photo->move($uploadDirectory, $documentName);
+                $db_arr[] = $documentName;
+                $count++;
+              }  
+            }
+            IncidentReport::where('id',$IncidentReport->id)->update(['photos' => json_encode($db_arr)]);
+            // $report_img = $this->generate_incident_report_form($IncidentReport->id);
+            // $path=public_path('/files/test.jpg');
+            // $report_img->save($path,100);
+
+            return back()->with('message','Incident Report Generated Successfully');
+        }
+    
     }
 
     public function updateIncidentStatus(Request $request)
     {   
         $update = IncidentReport::where('id',$request->incident_id)
                                 ->update([
+                                    'status' => 1,
                                     'ext_auth_notify' => $request->ext_auth_notify,
                                     'ext_auth' => $request->ext_auth,
                                     'investigation_required' => $request->investigation_required,
                                     'investigation_type' => $request->investigation_type,
+                                    'HSE_manager' => $request->HSE_manager,
                                 ]);
         if($update)
             return json_encode('Success');
@@ -177,6 +218,8 @@ class IncidentReportController extends Controller
                 $font->size('22');
                 $font->color('#000');
             };
+
+            $report->text('INC-'.$IncidentReport->id, 1217,247,$font_style);
 
             foreach($incident_types as $inc_typ){
                 if($inc_typ=='work_related_illness')
@@ -310,6 +353,11 @@ class IncidentReportController extends Controller
             if($IncidentReport->investigation_type=='2')
                 $report->text('■', 1454,2048,$sym_font_style);
 
+            $report->text($IncidentReport->HSE_manager, 471,2147,$font_style);
+
+            $updated_date = \Carbon\Carbon::parse($IncidentReport->updated_at)->format('M-d-Y');
+
+            $report->text($updated_date, 1208,2143,$font_style);
             // $path=public_path('/files/test.jpg');
             // $report->save($path,100);
 

@@ -210,13 +210,14 @@
       let id=$(this).attr('dataid');
       var position = $(this).position();
       var cardHeight = $(".card").height();
-      var dialogHeight = $("#contextmenu_"+id).outerHeight();
+      var contextMenu = $(this).parents("table").siblings("#contextmenu_"+id);
+      var dialogHeight = contextMenu.outerHeight();
       var total = position.top + dialogHeight + 100;
       $('.dropdown-contextmenu').hide();
-      $('#contextmenu_'+id).show();
-      $('#contextmenu_'+id).offset({left:e.pageX,top:e.pageY});
+      contextMenu.show();
+      contextMenu.offset({left:e.pageX,top:e.pageY});
       if(total>=cardHeight){
-        $('#contextmenu_'+id).offset({top:e.pageY-dialogHeight});
+        contextMenu.offset({top:e.pageY-dialogHeight});
       }
   });
 

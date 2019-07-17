@@ -16,30 +16,54 @@ class SiteController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $buildings = Building::simplePaginate(config('setting.rows'));
-        $questionTemplate = QuestionTemplate::all();
+        $questionTemplate = QuestionTemplate::select('template_title',
+                                                     'category_id',
+                                                     'name',
+                                                     'added_by');
+        $buildings = Building::select('id',
+                                     'name',
+                                     'building_no',
+                                     'address',
+                                     'description',
+                                     'added_by');
+        $rooms = Room::select('rooms.id',
+                              'rooms.name',
+                              'rooms.description',
+                              'rooms.building_id',
+                              'rooms.question_id',
+                              'buildings.building_no',
+                              'buildings.id as building_id',
+                              'question_template.template_title',
+                              'rooms.room_no')
+                    ->join('buildings','rooms.building_id','=','buildings.id')
+                    ->whereNull('buildings.deleted_at')
+                    ->leftJoin('question_template','rooms.question_id','=','question_template.id');
 
         if(Entrust::hasRole('contractor')){
-            $buildings = $buildings->where('added_by','=',Auth::id());
-            $questionTemplate = $questionTemplate ->where('added_by','=',Auth::id());
+            $buildings->where('added_by','=',Auth::id());
+            $rooms->where('added_by','=',Auth::id());
+            $questionTemplate->where('added_by','=',Auth::id());
         }
-        
-        $rooms = Room::select(
-                            'rooms.id',
-                            'rooms.name',
-                            'rooms.description',
-                            'rooms.building_id',
-                            'rooms.question_id',
-                            'buildings.building_no',
-                            'question_template.template_title',
-                            'rooms.room_no')
-                        ->join('buildings','rooms.building_id','=','buildings.id')
-                        ->leftJoin('question_template','rooms.question_id','=','question_template.id')
-                        ->simplePaginate(config('setting.rows'));
+        $site_building_search = $buildings->get();
+        $site_room_search = $rooms->get();
 
-        return view('backend.pages.sites',compact('buildings','rooms', 'questionTemplate'));
+        if($request->all()){
+            if($request->B_search_by_id)
+                $buildings->where('id',$request->B_search_by_id);
+            if($request->B_search_by_address)
+                $buildings->where('address',$request->B_search_by_address);
+            if($request->R_search_by_id)
+                $rooms->where('rooms.id',$request->R_search_by_id);
+            if($request->R_search_by_building_id)
+                $rooms->where('buildings.id',$request->R_search_by_building_id);
+        }
+        $buildings = $buildings->get();
+        $rooms = $rooms->get();
+        $questionTemplate = $questionTemplate->get(); 
+
+        return view('backend.pages.sites',compact('buildings','rooms', 'questionTemplate','site_building_search', 'site_room_search'));
     }
 
     /**
@@ -131,11 +155,16 @@ class SiteController extends Controller
         return redirect(route('site.index') . '#area_division')->with('message', 'Room Added Successfully');
     }
 
-    public function delete_room(Request $request, $id)
+    public function delete_room($id)
     {
-        $room = Room::find($id); 
-        $room->delete(); //delete the id
-        return redirect(route('site.index') . '#area_division')->with('message', 'Room Deleted Successfully');
+        $room = Room::find(decrypt($id))->delete(); 
+        return redirect()->back()->with('message','Room Deleted Successfully');
+    }
+
+    public function delete_building($id)
+    {
+        $building = Building::find(decrypt($id))->delete(); 
+        return redirect()->back()->with('message','Building Deleted Successfully');
     }
 
     public function generate_qr($json)

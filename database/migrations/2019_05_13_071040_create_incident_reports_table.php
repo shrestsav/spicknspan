@@ -16,6 +16,7 @@ class CreateIncidentReportsTable extends Migration
         Schema::create('incident_reports', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('user_id')->unsigned();
+            $table->smallInteger('status')->default(0)->comment('0:Pending, 1: Approved, 2:Denied');
             $table->longText('type')->nullable();
             $table->string('person_involved')->nullable();
             $table->string('occupation')->nullable();
@@ -37,6 +38,7 @@ class CreateIncidentReportsTable extends Migration
             $table->smallInteger('investigation_required')->nullable()->comment('0: No, 1:Yes');
             $table->smallInteger('investigation_type')->nullable()->comment('1: Minor, 2:Major');
             $table->longText('photos')->nullable();
+            $table->string('HSE_manager')->nullable();
             $table->timestamps();
         });
     }

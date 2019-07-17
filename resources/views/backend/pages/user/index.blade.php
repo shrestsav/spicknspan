@@ -203,7 +203,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
           </div>
         </div>
         <div class="box-body">
-          <form action="{{ route('import_from_excel') }}" method="POST" enctype="multipart/form-data" data-toggle="validator">
+          <form action="{{ route('import_from_excel','users') }}" method="POST" enctype="multipart/form-data" data-toggle="validator">
             @csrf
             <input type="hidden" name="user_type" class="form-control" value="{{$user_type}}">
             <div class="col-md-12" style="text-align: center;">
@@ -333,7 +333,7 @@ elseif(Route::current()->getName() == 'user_client.index'){
         </div>
       </div>
       <div class="modal-footer" style="text-align: center;">
-        <a href="{{ asset('files/import_from_excel_format.xlsx') }}"><button type="button" class="btn btn-outline">Download Excel Format</button></a>
+        <a href="{{ asset('files/import_from_excel_format(users).xlsx') }}"><button type="button" class="btn btn-outline">Download Excel Format</button></a>
       </div>
     </div>
   </div>
@@ -372,9 +372,6 @@ elseif(Route::current()->getName() == 'user_client.index'){
 </script>
 
 <script type="text/javascript">
-  $(function () {
-    $('#users_table').DataTable()
-  });
   $('.delete_user').on('click',function(){
     var user_id = $(this).data('user_id');
     swal({

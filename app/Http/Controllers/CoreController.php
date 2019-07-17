@@ -20,16 +20,38 @@ use Entrust;
 use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Validator;
+use Exception;
 
 class CoreController extends Controller
 {
   //Method for Importing Excel Files
-  public function import_from_excel(Request $request){
-  	$request->validate([
+  public function import_from_excel(Request $request, $type)
+  {
+    $request->validate([
       'file' => 'required|mimes:xlsx'
     ]);
-  	$user_type = $request->user_type;
-  	Excel::import(new DataImport($user_type),request()->file('file'));
+
+    if($type=='users'){
+      $data = [
+        'user_type' => $request->user_type,
+      ];
+    	Excel::import(new DataImport($type,$data),request()->file('file'));
+    }
+
+    if($type=='wages'){
+      $data = [
+        'added_by' => Auth::id(),
+      ];
+      try{
+        Excel::import(new DataImport($type,$data),request()->file('file'));
+      } 
+      catch (Exception $e){
+        $errors = json_decode($e->getMessage());
+        return back()->withErrors($errors);
+        return var_dump($e->getMessage());
+      }
+    }
+
   	return back()->with('message','Successfully Imported');
   }
 

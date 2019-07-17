@@ -58,8 +58,11 @@
         </div>
       </div>
     </div>
-    @if(count($buildings))
+
     <div class="col-md-12">
+      @if(Request::input('B_search_by_address') || Request::input('B_search_by_id'))
+        <a href="{{url('/site')}}"><button class="btn btn-primary">Show All</button></a>
+      @endif
       @permission('import_export_excel')
         <div class="pull-right">
           <form role="form" action="{{route('export.excel')}}" method="POST">
@@ -73,38 +76,97 @@
     <div class="col-md-12">
       <div class="box">
         <div class="box-header">
-          <h3 class="box-title">Buildings</h3>
+          <div class="search_form">
+            <form autocomplete="off" role="form" action="{{route('site.search')}}" method="POST" enctype="multipart/form-data">
+              @csrf
+              @php 
+                $search_arr = [
+                  'Building Name' => [
+                    'class'   => 'B_search_by_building_name',
+                    'name'    => 'B_search_by_id',
+                    'value'   => 'id',
+                    'view'    => 'name'
+                  ],
+                  'Building No' => [
+                    'class'   => 'B_search_by_building_no',
+                    'name'    => '',
+                    'value'   => 'id',
+                    'view'    => 'building_no'
+                  ],
+                  'Address' => [
+                    'class'   => 'B_search_by_address',
+                    'name'    => 'B_search_by_address',
+                    'value'   => 'address',
+                    'view'    => 'address'
+                  ],
+                ]
+              @endphp
+              @foreach($search_arr as $part => $arr)
+                <select class="select2 {{$arr['class']}}" name="{{$arr['name']}}">
+                  <option disabled selected value> {{$part}}</option>
+                  @foreach($site_building_search->unique($arr['value']) as $site_attendance)
+                    @php 
+                      $val = $site_attendance->{$arr['value']};
+                    @endphp
+                    <option value="{{$val}}" @if(Request::input('B_search_by_'.$arr['value'])==$val) selected @endif>
+                      {{$site_attendance->{$arr['view']} }}
+                    </option>
+                  @endforeach
+                </select>
+              @endforeach
+
+              &nbsp; &nbsp; &nbsp;
+              <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+          </div>
         </div>
         <div class="box-body table-responsive no-padding">
           <table id="building_list_table" class="table table-bordered table-striped">
             <thead>
-            <tr>
-              <th>Name</th>
-              <th>Building No</th>
-              <th>Address</th>
-              <th>Description</th>
-            </tr>
+              <tr>
+                <th>Name</th>
+                <th>Building No</th>
+                <th>Address</th>
+                <th>Description</th>
+              </tr>
             </thead>
             <tbody>
-            @foreach($buildings as $building)
+            @if(count($buildings))
+              @foreach($buildings as $building)
+                <div class="dropdown-contextmenu" id="contextmenu_{{$building->id}}" data-building_id='{{encrypt($building->id)}}'>
+                  <a style="position: relative;"><i class="fa fa-building"></i>{{$building->name}}</a>
+                  <hr style="margin-top: 0px; margin-bottom: 0px;">
+                  <a href="{{route('generate.qr',json_encode([$building->id]))}}" target="_blank">
+                    <i class="fa fa-qrcode" aria-hidden="true"></i>Show QR
+                  </a>
+                  
+                  <a href="javascript:;" class="btn btn-link delete_building" title="Delete Wage">
+                    <i class="fa fa-trash" aria-hidden="true"></i>Delete building
+                  </a>
+                </div>
+                <tr class="contextmenurow" dataid="{{$building->id}}">
+                  <td>{{$building->name}}</td>
+                  <td>{{$building->building_no}}</td>
+                  <td>{{$building->address}}</td>
+                  <td>{{$building->description}}</td>
+                </tr>
+              @endforeach
+            @else 
               <tr>
-                <td>{{$building->name}}</td>
-                <td>{{$building->building_no}}</td>
-                <td>{{$building->address}}</td>
-                <td>{{$building->description}}</td>
+                <td colspan="4" class="text-center">No Records Found</td>
               </tr>
-            @endforeach
+            @endif
             </tbody>
           </table>
         </div>
-        <div class="box-footer clearfix">
+        {{--<div class="box-footer clearfix">
           <div class="col-md-4 col-md-offset-4 text-center">
             {{ $buildings->links() }}
           </div>
-        </div>
+        </div> --}}
       </div>
     </div>
-    @endif
+
   </div>
   <div class="row" id="area_division">
     <div class="col-md-12">
@@ -172,8 +234,10 @@
         </div>
       </div>
     </div>
-    @if(count($rooms))
     <div class="col-md-12">
+      @if(Request::input('R_search_by_building_id') || Request::input('R_search_by_id'))
+        <a href="{{url('/site')}}"><button class="btn btn-primary">Show All</button></a>
+      @endif
       @permission('import_export_excel')
         <div class="pull-right">
           <form role="form" action="{{route('export.excel')}}" method="POST">
@@ -187,10 +251,58 @@
     <div class="col-md-12">
       <div class="box">
         <div class="box-header">
-          <h3 class="box-title">Division / Area</h3>
+          <div class="search_form">
+            <form autocomplete="off" role="form" action="{{route('site.search')}}" method="POST" enctype="multipart/form-data">
+              @csrf
+              @php 
+                $search_arr = [
+                  'Division / Area' => [
+                    'class'   => 'R_search_by_room_name',
+                    'name'    => 'R_search_by_id',
+                    'value'   => 'id',
+                    'view'    => 'name'
+                  ],
+                  'Room No' => [
+                    'class'   => 'R_search_by_room_no',
+                    'name'    => '',
+                    'value'   => 'id',
+                    'view'    => 'room_no'
+                  ],
+                  'Building Name' => [
+                    'class'   => 'R_search_by_building_name',
+                    'name'    => 'R_search_by_building_id',
+                    'value'   => 'building_id',
+                    'view'    => 'name'
+                  ],
+                  'Building No' => [
+                    'class'   => 'R_search_by_building_no',
+                    'name'    => '',
+                    'value'   => 'building_id',
+                    'view'    => 'building_no'
+                  ],
+                ]
+              @endphp
+              @foreach($search_arr as $part => $arr)
+                <select class="select2 {{$arr['class']}}" name="{{$arr['name']}}">
+                  <option disabled selected value> {{$part}}</option>
+                  @foreach($site_room_search->unique($arr['value']) as $site_attendance)
+                    @php 
+                      $val = $site_attendance->{$arr['value']};
+                    @endphp
+                    <option value="{{$val}}" @if(Request::input('R_search_by_'.$arr['value'])==$val) selected @endif>
+                      {{$site_attendance->{$arr['view']} }}
+                    </option>
+                  @endforeach
+                </select>
+              @endforeach
+
+              &nbsp; &nbsp; &nbsp;
+              <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+          </div>
         </div>
         <div class="box-body table-responsive no-padding">
-          <table id="room_list_table" class="table table-bordered table-striped">
+          <table id="room_list_table" class="table table-bordered table-striped datatable">
             <thead>
             <tr>
               <th>
@@ -206,48 +318,55 @@
               @if(Auth::user()->hasRole(['superAdmin','contractor']) && Auth::user()->inspection == '1')
                   <th>Question Template</th>
               @endif
-              <th>QR</th>
-              <th>Action</th>
             </tr>
             </thead>
             <tbody>
-              @php $count = 1; @endphp
-            @foreach($rooms as $room)
-              <tr>
-                <td><input type="checkbox" class="room_check" data-room-id="{{$room->id}}"></td>
-                <td>{{$count}}</td>
-                <td>{{$room->name}}</td>
-                <td>{{$room->room_no}}</td>
-                <td>{{$room->description}}</td>
-                <td>{{$room->building_no}}</td>
-                <td>
-                  @if($room->template_title)
-                    {{$room->template_title}}
-                  @else
-                    --
-                  @endif
-                </td>
-
-                <td><a href="{{route('generate.qr',json_encode([$room->id]))}}" target="_blank">Show QR</a></td>
-                <form action="{{ url('/site/delete_room/').'/'.$room->id}}" method="POST">
-                  {{ csrf_field() }}
-                  <input type="hidden" name="_method" value="POST">
-                  <td><button><i class="fa fa-trash-o"></i></button></td>
-                </form>
-              </tr>
-              @php $count++; @endphp
-            @endforeach
+              @if(count($rooms))
+                @php $count = 1; @endphp
+                @foreach($rooms as $room)
+                  <div class="dropdown-contextmenu" id="contextmenu_{{$room->id}}" data-room_id='{{encrypt($room->id)}}'>
+                    <a style="position: relative;"><i class="fa fa-home"></i>{{$room->name}}</a>
+                    <hr style="margin-top: 0px; margin-bottom: 0px;">
+                    <a href="{{route('generate.qr',json_encode([$room->id]))}}" target="_blank">
+                      <i class="fa fa-qrcode" aria-hidden="true"></i>Show QR
+                    </a>
+                    
+                    <a href="javascript:;" class="btn btn-link delete_room" title="Delete Wage">
+                      <i class="fa fa-trash" aria-hidden="true"></i>Delete Room
+                    </a>
+                  </div>
+                  <tr class="contextmenurow" dataid="{{$room->id}}">
+                    <td><input type="checkbox" class="room_check" data-room-id="{{$room->id}}"></td>
+                    <td>{{$count}}</td>
+                    <td>{{$room->name}}</td>
+                    <td>{{$room->room_no}}</td>
+                    <td>{{$room->description}}</td>
+                    <td>{{$room->building_no}}</td>
+                    <td class="text-center">
+                      @if($room->template_title)
+                        {{$room->template_title}}
+                      @else
+                        --
+                      @endif
+                    </td>
+                  </tr>
+                  @php $count++; @endphp
+                @endforeach
+              @else 
+                <tr>
+                  <td colspan="9" class="text-center">No Records Found</td>
+                </tr>
+              @endif
             </tbody>
           </table>
         </div>
-        <div class="box-footer clearfix">
+        {{--<div class="box-footer clearfix">
           <div class="col-md-4 col-md-offset-4 text-center">
             {{ $rooms->links() }}
           </div>
-        </div>
+        </div> --}}
       </div>
     </div>
-    @endif
   </div>
 </section>
 
@@ -307,9 +426,58 @@
         var serialize = JSON.stringify(cboxArray);
         window.location = SITE_URL+"generate_qr/"+serialize;
       });
-})(jQuery);
+    })(jQuery);
 
+    // Search Switch Algorithms
+    search_by_classes = {
+      B_search_by_building_name:'B_search_by_building_no', 
+      B_search_by_building_no:'B_search_by_building_name',       
+      R_search_by_building_name:'R_search_by_building_no', 
+      R_search_by_building_no:'R_search_by_building_name', 
+      R_search_by_room_name:'R_search_by_room_no', 
+      R_search_by_room_no:'R_search_by_room_name', 
+    };
+    
+    Object.keys(search_by_classes).forEach(function(key){
+        $('.'+key).on('change', function(e) {
+          e.preventDefault();
+          var oldval = $('.'+search_by_classes[key]).val();
+          var newval = this.value;
+          if(oldval!=newval)
+              $('.'+search_by_classes[key]).val(this.value).trigger('change');
+        });
+    });
 
   //DELETE CHECKBOX COUNT ENDS
+
+    $('.delete_room').on('click',function(){
+      var room_id = $(this).parent().data('room_id');
+      swal({
+      title: "Are you sure?",
+      text: "Once deleted, you will not be able to recover this data!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then((willDelete) => {
+        if (willDelete) {
+          window.location.href = SITE_URL + "deleteRoom/"+room_id;
+        } 
+      });
+    });
+
+    $('.delete_building').on('click',function(){
+      var building_id = $(this).parent().data('building_id');
+      swal({
+      title: "Are you sure?",
+      text: "Once deleted, all Rooms associated with this building will be lost",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then((willDelete) => {
+        if (willDelete) {
+          window.location.href = SITE_URL + "deleteBuilding/"+building_id;
+        } 
+      });
+    });
 </script>
 @endpush

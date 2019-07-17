@@ -1,6 +1,20 @@
-@extends('backend.layouts.app',['title'=>'Incident Report'])
+@php
+
+  if(Route::current()->getName() == 'incident.pending' || $page === '0'){
+    $page = 0;
+    $title = 'Pending Incident Reports';
+  }
+  elseif(Route::current()->getName() == 'incident.approved' || $page === '1'){
+    $page = 1;
+    $title = 'Approved Incident Reports';
+  }
+
+@endphp
+
+@extends('backend.layouts.app',['title'=>$title])
 
 @push('styles')
+<link rel="stylesheet" href="{{ asset('backend/excel-plugins/tableexport.css') }}">
 <style type="text/css">
   label.checkbox.mark_default {
     padding-left: 20px;
@@ -285,52 +299,128 @@
         
       </div>
     </div>
-    @if(count($incident_reports))
+
     <div class="col-md-12">
-      <div class="box">
-        <div class="box-header">
-          <h3 class="box-title">Incident Reports</h3>
-        </div> 
-        <div class="box-body table-responsive">
-          <table id="users_table" class="table table-bordered table-striped">
-            <thead>
-            <tr>
-              <th>S.No</th>
-              <th>Reported by</th>
-              <th>Incident Location</th>
-              <th>Incident Date</th>
-              <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            @php
-              $count=1;
-            @endphp
-            @foreach($incident_reports as $report)
-              <tr>
-                <td>{{$count}}</td>
-                <td>{{$report->user->name}}</td>
-                <td>{{$report->location}}</td>
-                <td>{{$report->date}}</td>
-                <td>
-                  <a href="#" class="view_incident_details" data-incident-id="{{$report->id}}">
-                    <span class="action_icons"><i class="fa fa-eye" aria-hidden="true"></i></span>
-                  </a>
-                  <a href="{{route('incident.print',$report->id)}}" class="print_incident_report" target="_blank">
-                    <span class="action_icons"><i class="fa fa-print" aria-hidden="true"></i></span>
-                  </a>
-                </td>
-              </tr>
-            @php
-              $count++;
-            @endphp
-            @endforeach
-            </tbody>
-          </table>
+      @if(Request::all())
+        <a href="{{ URL::previous() }}"><button class="btn btn-primary">Show All</button></a>
+      @endif
+      @permission('import_export_excel')
+        <div class="pull-right">
+          <button type="submit" class="btn btn-success export_btn">Export to Excel</button>
+        </div>
+      @endpermission
+    </div>
+    <div class="col-md-12">
+      <div class="nav-tabs-custom">
+        <ul class="nav nav-tabs">
+          <li @if($page=='0') class="active" @endif><a href="{{ route('incident.pending') }}">Pending</a></li>
+          <li @if($page=='1') class="active" @endif><a href="{{ route('incident.approved') }}">Approved</a></li>
+        </ul>
+        <div class="tab-content">
+          <div class="active tab-pane">
+            <div class="{{-- box --}}">
+              <div class="box-header">
+                <div class="search_form">
+                  <form autocomplete="off" role="form" action="{{route('incident.search')}}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="page" value="{{$page}}">
+                    @php 
+                      $search_arr = [
+                        'User Name' => [
+                          'class'   => 'search_by_user_id',
+                          'name'    => 'search_by_user_id',
+                          'value'   => 'user_id',
+                          'view'    => 'name'
+                        ],
+                        'Employer Name' => [
+                          'class'   => 'search_by_employer',
+                          'name'    => 'search_by_employer',
+                          'value'   => 'employer',
+                          'view'    => 'employer'
+                        ],
+                        'Location' => [
+                          'class'   => 'search_by_location',
+                          'name'    => 'search_by_location',
+                          'value'   => 'location',
+                          'view'    => 'location'
+                        ],
+                      ];
+                    @endphp
+
+                    @foreach($search_arr as $part => $arr)
+                      <select class="select2 {{$arr['class']}}" name="{{$arr['name']}}">
+                        <option disabled selected value> {{$part}}</option>
+                        @foreach($search->unique($arr['value']) as $lr)
+                          @php 
+                            $val = $lr->{$arr['value']};
+                          @endphp
+                          <option value="{{$val}}" @if(Request::input('search_by_'.$arr['value'])==$val) selected @endif>
+                            {{$lr->{$arr['view']} }}
+                          </option>
+                        @endforeach
+                      </select>
+                    @endforeach
+                    <div class="input-group search_by_date">
+                      <div class="input-group-addon">
+                        <i class="fa fa-calendar"></i>
+                      </div>
+                      @php
+                        $today = date('m/d/Y');
+                        $pastOneMonth = date("m/d/Y", strtotime( date( "m/d/Y", strtotime( date("m/d/Y") ) ) . "-1 month" ) );
+                      @endphp
+                      <input type="text" class="form-control pull-right" id="search_date_from_to" name="search_date_from_to" @if(Request::input('search_date_from_to')) value="{{Request::input('search_date_from_to')}}" @else value="{{$pastOneMonth.' - '.$today}}" @endif>
+                    </div>
+                    &nbsp; &nbsp; &nbsp;
+                    <button type="submit" class="btn btn-primary">Search</button>
+                  </form>
+                </div>
+              </div>
+              <div class="box-body table-responsive no-padding">
+                @if(count($incident_reports))
+                <table id="incident_table" class="table table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th>S.No</th>
+                    <th>Reported by</th>
+                    <th>Employer</th>
+                    <th>Incident Location</th>
+                    <th>Incident Date</th>
+                    <th>Action</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  @php
+                    $count=1;
+                  @endphp
+                  @foreach($incident_reports as $report)
+                    <tr>
+                      <td>{{$count}}</td>
+                      <td>{{$report->name}}</td>
+                      <td>{{$report->employer}}</td>
+                      <td>{{$report->location}}</td>
+                      <td>{{$report->date}}</td>
+                      <td>
+                        <a href="#" class="view_incident_details" data-incident-id="{{$report->id}}">
+                          <span class="action_icons"><i class="fa fa-eye" aria-hidden="true"></i></span>
+                        </a>
+                        <a href="{{route('incident.print',$report->id)}}" class="print_incident_report" target="_blank">
+                          <span class="action_icons"><i class="fa fa-print" aria-hidden="true"></i></span>
+                        </a>
+                      </td>
+                    </tr>
+                  @php
+                    $count++;
+                  @endphp
+                  @endforeach
+                  </tbody>
+                </table>
+                @endif
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    @endif
   </div>
 </section>
 
@@ -344,29 +434,34 @@
 @endsection
 @push('scripts')
 
+<script src="{{ asset('backend/excel-plugins/xlsx.core.min.js') }}"></script>
+<script src="{{ asset('backend/excel-plugins/Blob.js') }}"></script>
+<script src="{{ asset('backend/excel-plugins/FileSaver.js') }}"></script>
+<script src="{{ asset('backend/excel-plugins/Export2Excel.js') }}"></script>
+<script src="{{ asset('backend/excel-plugins/jquery.tableexport.v2.js') }}"></script>
+
 <script src="{{ asset('backend/js/character-counter.js') }}"></script>
 <script type="text/javascript">
-    //Show Incident Detail Modal
-    
-    $('.view_incident_details').on('click',function (e) {
-        e.preventDefault();
-        var incident_id = $(this).data('incident-id');
-        // alert(incident_id);
-        $.ajax({
-            type: 'POST',
-            url: SITE_URL + 'ajax_incident_report_details',
-            data: {
-                'incident_id': incident_id
-            },
-            dataType: 'json'
-        }).done(function (response) {
-            console.log(response);
-            detailModel = $('#incidentReportsModal');
-            detailModel.find('.modal-content .modal-title').html(response.title);
-            detailModel.find('.modal-body').html(response.html);
-            detailModel.modal('show');
-        });
-    });
+
+  //Show Incident Detail Modal
+  $('.view_incident_details').on('click',function (e) {
+      e.preventDefault();
+      var incident_id = $(this).data('incident-id');
+      $.ajax({
+          type: 'POST',
+          url: SITE_URL + 'ajax_incident_report_details',
+          data: {
+              'incident_id': incident_id
+          },
+          dataType: 'json'
+      }).done(function (response) {
+          console.log(response);
+          detailModel = $('#incidentReportsModal');
+          detailModel.find('.modal-content .modal-title').html(response.title);
+          detailModel.find('.modal-body').html(response.html);
+          detailModel.modal('show');
+      });
+  });
 </script>
 <script type="text/javascript">
   $('.desc_texts').characterCounter({
@@ -401,17 +496,47 @@
 
   $('body').on('click','.update_incident_status',function(e){
     var datastring = $("#update_incident_status").serialize();
-    $.ajax({
-        type: 'POST',
-        url: SITE_URL + 'updateIncidentStatus',
-        data: datastring,
-        dataType: 'json'
-    }).done(function (response) {
-        console.log(response);
-        showNotify('success','Updated');
-    });
+    if(validateApprove()){
+      $.ajax({
+          type: 'POST',
+          url: SITE_URL + 'updateIncidentStatus',
+          data: datastring,
+          dataType: 'json'
+      }).done(function (response) {
+          console.log(response);
+          showNotify('success','Updated');
+          setTimeout(function(){ window.location.reload() }, 1500);
+      });
+    }
+    else{
+      alert('Please Fill Required Fields First')
+    }
   })
 
+  function validateApprove(){
+    if ($('input[name="ext_auth_notify"]:checked').length == 0) {
+      return false; 
+    }
+    if ($('input[name="investigation_required"]:checked').length == 0) {
+      return false; 
+    }
+    if ($('input[name="HSE_manager"]').val() == '') {
+      return false; 
+    }
+    return true;
+  }
 
+  $("#incident_table").tableExport({
+    formats: ["xlsx"],
+  });
+  
+  $('.export_btn').on('click',function(e){
+    e.preventDefault();
+    $("button.xlsx").trigger('click')
+  })
+
+  $('button.xlsx').hide();
+
+  $('#search_date_from_to').daterangepicker();
 </script>
 @endpush

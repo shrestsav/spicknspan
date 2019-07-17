@@ -47,22 +47,28 @@ Route::middleware(['auth'])->group(function () {
 	Route::post('/checkout', 'AttendanceController@checkout')->name('attendance.checkout');
 	Route::post('/ajax_in_out_stat', 'AttendanceController@ajax_in_out_stat')->name('ajax.in_out_stat');
 
-	Route::get('/incident_report', 'IncidentReportController@incident_report')->name('incident.create');
-	Route::post('/incident_report', 'IncidentReportController@incident_report')->name('incident.store');
+	Route::group(['prefix' => 'incidentReport'], function() {
+		Route::get('/pending', 'IncidentReportController@incident_report')->name('incident.pending');
+		Route::get('/approved', 'IncidentReportController@incident_report')->name('incident.approved');
+		Route::post('/search', 'IncidentReportController@incident_report')->name('incident.search');
+		Route::post('/store', 'IncidentReportController@store')->name('incident.store');
+	});
+
 	Route::post('/ajax_incident_report_details', 'IncidentReportController@ajax_incident_report_details')->name('incident.view');
 	Route::get('/print_incident_report/{id}', 'IncidentReportController@print_incident_report')->name('incident.print');
 	Route::post('/updateIncidentStatus', 'IncidentReportController@updateIncidentStatus')->name('incident.update');
 
-	Route::get('/leaveApplication','LeaveRequestController@leaveRequests')->name('leaveRequest.index');
-	Route::post('/leaveApplication','LeaveRequestController@leaveRequests')->name('leaveRequest.search');
-	Route::post('/createLeaveApplication','LeaveRequestController@createLeaveRequests')->name('leaveRequest.store');
-
-	Route::get('/archivedLeaveApplication','LeaveRequestController@archivedleaveRequests')->name('archivedleaveRequest.index');
-	Route::post('/archivedLeaveApplication','LeaveRequestController@archivedleaveRequests')->name('archivedleaveRequest.search');
-	Route::delete('/archiveLeaveApplication','LeaveRequestController@archiveLeaveRequests')->name('leaveRequest.archive');
-	Route::post('/undoArchiveLeaveApplication','LeaveRequestController@undoArchiveLeaveApplication')->name('leaveRequest.undoArchive');
-
-
+	Route::group(['prefix' => 'leaveApplications'], function() {
+		Route::post('/create','LeaveRequestController@createLeaveRequests')->name('leaveRequest.store');
+		Route::get('/pending','LeaveRequestController@leaveRequests')->name('leaveRequest.pending');
+		Route::get('/approved','LeaveRequestController@leaveRequests')->name('leaveRequest.approved');
+		Route::get('/denied','LeaveRequestController@leaveRequests')->name('leaveRequest.denied');
+		Route::get('/archived','LeaveRequestController@leaveRequests')->name('leaveRequest.archived');
+		Route::post('/search','LeaveRequestController@leaveRequests')->name('leaveRequest.search');
+		Route::delete('/archive','LeaveRequestController@archiveLeaveRequests')->name('leaveRequest.archive');
+		Route::post('/undoArchive','LeaveRequestController@undoArchiveLeaveApplication')->name('leaveRequest.undoArchive');
+	});
+	
 	
 	//this goes to admin route
 	Route::post('/updateLeaveRequestStatus','LeaveRequestController@updateStatus')->name('leave_request.status');
@@ -85,6 +91,8 @@ Route::middleware(['auth'])->group(function () {
 	
 	Route::get('/roster','RosterController@index')->name('roster.index');
 	Route::post('/roster','RosterController@index')->name('roster.index');
+
+	Route::get('/sheets','RosterController@sheets')->name('roster.sheets');
 
 	//Allow these routes for admin and contractor only
 	Route::middleware(['role:superAdmin|contractor'])->group(function () {
@@ -113,7 +121,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/wages','WagesController@index')->name('wages.index');
 		Route::post('/wages', 'WagesController@index')->name('wages.search');
 		Route::post('/storeWages','WagesController@store')->name('wages.store');
-		Route::get('/deleleWages/{id}','WagesController@destroy')->name('wages.destroy');
+		Route::get('/deleteWages/{id}','WagesController@destroy')->name('wages.destroy');
 		Route::post('/editWages','WagesController@edit')->name('wages.edit');
 		Route::post('/updateWages','WagesController@update')->name('wages.update');
 		
@@ -127,10 +135,12 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('declineVariation','RosterVariationController@declineVariation')->name('variation.decline');
 
 		Route::get('/site','SiteController@index')->name('site.index');
-		Route::post('/site','SiteController@store')->name('site.store');
+		Route::post('/site','SiteController@index')->name('site.search');
+		Route::post('/siteStore','SiteController@store')->name('site.store');
 		Route::post('/store_room','SiteController@store_room')->name('room.store');
 		Route::get('/generate_qr/{arr}', 'SiteController@generate_qr')->name('generate.qr');
-		Route::post('/site/delete_room/{id}','SiteController@delete_room')->name('room.destroy');
+		Route::get('/deleteRoom/{id}','SiteController@delete_room')->name('room.destroy');
+		Route::get('/deleteBuilding/{id}','SiteController@delete_building')->name('building.destroy');
 		
 		Route::get('/questionTemplate','QuestionTemplateController@index')->name('question.index');
 		Route::get('/questionTemplate/add','QuestionTemplateController@addMore')->name('question.add');
@@ -142,7 +152,7 @@ Route::middleware(['auth'])->group(function () {
 	});	
 	Route::middleware(['permission:import_export_excel'])->group(function () {
 		Route::post('/exportExcel', 'CoreController@export_to_excel')->name('export.excel');
-		Route::post('/import_excel', 'CoreController@import_from_excel')->name('import_from_excel');
+		Route::post('/import_excel/{type}', 'CoreController@import_from_excel')->name('import_from_excel');
 	});
 
 	Route::get('reports/','ReportController@index')->name('report.index');

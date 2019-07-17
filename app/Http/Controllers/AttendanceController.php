@@ -349,9 +349,11 @@ class AttendanceController extends Controller
           }
 
         //This is for search according to users timezone
-        if($request->search_by_date){
-          $search_date = date('Y-m-d',strtotime($request->search_by_date));
-          $site_attendances = $site_attendances->where('tz_login_date',$search_date);
+        if($request->search_date_from_to){
+          $search_date_from_to = explode("-", $request->search_date_from_to);
+          $search_date_from = date('Y-m-d',strtotime($search_date_from_to[0]));
+          $search_date_to = date('Y-m-d',strtotime($search_date_from_to[1]));
+          $site_attendances = $site_attendances->where('tz_login_date','>=',$search_date_from)->where('tz_login_date','<=',$search_date_to);
         }
 
         return view('backend.pages.site_attendance',compact('site_attendances','site_attendances_search'));

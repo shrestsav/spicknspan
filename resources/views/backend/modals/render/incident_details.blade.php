@@ -1,6 +1,15 @@
 <div class="col-md-12">
   <div class="pull-right">
-    <a data-toggle="modal" data-target="#modal-info"><button type="button" class="btn btn-success">Approve</button></a>
+    
+      <a data-toggle="modal" data-target="#modal-info">
+        <button type="button" class="btn btn-success">
+          @if($incident_details->status===0)
+            Approve
+          @elseif($incident_details->status===1)
+            Approved
+          @endif
+        </button>
+      </a>  
     <a href="{{route('incident.print',$incident_details->id)}}" target="_blank"><button type="button" class="btn btn-primary">Print to Form</button></a>
   </div>
 </div>
@@ -278,6 +287,15 @@
         <input type="hidden" name="incident_id" value="{{$incident_details->id}}">
         <div class="modal-body">
           <div class="row">
+            <div class="col-md-12">
+              <div class="col-md-12">
+                <div class="form-group ext_auth"{{--  style="display: none;" --}}>
+                  <label>HSE Manager</label>
+                  <input type="text" name="HSE_manager" class="form-control" value="{{$incident_details->HSE_manager}}" required>
+                  <div class="help-block with-errors"></div>
+                </div>
+              </div>
+            </div>
             <div class="col-md-6">
               <div class="col-md-12">
                 <div class="form-group">
@@ -340,7 +358,12 @@
           <br><br>
         </div>
         <div class="modal-footer" style="text-align: center;">
-          <button type="button" class="btn btn-outline update_incident_status">Update</button>
+          @if($incident_details->status===0)
+            <button type="button" class="btn btn-outline update_incident_status">Approve</button>
+          @elseif($incident_details->status===1)
+            <button type="button" class="btn btn-outline" disabled>Approved</button>
+          @endif
+          
         </div>
       </form>
     </div>

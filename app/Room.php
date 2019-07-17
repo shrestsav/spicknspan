@@ -12,4 +12,9 @@ class Room extends Model
     {
         return $this->hasMany(SiteAttendance::class);
     }
+
+    public function building()
+    {
+        return $this->belongsTo(Building::class);
+    }
 }

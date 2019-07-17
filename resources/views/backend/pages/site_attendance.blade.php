@@ -11,11 +11,6 @@
       .filter_label{
         padding: 20px;
       }
-      .search_by_date{
-        display: inline-table;
-        width: 150px; 
-        top: 14px;
-      }
   </style>
 @endpush
 @section('content')
@@ -39,13 +34,9 @@
     <div class="col-md-12">
       <div class="box">
         <div class="box-header">
-          {{-- <h3 class="box-title">Logged in Users</h3> --}}
-          
-          {{-- Search Form --}}
           <div class="search_form">
             <form autocomplete="off" role="form" action="{{route('site.attendance.search')}}" method="POST" enctype="multipart/form-data">
               @csrf
-              {{-- <label class="filter_label">Filter</label> --}}
               @php 
                 $search_arr = [
                   'User Name' => [
@@ -94,12 +85,15 @@
                   @endforeach
                 </select>
               @endforeach
-
               <div class="input-group date search_by_date">
                 <div class="input-group-addon">
                   <i class="fa fa-calendar"></i>
                 </div>
-                <input type="text" class="form-control pull-right" name="search_by_date" id="datepicker" placeholder="Select Date" @if(Request::input('search_by_date')) value="{{Request::input('search_by_date')}}" @endif>
+                @php
+                  $today = date('m/d/Y');
+                  $pastOneMonth = date("m/d/Y", strtotime( date( "m/d/Y", strtotime( date("m/d/Y") ) ) . "-1 month" ) );
+                @endphp
+                <input type="text" class="form-control pull-right" id="search_date_from_to" name="search_date_from_to" @if(Request::input('search_date_from_to')) value="{{Request::input('search_date_from_to')}}" @else value="{{$pastOneMonth.' - '.$today}}" @endif>
               </div>
               &nbsp; &nbsp; &nbsp;
               <button type="submit" class="btn btn-primary">Search</button>
@@ -155,7 +149,6 @@
               @endforeach
               </tbody>
             </table>
-             {{-- {{ $site_attendances->links() }}  --}}
           @else
             <div class="col-md-12" style="text-align: center;">
               No results found
@@ -194,7 +187,8 @@
       autoclose: true
     });
 
-
+    $('#search_date_from_to').daterangepicker();
+    
     // Search Switch Algorithms
     search_by_classes = {
       search_by_building_name:'search_by_building_no', 

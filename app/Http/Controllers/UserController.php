@@ -175,17 +175,7 @@ class UserController extends Controller
             'message'    => 'These are your login credentials for Spick and Span Portal. Please change your password immediately after you receive this email for User privacy',
           ];
 
-          // Mail::send(new sendMail($mailData));
-          //Mail the user
-          // $name = $request['name'];
-          // $username = $request['email'];
-          // $password = $request['password'];
-          // Mail::send('backend.layouts.email.register_user', array('username' => $username, 'password' => $password), function($message) use ($name,$username)
-          // {      
-          //     $message->from('support@trackncheck.com', 'Spick And Span');
-          //     $message->to($username)->subject('Greetings '.$name.': Welcome to Spick and Span Team');
-          // });
-
+          Mail::send(new sendMail($mailData));
         }
 
         return redirect()->back()->with('message', 'Added Successfully');

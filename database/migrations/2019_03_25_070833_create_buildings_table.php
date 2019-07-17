@@ -23,6 +23,7 @@ class CreateBuildingsTable extends Migration
             $table->string('gps_coordinates')->nullable();
             $table->string('added_by')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
