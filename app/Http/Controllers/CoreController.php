@@ -8,6 +8,7 @@ use App\UserDetail;
 use App\UserSetting;
 use App\SiteAttendance;
 use App\Roster;
+use App\RosterTimetable;
 use App\Wages;
 use App\Building;
 use App\Room;
@@ -18,6 +19,7 @@ use Illuminate\Http\Request;
 use Auth;
 use Entrust;
 use Carbon\Carbon;
+use Maatwebsite\Excel\HeadingRowImport;
 
 use Illuminate\Support\Facades\Validator;
 use Exception;
@@ -49,6 +51,24 @@ class CoreController extends Controller
         $errors = json_decode($e->getMessage());
         return back()->withErrors($errors);
         return var_dump($e->getMessage());
+      }
+    }
+
+    if($type=='rosters'){
+      $headings = (new HeadingRowImport)->toArray(request()->file('file'));
+      $headings = $headings[0][0];
+      // return $headings;
+      $data = [
+        'headings' => $headings,
+        'added_by' => Auth::id(),
+      ];
+      try{
+        Excel::import(new DataImport($type,$data),request()->file('file'));
+      } 
+      catch (Exception $e){
+        $errors = json_decode($e->getMessage());
+        return back()->withErrors($errors);
+        // return var_dump($e->getMessage());
       }
     }
 
@@ -170,6 +190,12 @@ class CoreController extends Controller
           $head[] = $date;
         }
       }
+    }    
+    elseif($type=='roster_details'){
+      $data = RosterTimetable::select('date','start_time','end_time')
+                            ->where('roster_id',$request->roster_id)
+                            ->get();
+        $head = ['Date','Start Time','End Time'];
     }
 
     if(!count($data)){

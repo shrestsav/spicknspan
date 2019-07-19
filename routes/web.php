@@ -91,8 +91,10 @@ Route::middleware(['auth'])->group(function () {
 	
 	Route::get('/roster','RosterController@index')->name('roster.index');
 	Route::post('/roster','RosterController@index')->name('roster.index');
+	Route::post('/ajaxRosterDetails','RosterController@ajaxRosterDetails')->name('roster.details');
 
 	Route::get('/sheets','RosterController@sheets')->name('roster.sheets');
+	Route::post('/sheets','RosterController@sheets')->name('roster.sheets');
 
 	//Allow these routes for admin and contractor only
 	Route::middleware(['role:superAdmin|contractor'])->group(function () {
@@ -129,6 +131,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('/ajax_update_roster','RosterController@ajax_update_roster')->name('roster.update');
 		Route::post('/ajax_store_roster','RosterController@ajax_store_roster')->name('roster.store');
 		Route::post('/ajaxCheckIfRosterExists','RosterController@ajaxCheckIfRosterExists')->name('roster.check');
+
 
 		Route::get('/roster-variation','RosterVariationController@index')->name('roster_variation.index');
 		Route::post('approveVariation','RosterVariationController@approveVariation')->name('variation.approve');

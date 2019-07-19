@@ -297,6 +297,23 @@ class RosterController extends Controller
             return response()->json(['success'=>'Safe to Proceed']);
     }
 
+    public function ajaxRosterDetails(Request $request)
+    {
+        $roster_details = Roster::where('rosters.id',$request->roster_id)
+                        ->with('client','employee','timetable')
+                        ->first();
+        // return json_encode($roster_details);
+        $view = view('backend.modals.render.roster_details')->with([
+           'roster_details' => $roster_details ])->render();
+
+        $response = [
+           'status' => true,
+           'title' => 'Roster Details',
+           'html' => $view
+        ];
+       return response()->json($response);
+    }
+
     public function rosterNotify(Request $request)
     {
         $rule = [

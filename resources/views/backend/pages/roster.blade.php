@@ -84,6 +84,35 @@
 
 <section class="content">
   <div class="row">
+    <div class="col-lg-12">
+      <div class="box box-default collapsed-box box-solid">
+        <div class="box-header">
+          <h3 class="box-title">IMPORT FROM EXCEL
+            <small>Format: xlsx</small>
+          </h3>
+          <div class="pull-right box-tools">
+            <button type="button" class="btn btn-info btn-sm" data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse">
+              <i class="fa fa-plus"></i></button>
+            <button type="button" class="btn btn-info btn-sm" data-widget="remove" data-toggle="tooltip" title="" data-original-title="Remove">
+              <i class="fa fa-times"></i></button>
+          </div>
+        </div>
+        <div class="box-body">
+          <form action="{{ route('import_from_excel','rosters') }}" method="POST" enctype="multipart/form-data" data-toggle="validator">
+            @csrf
+            {{-- <input type="hidden" name="user_type" class="form-control" value="{{$user_type}}"> --}}
+            <div class="col-md-12" style="text-align: center;">
+              <div class="form-group">
+                <label for="file"><a href="javascript:;"  data-toggle="modal" data-target="#modal-info"> Please Read this before using this feature</a></label><br><br>
+                <input type="file" name="file" class="form-control jfilestyle" required>
+                <div class="help-block with-errors"></div>
+                <button class="btn btn-success" type="submit">Import User Data</button>
+              </div>
+            </div>  
+          </form>
+        </div>
+      </div>
+    </div>
     <div class="col-md-12">
       @permission('import_export_excel')
         <div class="pull-right">
@@ -179,6 +208,9 @@
                 <a href="javascript:;" class="btn btn-link email_employee" data-employee-mail="{{$emp_mail}}" data-employee-name="{{$emp_name}}" title="Notify Employee of Roster Update">
                   <i class="fa fa-envelope" aria-hidden="true"></i>Notify Employee
                 </a>
+                <a href="javascript:;" class="btn btn-link roster_details" data-roster_id="{{$r_id}}" title="View Roster Summary">
+                  <i class="fa fa-envelope" aria-hidden="true"></i>Roster Summary
+                </a>
                 {{--<a href="{{route('user.edit',$user->id)}}" class="btn btn-link" title="Edit Details">
                   <i class="fa fa-pencil-square-o" aria-hidden="true"></i>Edit Details
                 </a> --}}
@@ -258,7 +290,43 @@
             'modalSize' => 'tiny_modal_dialog',
         ])
 
+@include('backend.modals.modal', [
+            'modalId' => 'rosterDetailsModal',
+            'modalFile' => '__modal_body',
+            'modalTitle' => __('Roster Summary'),
+            'modalSize' => 'large_modal_dialog',
+        ])
 
+<div class="modal modal-info fade" id="modal-info">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Read Very Carefully</h4>
+      </div>
+      <div class="modal-body">
+        <h3></h3>
+        <div>
+          <ol>
+            <li>First Download the excel file provided here for the correct format to upload</li>
+            <li>Now open the file and replace the dummy data with your actual data</li>
+            <li>Please donot edit or remove any header columns</li>
+            <li>The yellow marked column should not be left empty</li>
+            <li>Donot leave any empty row after heading row or in between any of the rows</li>
+            <li>If you need to keep some day in roster as empty like in holidays, then just leave it empty (Very Important)</li>
+            <li>Heading Numbers 1 2 3 4 ... all represents particular day of the mentioned month.</li>
+            <li>Client and Employee email should exists in the system</li>
+            <li>After you have filled X number of rows, save and upload it.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="modal-footer" style="text-align: center;">
+        <a href="{{ asset('files/import_from_excel_format(rosters).xlsx') }}"><button type="button" class="btn btn-outline">Download Excel Format</button></a>
+      </div>
+    </div>
+  </div>
+</div>
 
 @endsection
 
@@ -610,6 +678,25 @@
       detailModel.find('.modal-content .modal-title').html(emp_name);
       detailModel.find('.modal-body').html(html);
       detailModel.modal('show');
+    });
+
+    $('body').on('click','.roster_details',function(e){
+      e.preventDefault();
+      var roster_id = $(this).data('roster_id');
+      $.ajax({
+            type: 'POST',
+            url: SITE_URL + 'ajaxRosterDetails',
+            data: {
+                'roster_id': roster_id
+            },
+            dataType: 'json'
+        }).done(function (response) {
+            console.log(response);
+            detailModel = $('#rosterDetailsModal');
+            detailModel.find('.modal-content .modal-title').html(response.title);
+            detailModel.find('.modal-body').html(response.html);
+            detailModel.modal('show');
+        });
     });
 
     $('body').on('click','.roster_notify',function(e){
