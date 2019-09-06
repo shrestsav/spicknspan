@@ -24,7 +24,10 @@
         "vue-template-compiler": "^2.6.10"
     },
     "dependencies": {
+        "jexcel": "^3.3.0",
+        "jsuites": "^2.1.0",
         "vue-dynamic-select": "^1.0.13",
+        "vue-moment": "^4.0.0",
         "vue-router": "^3.0.6",
         "vue-select": "^3.1.0",
         "vue2-datepicker": "^2.11.2",

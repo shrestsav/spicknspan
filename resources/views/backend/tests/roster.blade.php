@@ -53,6 +53,10 @@
     opacity: 1;
   }
 </style>
+<style type="text/css">
+  #rosterSheets td.ui-selecting { background: #e2ffbb; }
+  #rosterSheets td.ui-selected { background: #8dc63f; color: white; }
+</style>
 @endpush
 
 @section('content')
@@ -106,7 +110,7 @@
                 <label for="file"><a href="javascript:;"  data-toggle="modal" data-target="#modal-info"> Please Read this before using this feature</a></label><br><br>
                 <input type="file" name="file" class="form-control jfilestyle" required>
                 <div class="help-block with-errors"></div>
-                <button class="btn btn-success" type="submit">Import Roster</button>
+                <button class="btn btn-success" type="submit">Import User Data</button>
               </div>
             </div>  
           </form>
@@ -134,10 +138,12 @@
     <div class="col-md-12">
       <div class="box box-primary">
         <div class="box-header with-border">
-          {{-- Filter Form --}}
-          <div class="col-md-5">
+          <div class="box-header">
+            {{-- <h3 class="box-title"></h3> --}}
+
+            {{-- Filter Form --}}
             <div class="search_form">
-              <form autocomplete="off" role="form" action="{{route('roster.index')}}" method="POST" enctype="multipart/form-data" style="margin-top: -14px">
+              <form autocomplete="off" role="form" action="{{route('roster.index')}}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @foreach($search_arr as $part => $arr)
                   <select class="select2 {{$arr['name']}}" name="{{$arr['name']}}">
@@ -158,38 +164,20 @@
                 <button type="submit" class="btn btn-primary">SEARCH</button>
               </form>
             </div>
-          </div>
-          <div class="col-md-3">
             @role('superAdmin','contractor')
-              <button type="button" class="btn btn-danger edit_rosters">EDIT</button>
-              <button id="addrow" class="btn btn-success" style="display: none;">Add Row</button>
-              <button type="button" class="btn btn-danger delete_all" disabled style="display: none;">Delete</button>
+            <button type="button" class="btn btn-danger edit_rosters pull-right">EDIT</button>
             @endrole
-          </div>
-          <div class="col-md-4">
-            <div class="box-tools">
-              <div class="pull-right">
-                <select class="select2 week_selector">
-                  <option disabled selected value>Select Week</option>
-                  @foreach($week as $a)
-                    <option value="{{$a}}">Week {{$a}}</option>
-                  @endforeach
-                </select>
-              </div>
-              @role('superAdmin','contractor')
-                <div class="input-group input-group-sm copy_to_month pull-right" style="width: 150px; display: none;">
-                  <input type="text" id="copy_to_month" class="form-control pull-right" style="width:100px;" placeholder="Copy Roster" autocomplete="off">
-                  <div class="input-group-btn">
-                    <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
-                  </div>
-                </div>
-              @endrole
+            <div class="pull-right">
+              <select class="select2 week_selector">
+                <option disabled selected value>Select Week</option>
+                @foreach($week as $a)
+                  <option value="{{$a}}">Week {{$a}}</option>
+                @endforeach
+              </select>
             </div>
-          </div>
-
-
+          </div> 
         </div>
-        <div class="box-body {{-- table-responsive  --}}no-padding">
+        <div class="box-body {{-- table-responsive  --}}no-padding" id="rosterSheets">
           <table id="rosterTable" class="table {{-- table-hover --}} table-bordered dataTable">
             <thead class="thead-dark">
               <tr role="row">
@@ -210,6 +198,9 @@
             </thead>
 
             <tbody class="roster-list readonly_roster">
+            @php 
+              $y = 0;
+            @endphp  
             @foreach($rosters as $client_id => $roster_by_clients)
               @foreach($roster_by_clients as $emp_id => $emp_rosters)
               
@@ -225,10 +216,7 @@
                   <i class="fa fa-envelope" aria-hidden="true"></i>Notify Employee
                 </a>
                 <a href="javascript:;" class="btn btn-link roster_details" data-roster_id="{{$r_id}}" title="View Roster Summary">
-                  <i class="fa  fa-info-circle" aria-hidden="true"></i>Roster Summary
-                </a>
-                <a href="javascript:;" class="btn btn-link roster_clone_row" data-roster_id="{{$r_id}}" title="Create New Clone">
-                  <i class="fa fa-clone" aria-hidden="true"></i>Create Clone
+                  <i class="fa fa-envelope" aria-hidden="true"></i>Roster Summary
                 </a>
                 {{--<a href="{{route('user.edit',$user->id)}}" class="btn btn-link" title="Edit Details">
                   <i class="fa fa-pencil-square-o" aria-hidden="true"></i>Edit Details
@@ -244,6 +232,7 @@
                 <td>
                   {{$emp_rosters[0]->client->name}}
                 </td>
+                @php $x=0; @endphp
                 @foreach($all_days as $day => $date)
                   @php
                     $start_time = '';
@@ -271,28 +260,31 @@
                       }
                     }
                   @endphp
-                  <td class="{{$week}}">
+                  <td class="{{$week}}" data-x="{{$x}}"  data-y="{{$y}}">
                     <input type="text" class="form-control timepicker txtTime time_from" value=" @if($status){{config('setting.leave_types')[$leave_type]}} @else{{$start_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif readonly>
                        
                     <input type="text" class="form-control timepicker txtTime time_to" value="@if($status){{config('setting.leave_types')[$leave_type]}} @else{{$end_time}}@endif" data-date = "{{$year.'-'.$month.'-'.$day}}" @if($status)disabled @endif readonly>
                   </td>
+                  @php $x++; @endphp
                 @endforeach
               </tr>
+              @php $y++; @endphp
               @endforeach
             @endforeach
             </tbody>
           </table>
+          
         </div>
         @role('superAdmin','contractor')
         <div class="box-footer clearfix">
           <div class="col-md-4">
-            
+            <button type="button" class="btn btn-danger delete_all" disabled>Delete</button>
           </div>
           <div class="col-md-4 text-center">
             {{ $customPaginate->links() }}
           </div>
           <div class="col-md-4">
-            
+            <button id="addrow" class="btn btn-success pull-right" disabled>Add Row</button>
           </div>
         </div>
         @endrole
@@ -355,7 +347,7 @@
   // Initialize
     $('.timepicker').timepicker({ 'timeFormat': 'H:i' });
 
-    $('#year_month, #copy_to_month').datepicker({
+    $('#year_month').datepicker({
         autoclose: true,
         minViewMode: 1,
         format: 'yyyy-mm'
@@ -378,11 +370,6 @@
     e.preventDefault();
     var my = $(this);
     var row_type = my.parent().parent().data('row-type');
-    var cloned = my.parent().parent().data('cloned');
-    if(cloned)
-      var showNotification = 0;
-    else
-      var showNotification = 1;
     var type = 'start_time';
     var time_from = my.val();
     var date = my.data('date');
@@ -390,10 +377,10 @@
     if(row_type=='new_row'){
       var client_id = my.parent().siblings('.client_td').children('.client_name').val();
       var employee_id = my.parent().siblings('.employee_td').children('.employee_name').val();
-      newTimetable(my,type,client_id,employee_id,time_from,date,showNotification);
+      newTimetable(my,type,client_id,employee_id,time_from,date);
     }
     else if(row_type=='old_row'){
-      updateTimetable(my,type,roster_id,time_from,date,showNotification);
+      updateTimetable(my,type,roster_id,time_from,date);
     }
     
   });
@@ -402,11 +389,6 @@
     e.preventDefault();
     var my = $(this);
     var row_type = my.parent().parent().data('row-type');
-    var cloned = my.parent().parent().data('cloned');
-    if(cloned)
-      var showNotification = 0;
-    else
-      var showNotification = 1;
     var type = 'end_time';
     var time_to = my.val();
     var date = my.data('date');
@@ -414,14 +396,14 @@
     if(row_type=='new_row'){
       var client_id = my.parent().siblings('.client_td').children('.client_name').val();
       var employee_id = my.parent().siblings('.employee_td').children('.employee_name').val();
-      newTimetable(my,type,client_id,employee_id,time_to,date,showNotification);
+      newTimetable(my,type,client_id,employee_id,time_to,date);
     }
     else if(row_type=='old_row'){
-      updateTimetable(my,type,roster_id,time_to,date,showNotification);
+      updateTimetable(my,type,roster_id,time_to,date);
     }
   });
 
-  function updateTimetable(my,type,roster_id,time,date,showNotification){
+  function updateTimetable(my,type,roster_id,time,date){
     $.ajax({
       type:'post',
       url: SITE_URL+'ajax_update_roster',
@@ -434,21 +416,19 @@
       },
       success:function(data) {
         console.log(data);
-        if(showNotification)
-          showNotify('success','Roster Set Successfully');
+        showNotify('success','Roster Set Successfully');
       },
       error: function(response){
         $.each(response.responseJSON, function(index, val){
           console.log(index+":"+val);
-          if(showNotification)
-            showNotify('danger',val); 
+          showNotify('danger',val); 
         });
         my.val('');
       }
     });
   }
 
-  function newTimetable(my,type,client_id,employee_id,time,date,showNotification){
+  function newTimetable(my,type,client_id,employee_id,time,date){
     $.ajax({
       type:'post',
       url: SITE_URL+'ajax_store_roster',
@@ -462,14 +442,12 @@
       },
       success:function(data) {
         console.log(data);
-        if(showNotification)
-          showNotify('success','Roster Set Successfully');
+        showNotify('success','Roster Set Successfully');
       },
       error: function(response){
         $.each(response.responseJSON, function(index, val){
           console.log(index+":"+val);
-          if(showNotification)
-            showNotify('danger',val); 
+          showNotify('danger',val); 
         });
         my.val('');
       }
@@ -542,7 +520,7 @@
         cols += '<input type="text" class="form-control timepicker txtTime time_to"  data-date = "{{$year.'-'.$month.'-'.$day}}">';
         cols += '</td>@endforeach';
         newRow.append(cols);
-        $("tbody.roster-list").prepend(newRow);
+        $("tbody.roster-list").append(newRow);
         $('.timepicker').timepicker({ 'timeFormat': 'H:i' });
 
         counter++;
@@ -568,7 +546,6 @@
     $('body').on('change','.employee_name',function(e){
       e.preventDefault();
       var t = $(this);
-      const cloned = t.parent().parent().data('cloned');
       var employee_id = t.val();
       $.ajax({
         type:'post',
@@ -581,11 +558,9 @@
         success:function(data) {
           console.log(data);
           $('.client_name').prop('disabled',0);
-          if(!cloned){
-            t.parent().parent().find('td').each (function(){
-              $(this).children('.txtTime').prop('disabled',0).val('');
-            });
-          }
+          t.parent().parent().find('td').each (function(){
+            $(this).children('.txtTime').prop('disabled',0).val('');
+          });
           if(data.length >= 0){
             data.forEach(function(e){
               var from = new Date(e.from);
@@ -609,7 +584,6 @@
       e.preventDefault();
       var my = $(this);
       var client_id = my.val();
-      const cloned = my.parent().parent().data('cloned');
       var employee_id = my.parent().siblings('.employee_td').children('.employee_name').val();
       $.ajax({
         type:'post',
@@ -623,13 +597,6 @@
         success:function(data) {
           console.log(data);
           $('.ibtnDel').hide();
-          if(cloned){
-            showNotify('success','Roster Copy Started. Please Wait .....',true); 
-            my.parent().parent().find('td').each (function(){
-              $(this).children('.time_from').trigger('change');
-              $(this).children('.time_to').trigger('change');
-            });
-          }
         },
         error: function(response){
           $.each(response.responseJSON, function(index, val){
@@ -695,16 +662,14 @@
 
     $('body').on('click','.edit_rosters',function(e){
       $('.time_from, .time_to').prop('readonly',false);
-      $('.delete_all').prop('disabled',false);
-      $('#addrow').show();
+      $('.delete_all, #addrow').prop('disabled',false);
       $('tbody').removeClass('readonly_roster').addClass('editable_roster');
       $(this).html('DONE').removeClass('btn-danger edit_rosters').addClass('btn-success done_rosters');
     });
 
     $('body').on('click','.done_rosters',function(e){
       $('.time_from, .time_to').prop('readonly',true);
-      $('.delete_all').prop('disabled',true);
-      $('#addrow').hide();
+      $('.delete_all, #addrow').prop('disabled',true);
       $('tbody').addClass('readonly_roster').removeClass('editable_roster');;
       $(this).html('EDIT').removeClass('btn-success done_rosters').addClass('btn-danger edit_rosters');
     });
@@ -775,29 +740,6 @@
         cont.focus();
       }
     });
-
-    $('body').on('click','.roster_clone_row',function(e){
-      e.preventDefault();
-      var roster_id = $(this).data('roster_id');
-      var roster_row = $('tr[dataid="'+roster_id+'"]');
-      var cloned = roster_row.clone().attr('data-row-type', 'new_row').attr('data-cloned', '1');
-      
-      $("tbody.roster-list").prepend(cloned);
-      
-      var checkbox_col = '<span class="ibtnDel"><i class="fa fa-times" aria-hidden="true"></i></span>';
-      var employee_col = '<select class="employee_name form-control" required>';
-      employee_col += '<option value="" selected disabled>Select Employee</option>';
-      employee_col += '@foreach($employees as $user)<option value="{{$user->id}}">{{$user->name}}</option>@endforeach';
-      employee_col += '</select>';
-      var client_col = '<select class="client_name form-control" required disabled>';
-      client_col += '<option value selected disabled>Select Client</option>';
-      client_col += '@foreach($clients as $user)<option value="{{$user->id}}">{{$user->name}}</option>@endforeach</select>';
-
-      cloned.children('td:first-child').html(checkbox_col);
-      cloned.children('td:nth-child(2)').addClass('employee_td').html(employee_col);
-      cloned.children('td:nth-child(3)').addClass('client_td').html(client_col);
-
-    });
 </script>
 
 <script type="text/javascript">
@@ -818,7 +760,6 @@
           checkboxes.iCheck('uncheck');
       }
   });
-
   checkboxes.on('ifChanged', function(event){
       if(checkboxes.filter(':checked').length == checkboxes.length) {
           checkAll.prop('checked', 'checked');
@@ -826,52 +767,8 @@
           checkAll.prop( "checked", false );
       }
       checkAll.iCheck('update');
-      if(checkboxes.filter(':checked').length >= 1) {
-        $('.copy_to_month').show();
-        $('.delete_all').show();
-      }
-      else{
-        $('.copy_to_month').hide();
-        $('.delete_all').hide();
-      }
   });
 
-  $('.copy_to_month').on('change',function(e){
-    e.preventDefault();
-    var copy_year_month = $('#copy_to_month').val();
-    var sel_Rows = []; 
-    $(".sub_chk:checked").each(function() {  
-        sel_Rows.push($(this).parent().parent().parent().data('roster-id'));
-    });  
-    console.log(sel_Rows);
-    swal({
-      title: "Are you sure?",
-      text: "If roster already exists, nothing will be copied",
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    })
-    .then((willCopy) => {
-      if (willCopy) {
-        $.ajax({
-          type:'POST',
-          url: SITE_URL+'copyRoster',
-          dataType: 'json',
-          data:{                
-            sel_Rows: sel_Rows,                
-            year_month: copy_year_month,                
-          },
-          success:function(data) {
-            console.log(data);
-            showNotify('success','Roster for selected users have been copied'); 
-          },
-          error: function(response){
-          
-          }
-        });
-      } 
-    }); 
-  })
 
     //For default checkboxes
     // $('#check_all').on('click', function(e){
@@ -893,26 +790,71 @@
       'from' : '',
       'to'   : ''
     };
+    var copied = [];
  
-    $('body').on('click','.editable_roster td',function(e){
-      $('td').css('border','unset')
-      $(this).css('border','1px solid #9a9a9a');
-    })
+    // $('body').on('click','.editable_roster td',function(e){
+    //   $('td').css('border','unset')
+    //   $(this).css('border','1px solid #9a9a9a');
+    // })
     // $(".editable_roster td").bind("copy", function(e){
-    $('table').on('copy','.editable_roster td',function(e){
-      var copy_from = $(this).children('.time_from').val();
-      var copy_to = $(this).children('.time_to').val();
-      timetable['from'] = copy_from;
-      timetable['to'] = copy_to;
-      showNotify('success','Copied to Clipboard');  
-    });
+    // $('table').on('copy','.editable_roster td',function(e){
+    //   var copy_from = $(this).children('.time_from').val();
+    //   var copy_to = $(this).children('.time_to').val();
+    //   timetable['from'] = copy_from;
+    //   timetable['to'] = copy_to;
+    //   showNotify('success','Copied to Clipboard');  
+    // });
 
     // $(".editable_roster td").bind("paste", function(e){
-    $('table').on('paste','.editable_roster td',function(e){
-      $(this).children('.time_from').val(timetable['from']).trigger("change");;
-      $(this).children('.time_to').val(timetable['to']).trigger("change");;
+    // $('table').on('paste','.editable_roster td',function(e){
+    //   $(this).children('.time_from').val(timetable['from']).trigger("change");
+    //   $(this).children('.time_to').val(timetable['to']).trigger("change");
+    // });
+
+    $( "#rosterSheets" ).selectable({
+      delay: 0
+    });
+    // $(".editable_roster td").bind("copy", function(e){
+    $('body').on('copy','.content-wrapper',function(e){
+      e.preventDefault();
+      copyRoster();
     });
 
+    $('table').on('paste','.editable_roster td',function(e){
+      console.log(copied)
+      var sel_x = $(this).data('x');
+      var sel_y = $(this).data('y');
+      var copy_x = copied[0]['x'];
+      var copy_y = copied[0]['y'];
+      var diff_x = Math.abs(copy_x-sel_x);
+      var diff_y = Math.abs(copy_y-sel_y);
+      for(var i=0; i<copied.length; i++){
+        var paste_x = copied[i]['x']+diff_x;
+        var paste_y = copied[i]['y']+diff_y;
+        var elm = $('td').filter('[data-x="'+paste_x+'"], [data-y="'+paste_y+'"]').children('.time_from').val(copied[i]['from']);
+        var elm = $('td').filter('[data-x="'+paste_x+'"], [data-y="'+paste_y+'"]').children('.time_to').val(copied[i]['to']);
+      }
+      // $(this).children('.time_from').val(timetable['from']).trigger("change");
+      // $(this).children('.time_to').val(timetable['to']).trigger("change");
+    });
+
+    function copyRoster(){
+      $('td.ui-selected').each(function(index) {
+        var cx = $(this).data('x');
+        var cy = $(this).data('y');
+        var from = $(this).children('.time_from').val();
+        var to = $(this).children('.time_to').val();
+        var tempObj = {
+          'x'   :cx,
+          'y'   :cy,
+          'from':from,
+          'to'  :to
+        }
+        copied.push(tempObj);
+      });
+      console.log(copied)
+      showNotify('success','Copied to Clipboard');  
+    }
 
   </script>
 @endpush

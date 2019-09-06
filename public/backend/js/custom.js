@@ -26,7 +26,11 @@ $(document).ready(function() {
 
 });
 
-function showNotify(type,message){
+function showNotify(type,message,progressbar = false){
+    if(progressbar)
+      var delayTime = 20000;
+    else
+      var delayTime = 4000;
     if(type=='success')
       var icon = 'glyphicon glyphicon-ok';
     else if(type=='danger')
@@ -39,10 +43,12 @@ function showNotify(type,message){
     },{
       // settings
       type: type,
+      showProgressbar: progressbar,
       placement: {
         from: "bottom",
         align: "right"
       },
+      delay: delayTime,
       z_index: 1300,
       template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
                 '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +

@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="{{ asset('backend/css/AdminLTE.min.css') }}">
   {{-- Theme Color CSS --}}
   <link rel="stylesheet" href="{{ asset('backend/css/skin-green.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('backend/css/jquery-ui.min.css') }}">
   <link rel="stylesheet" href="{{ asset('backend/css/jquery-filestyle.min.css') }}">
   <link rel="stylesheet" href="{{ asset('backend/css/daterangepicker.css') }}">
   <link rel="stylesheet" href="{{ asset('backend/css/animate.css') }}">

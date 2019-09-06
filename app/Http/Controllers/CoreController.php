@@ -37,7 +37,13 @@ class CoreController extends Controller
       $data = [
         'user_type' => $request->user_type,
       ];
-    	Excel::import(new DataImport($type,$data),request()->file('file'));
+      try{
+    	  Excel::import(new DataImport($type,$data),request()->file('file'));
+      } 
+      catch (Exception $e){
+        $errors = json_decode($e->getMessage());
+        return back()->withErrors($errors);
+      }
     }
 
     if($type=='wages'){

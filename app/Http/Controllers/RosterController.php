@@ -89,6 +89,63 @@ class RosterController extends Controller
         return view('backend.pages.roster',compact('rosters','employees', 'clients','leaves','all_days','year','month','customPaginate'));
     }
 
+    public function test(Request $request)
+    {
+        // I think Roster maa Eager loading garyo bhaney load kam parla
+        if($request->year_month){
+            $year_month = explode('-', $request->year_month);
+            $year = $year_month[0];
+            $month = $year_month[1];
+        }
+        else{
+            $year = date('Y');
+            $month = date('m');
+        }
+
+        $all_days = $this->dates_month($month,$year);
+
+        // This is used for pagination of roster as direct pagination on rosters query is not practical for this case, see the code and you'll get it
+        $customPaginate = Roster::where('full_date','=',$year.'-'.$month);
+
+        if($request->search_by_employee_id)
+            $customPaginate->where('employee_id','=',$request->search_by_employee_id);
+        if($request->search_by_client_id)
+            $customPaginate->where('client_id','=',$request->search_by_client_id);
+        if(Entrust::hasRole('contractor')){
+            $customPaginate->where('added_by','=',Auth::id());
+        }
+        if(Entrust::hasRole('employee')){
+            $customPaginate->where('employee_id','=',Auth::id());
+        }
+        $customPaginate = $customPaginate->orderBy('created_at','desc')->simplePaginate(config('setting.rows'));
+        //Now grab roster ids & fetch rosters ids to get actual data
+        $rostIds = $customPaginate->pluck('id')->toArray();
+
+        $rosters = Roster::select('rosters.id',
+                                  'rosters.employee_id',
+                                  'rosters.client_id',
+                                  'rosters.full_date',
+                                  'rosters.added_by',
+                                  'rt.id as rt_id',
+                                  'rt.date',
+                                  'rt.start_time',
+                                  'rt.end_time',
+                                  'rt.status')
+                        ->join('roster_timetables as rt','rt.roster_id','=','rosters.id')
+                        ->whereIn('rosters.id',$rostIds)
+                        ->with('client','employee')
+                        ->orderBy('rosters.created_at','desc');
+        
+        $leaves = LeaveRequest::where('status',1)->get();
+
+        $employees = $this->user->employeeList();
+        $clients = $this->user->clientList();
+        $rosters = $rosters->get();
+        $rosters = $rosters->groupBy(['client_id','employee_id']);
+
+        return view('backend.tests.roster',compact('rosters','employees', 'clients','leaves','all_days','year','month','customPaginate'));
+    }
+
     public function sheets(Request $request)
     {
         // I think Roster maa Eager loading garyo bhaney load kam parla
@@ -143,6 +200,7 @@ class RosterController extends Controller
         $rosters = $rosters->get();
         $rosters = $rosters->groupBy(['client_id','employee_id']);
 
+        // return $rosters;
         return view('backend.pages.sheets',compact('rosters','employees', 'clients','leaves','all_days','year','month','customPaginate'));
     }
 
@@ -180,6 +238,34 @@ class RosterController extends Controller
             Roster::find($sel_Row)->delete();
         }
         return response()->json("Roster Deleted successfully");
+    }
+
+    public function copyRoster(Request $request)
+    {
+        $year_month = explode('-', $request->year_month);
+        foreach($request->sel_Rows as $roster_id){
+            $roster = Roster::where('id',$roster_id)->with('timetable')->first();
+            $check = Roster::where('employee_id',$roster->employee_id)->where('client_id',$roster->client_id)->where('full_date',$request->year_month);
+            if(!$check->exists()){
+                $newRoster = Roster::create(['employee_id' => $roster->employee_id,
+                                'client_id' => $roster->client_id,
+                                'full_date' => $request->year_month,
+                                'added_by' => Auth::id()]);
+                if($newRoster){
+                    foreach($roster->timetable as $timetable){
+                        $newDate = explode('-', $timetable->date);
+                        $newRosterTimetable = RosterTimetable::create([
+                                    'roster_id' => $newRoster->id,
+                                    'date' => $year_month[0].'-'.$year_month[1].'-'.$newDate[2],
+                                    'start_time' => $timetable->start_time,
+                                    'end_time' => $timetable->end_time,
+                                  ]);
+                    }
+                }
+
+            }
+        }
+        return response()->json("Roster Copied successfully");
     }
 
     public function ajax_store_roster(Request $request)

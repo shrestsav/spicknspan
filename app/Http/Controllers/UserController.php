@@ -16,9 +16,8 @@ use App\Mail\sendMail;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        //
+    public function __construct(User $user){
+        $this->user = $user;
     }
     /**
      * Display a listing of the resource.
@@ -427,7 +426,7 @@ class UserController extends Controller
             $update_user = User::where('id','=',$id)
                           ->update(['password' => Hash::make($request['password'])]);
             return redirect()->back()->with('message','Password Updated Successfully');
-        } else {
+        }else{
             return redirect()->back()->with('error','Old & New Password do not match.');
       }
     }
@@ -440,7 +439,13 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        User::where('id',$id)->delete();
-        return redirect()->back()->with('message','Deleted Successfully');
+      User::where('id',$id)->delete();
+      return redirect()->back()->with('message','Deleted Successfully');
+    }    
+
+    public function clientsList()
+    {
+      $clients = $this->user->clientList();
+      return $clients;
     }
 }

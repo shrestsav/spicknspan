@@ -15,7 +15,7 @@
 Route::get('refresh-csrf', function(){
     return csrf_token();
 });
-Route::get('testing','Tests\TestController@index');
+Route::get('rosterTest','RosterController@test');
 Route::post('testing','Tests\TestController@get');
 
 
@@ -131,7 +131,7 @@ Route::middleware(['auth'])->group(function () {
 		Route::post('/ajax_update_roster','RosterController@ajax_update_roster')->name('roster.update');
 		Route::post('/ajax_store_roster','RosterController@ajax_store_roster')->name('roster.store');
 		Route::post('/ajaxCheckIfRosterExists','RosterController@ajaxCheckIfRosterExists')->name('roster.check');
-
+		Route::post('/copyRoster','RosterController@copyRoster')->name('roster.copy');
 
 		Route::get('/roster-variation','RosterVariationController@index')->name('roster_variation.index');
 		Route::post('approveVariation','RosterVariationController@approveVariation')->name('variation.approve');
@@ -150,7 +150,9 @@ Route::middleware(['auth'])->group(function () {
 		Route::post("/questionTemplate/add","QuestionTemplateController@addMorePost");
 		Route::get('/questionTemplate/{id}','QuestionTemplateController@destroy')->name('question.destroy');
 
-
+		Route::get('/clientsList','UserController@clientslist')->name('list.clients');
+		Route::get('/employeesList','UserController@employeesList')->name('list.employees');
+		Route::get('/contractorsList','UserController@contractorsList')->name('list.contractors');
 
 	});	
 	Route::middleware(['permission:import_export_excel'])->group(function () {

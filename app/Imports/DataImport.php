@@ -37,28 +37,23 @@ class DataImport implements ToCollection, WithHeadingRow
         //      ])->validate();
         // }
         if($this->import_type == 'users'){
+             $holdEmail = [];
+             foreach ($rows as $row) 
+            {
+                if($row->filter()->isNotEmpty()){
+                    $this->validate_users($row);
+                    
+                    if (in_array($row['email'], $holdEmail)){
+                        $errors = collect(['message' => $row['email'].' is repeated, please check your excel']);
+                        throw new exception($errors);
+                    }
+                    array_push($holdEmail,$row['email']);
+                }
+            }
             foreach ($rows as $row) 
             {
                 if($row->filter()->isNotEmpty()){
-
-                    $rules = [
-                            'name' => ['required', 'string', 'max:255'],
-                            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-                            'password' => ['required', 'string', 'min:6'],
-                            'gender' => ['required', 'string'],
-                            'contact' => ['required'],
-                            ];
-
-                    $customMessages = [
-                            'email.unique' => $row['email'].':  This :attribute already exists.',
-                            'password.min' => $row['email'].':  Password must be minimum of 6 characters.',
-                            'required' => $row['email'].':  :attribute cannot be left empty.',
-                            
-                        ];
-
-                    $validator = Validator::make($row->toArray(), $rules, $customMessages);
-                    $validator->validate();
-
+                    $this->validate_users($row);
                     $user = User::create([
                         'name'     => $row['name'],
                         'email'    => $row['email'], 
@@ -78,12 +73,12 @@ class DataImport implements ToCollection, WithHeadingRow
                         'user_id'               =>  $user->id,
                         'address'               =>  $row['address'],
                         'gender'                =>  $row['gender'],
-                        'date_of_birth'         =>  \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['dob']),
+                        // 'date_of_birth'         =>  \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['dob']),
                         'contact'               =>  $row['contact'],
                         'hourly_rate'           =>  $row['hourly_rate'],
                         'annual_salary'         =>  $row['annual_salary'],
                         'description'           =>  $row['description'],
-                        'employment_start_date' =>  \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['start_date']),
+                        // 'employment_start_date' =>  \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['start_date']),
                     ]);
                 }
             }
@@ -214,6 +209,36 @@ class DataImport implements ToCollection, WithHeadingRow
                     }
                 }
             }
+        }
+    }
+
+    public function validate_users($row)
+    {
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:6'],
+            'gender' => ['required', 'string'],
+            'contact' => ['required'],
+            'dob' => ['date'],
+            'hourly_rate' => ['numeric'],
+        ];
+
+        $customMessages = [
+            'name.string' => $row['email'].':  This :attribute should be string.',
+            'email.unique' => $row['email'].':  This :attribute already exists.',
+            'email.email' => $row['email'].':  This :attribute must be in valid email format.',
+            'password.min' => $row['email'].':  Password must be minimum of 6 characters.',
+            'required' => $row['email'].':  :attribute cannot be left empty.',
+            'dob.date' => $row['email'].':  :attribute should be a valid date.',
+            'hourly_rate.numeric' => $row['email'].':  :attribute should be a numeric.',
+        ];
+
+        $validator = Validator::make($row->toArray(), $rules, $customMessages);
+        // $validator->validate();
+        if ($validator->fails()) {
+            $errors = collect($validator->errors());
+            throw new exception($errors);
         }
     }
 }
